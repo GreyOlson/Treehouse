@@ -1,0 +1,808 @@
+<?xml version="1.0" encoding="utf-8"?>
+<roblox version="4">
+<Item class="Script" referent="RBX0"><Properties><string name="Name">Treehouse</string><ProtectedString name="Source">--[[
+	Plugin.server.luau  (plugin entry point)
+	----------------------------------------
+	Toolbar button -&gt; dock widget with the AttributeToolGui. The two buttons walk
+	the DataModel (Dumpers) and POST the dump to the local mailbox server, which
+	writes the .luau, runs the generators, and opens the browser.
+
+	Requires: Studio "Allow HTTP Requests" enabled, and the mailbox running
+	(see ../mailbox/). All traffic is localhost-only.
+--]]
+
+local HttpService = game:GetService("HttpService")
+
+local Gui = require(script.AttributeToolGui)
+local Dumpers = require(script.Dumpers)
+
+-- where the local mailbox listens
+local MAILBOX = "http://localhost:8787"
+
+-- The open place's name (same value the GUI titles itself with). Sent with each
+-- dump so the generated HTML pages are titled with the real place name.
+local function getPlaceName(): string
+	local ok, info = pcall(function()
+		return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+	end)
+	if ok and typeof(info) == "table" and info.Name and #info.Name &gt; 0 then
+		return info.Name
+	end
+	return game.Name
+end
+local PROJECT = getPlaceName()
+
+local toolbar = plugin:CreateToolbar("Treehouse")
+local button = toolbar:CreateButton(
+	"Attribute Explorer",
+	"Treehouse: Attribute Explorer (Search Manager)",
+	"rbxassetid://126503186724852" -- shared across both tiers
+)
+button.ClickableWhenViewportHidden = true
+
+local widgetInfo = DockWidgetPluginGuiInfo.new(
+	Enum.InitialDockState.Float,
+	false, -- start disabled (closed)
+	true,  -- OVERRIDE the restored state so it never auto-opens on launch
+	460, 560, -- default size
+	380, 420  -- min size
+)
+local widget = plugin:CreateDockWidgetPluginGui("TreehouseAttributeExplorer", widgetInfo)
+widget.Name = "Treehouse"
+widget.Title = "Treehouse - Attribute Explorer"
+
+local HTTP_WARNING =
+	"HTTP requests are disabled. Turn on File → Experience Settings → "
+	.. "Security → Allow HTTP Requests, then click again."
+
+-- Whether the "Include Runtime in Treehouse" toggle is on (driven by the GUI).
+local includeRuntime = false
+local mailboxUp = false -- set true when an open-time ping reaches the mailbox
+local ui                  -- GUI handle (assigned after Gui.build below)
+
+-- Build the setup text. Steps are numbered dynamically: if "Allow HTTP Requests"
+-- is already enabled, step 1 is skipped and the rest shift down a number. The
+-- optional runtime step is always LAST, shown with ✅ when the toggle is on and
+-- ❌ (with a hint) when off.
+local function buildSetup(): string
+	local httpOn = false
+	pcall(function() httpOn = HttpService.HttpEnabled end)
+
+	local out = {}
+	local function add(s: string) out[#out + 1] = s end
+	local n = 0
+	local function step(body: string)
+		n += 1
+		add(n .. ". " .. body)
+		add("")
+	end
+
+	add("SETUP - Treehouse needs a mailbox running to build the HTML.")
+	add("")
+	add("The mailbox is a small program that picks up the 'mail' your Roblox place")
+	add("sends - its attribute / value hierarchy - and turns it into the HTML. It")
+	add("always runs at " .. MAILBOX .. ", and the plugin talks to it there - so you")
+	add("never choose where to connect. You just start it once.")
+	add("")
+
+	if httpOn then
+		add("✅ HTTP requests enabled.")
+		add("")
+	else
+		step("In Studio, enable: File → Experience Settings → Security →\n"
+			.. "   Allow HTTP Requests.  (the easy one)")
+	end
+
+	step("Install Python 3 (nothing else to install): python.org/downloads")
+	step("Open the Treehouse folder you downloaded and double-click the launcher:\n"
+		.. "      macOS:    Start Treehouse (Mac).command\n"
+		.. "      Windows:  Start Treehouse (Windows).bat\n"
+		.. "   (It finds itself, so the folder can live anywhere - no path needed.)\n"
+		.. "   macOS may block it the first time: right-click the file -&gt; Open -&gt; Open.")
+	step("A window opens and prints  Treehouse listening on " .. MAILBOX .. "  -\n"
+		.. "   leave it open, then click a Generate button above. Nothing leaves\n"
+		.. "   your machine.")
+
+	add("Prefer the terminal, or the launcher won't run? Use the command for your")
+	add("system in the boxes below (they assume the folder is in your home folder,")
+	add("named Treehouse - or edit the path to wherever you put it).")
+
+	return table.concat(out, "\n")
+end
+
+-- The "Include Runtime in Treehouse" section. Rendered LAST and ALWAYS (whether
+-- the mailbox is up or not), so toggling the checkbox always changes what's on
+-- screen. ✅ shows the full src-connection steps; ❌ shows a short hint.
+local function runtimeBlock(): string
+	if includeRuntime then
+		return "✅ Runtime in Treehouse - INCLUDED\n"
+			.. "Connect your project src so the * / ** runtime markers fill in.\n"
+			.. "Set ATTRTREE_SRC to your project's Rojo src/ before starting the mailbox:\n"
+			.. "      Windows:  set ATTRTREE_SRC=C:\\path\\YourProject\\src\n"
+			.. "      macOS:    ATTRTREE_SRC=/path/YourProject/src python3 mailbox/server.py"
+	end
+	return "❌ Runtime in Treehouse - not included\n"
+		.. 'Tick "Include Runtime in Treehouse" above to also capture runtime\n'
+		.. "attribute / value states (adds the src-connection step above)."
+end
+
+-- Ping the mailbox's health endpoint. Returns true if it answered, which means
+-- Python + the mailbox are up. False on connect-fail or if HTTP is disabled.
+local function pingMailbox(): boolean
+	local ok = pcall(function()
+		HttpService:GetAsync(MAILBOX .. "/health", true) -- nocache: always a fresh check
+	end)
+	return ok
+end
+
+-- The idle status text: a short "already running" note when the mailbox
+-- answered the ping, otherwise the full setup guide.
+local function currentGuide(): string
+	if mailboxUp then
+		return "✅ Mailbox already running on " .. MAILBOX .. ".\n"
+			.. "Click a Generate button above to build the HTML."
+	end
+	return buildSetup()
+end
+
+-- Re-check whether the mailbox is up, then refresh the idle status + runtime note.
+local function refresh()
+	mailboxUp = pingMailbox()
+	ui.setStatus(currentGuide())
+	ui.setRuntimeText(runtimeBlock())
+end
+
+-- True if Studio's "Allow HTTP Requests" is on. Otherwise warns and returns false
+-- so we never walk the DataModel for a request that can't be sent.
+local function httpReady(setStatus): boolean
+	local ok, enabled = pcall(function()
+		return HttpService.HttpEnabled
+	end)
+	if ok and not enabled then
+		setStatus(HTTP_WARNING, true)
+		return false
+	end
+	return true
+end
+
+local function kb(bytes: number): number
+	return math.floor(bytes / 1024 + 0.5)
+end
+
+-- POST a dump to the mailbox, reporting each stage in the status line.
+local function post(endpoint: string, label: string, body: string, setStatus)
+	local url = MAILBOX .. endpoint .. "?project=" .. HttpService:UrlEncode(PROJECT)
+	local _, lines = body:gsub("\n", "")
+	setStatus(("Dumped %d %s lines (%d KB).\nPOSTing to %s …"):format(lines, label, kb(#body), url))
+	task.wait() -- paint before the (blocking) request
+
+	local t0 = os.clock()
+	local ok, resp = pcall(function()
+		return HttpService:PostAsync(url, body, Enum.HttpContentType.TextPlain)
+	end)
+	local secs = os.clock() - t0
+	local msg = tostring(resp)
+	local low = msg:lower()
+
+	if ok then
+		mailboxUp = true
+		-- the mailbox echoes e.g. "wrote N bytes -&gt; X.luau, opened A.html, B.html"
+		setStatus(("Done in %.1fs. Treehouse replied:\n%s\nCheck your browser for the refreshed pages.")
+			:format(secs, msg))
+	elseif low:find("not enabled") then
+		-- HttpEnabled read stale / toggled off mid-session.
+		setStatus(HTTP_WARNING, true)
+	elseif low:find("connectfail") or low:find("connect") or low:find("refused") then
+		mailboxUp = false
+		setStatus(
+			("Couldn't reach Treehouse at %s - the mailbox isn't running yet.\n\n"):format(url)
+			.. currentGuide(),
+			true)
+	elseif low:find("timedout") or low:find("timeout") then
+		setStatus(("Treehouse at %s timed out after %.0fs.\nIt may still be running the generators - wait, then retry.")
+			:format(url, secs), true)
+	else
+		-- e.g. a 500 from a generator that failed server-side.
+		setStatus(("Treehouse error from %s:\n%s"):format(url, msg), true)
+	end
+end
+
+ui = Gui.build(widget, {
+	onGenerateAttribute = function(setStatus)
+		if not httpReady(setStatus) then return end
+		setStatus("Walking the DataModel for attributes…")
+		task.wait() -- let the status paint before the synchronous walk
+		local dump = Dumpers.AttributeDump()
+		post("/refresh/attributes", "attribute", dump, setStatus)
+	end,
+	onGenerateValue = function(setStatus)
+		if not httpReady(setStatus) then return end
+		setStatus("Walking the DataModel for ValueBase objects…")
+		task.wait()
+		local dump = Dumpers.ValueBaseDump()
+		post("/refresh/values", "value", dump, setStatus)
+	end,
+	-- "Include Runtime in Treehouse" toggle: update the runtime note (✅/❌).
+	onToggleRuntime = function(checked)
+		includeRuntime = checked
+		ui.setRuntimeText(runtimeBlock())
+		ui.scrollStatusToBottom() -- reveal the runtime note at the bottom
+	end,
+})
+
+-- Greet with the setup explainer + runtime note (mailboxUp is false until the
+-- first ping on open).
+ui.setStatus(currentGuide())
+ui.setRuntimeText(runtimeBlock())
+
+-- Re-check the mailbox each time the widget is opened: if it answers, the
+-- guide collapses to "✅ Mailbox already running."
+widget:GetPropertyChangedSignal("Enabled"):Connect(function()
+	if widget.Enabled then
+		refresh()
+	end
+end)
+
+button.Click:Connect(function()
+	widget.Enabled = not widget.Enabled
+end)
+</ProtectedString></Properties><Item class="ModuleScript" referent="RBX1"><Properties><string name="Name">AttributeToolGui</string><ProtectedString name="Source">--[[
+	AttributeToolGui.luau
+	---------------------
+	Builds the "Attribute / ValueBase Tree" tool GUI entirely in code - no assets,
+	fully memory-contained. Drop it in StarterGui as a LocalScript, or call
+	M.build(parentGui) from a plugin's DockWidgetPluginGui.
+
+	Layout is fully anchor-based so every element stays inside the widget and the
+	output area grows/shrinks when the dock is resized:
+	  • Title TextLabel      - place name (PROJECT_NAME), pinned at the top
+	  • GenerateAttribute / GenerateValueBase TextButtons - side by side, below it
+	  • Status ScrollingFrame - fills the space between the buttons and Clear Output
+	  • ClearOutput TextButton - pinned to the bottom; clears the status message
+	  • White backdrop with a 40,40,40 -&gt; 60,60,80 gradient
+
+	Wire the two buttons to your refresh pipeline via opts (see Plugin.server.luau).
+--]]
+
+local M = {}
+
+-- The place name your Studio session is tied to (also used as PROJECT_NAME).
+local function getPlaceName(): string
+	local ok, info = pcall(function()
+		return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+	end)
+	if ok and typeof(info) == "table" and info.Name and #info.Name &gt; 0 then
+		return info.Name
+	end
+	return game.Name -- Studio fallback: game.Name is the open place's name
+end
+
+local function corner(parent: Instance, radius: number)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, radius)
+	c.Parent = parent
+	return c
+end
+
+-- Builds the whole UI into `host` (a ScreenGui or a plugin widget).
+-- opts (optional): { onGenerateAttribute = function()..., onGenerateValue = function()... }
+-- Returns a handle: { root = Frame, setStatus = function(text, isError) }
+function M.build(host: Instance, opts: { [string]: any }?)
+	opts = opts or {}
+
+	-- backdrop: white base + dark diagonal gradient
+	local backdrop = Instance.new("Frame")
+	backdrop.Name = "Backdrop"
+	backdrop.Size = UDim2.fromScale(1, 1)
+	backdrop.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	backdrop.BorderSizePixel = 0
+	backdrop.ZIndex = 0
+	backdrop.Parent = host
+
+	local grad = Instance.new("UIGradient")
+	grad.Color = ColorSequence.new(Color3.fromRGB(40, 40, 40), Color3.fromRGB(60, 60, 80))
+	grad.Rotation = 90
+	grad.Parent = backdrop
+
+	-- Anchor metrics. The header (title + buttons) and footer (clear) are fixed
+	-- pixel heights; the status scroll fills everything between them and so
+	-- resizes automatically with the widget - no fixed sizes, nothing clips.
+	local MARGIN = 12
+	local HEADER_H = 256 -- title + generate row + runtime toggle + two descriptions
+	local FOOTER_H = 56  -- clear-output row
+
+	-- shared button factory
+	local function makeButton(name: string, text: string, bg: Color3,
+		size: UDim2, position: UDim2, parent: Instance, maxText: number?, radius: number?)
+		local b = Instance.new("TextButton")
+		b.Name = name
+		b.Text = text
+		b.Font = Enum.Font.GothamMedium
+		b.TextScaled = true
+		b.TextWrapped = true
+		b.TextColor3 = Color3.fromRGB(255, 255, 255)
+		b.BackgroundColor3 = bg
+		b.AutoButtonColor = true
+		b.BorderSizePixel = 0
+		b.Size = size
+		b.Position = position
+		b.ZIndex = 6
+		b.Parent = parent
+		corner(b, radius or 12)
+		local con = Instance.new("UITextSizeConstraint")
+		con.MaxTextSize = maxText or 18
+		con.Parent = b
+		return b
+	end
+
+	-- Title = place name, pinned at the top, left-aligned (matches the free tier)
+	local title = Instance.new("TextLabel")
+	title.Name = "Title"
+	title.Text = getPlaceName()
+	title.Font = Enum.Font.GothamBold
+	title.TextScaled = true
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.BackgroundTransparency = 1
+	title.ZIndex = 6
+	title.Position = UDim2.fromOffset(MARGIN, 8)
+	title.Size = UDim2.new(1, -2 * MARGIN, 0, 30)
+	title.Parent = backdrop
+	local titleConstraint = Instance.new("UITextSizeConstraint")
+	titleConstraint.MaxTextSize = 24
+	titleConstraint.Parent = title
+
+	-- Generate buttons, side by side below the title (same sizing as the free tier)
+	local genRow = Instance.new("Frame")
+	genRow.Name = "GenerateRow"
+	genRow.BackgroundTransparency = 1
+	genRow.ZIndex = 5
+	genRow.Position = UDim2.fromOffset(MARGIN, 44)
+	genRow.Size = UDim2.new(1, -2 * MARGIN, 0, 46)
+	genRow.Parent = backdrop
+
+	local genAttr = makeButton("GenerateAttributeTree", "Generate Attribute Treehouse",
+		Color3.fromRGB(120, 170, 235), -- medium-light blue
+		UDim2.new(0.5, -3, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 15, 8)
+	local genValue = makeButton("GenerateValueBaseTree", "Generate Value* Treehouse",
+		Color3.fromRGB(235, 120, 120), -- medium-light red
+		UDim2.new(0.5, -3, 1, 0), UDim2.new(0.5, 3, 0, 0), genRow, 15, 8)
+
+	-- Runtime toggle, between the generate buttons and the status area
+	local includeRuntime = false
+	local toggle = Instance.new("TextButton")
+	toggle.Name = "ToggleRuntimeTrees"
+	toggle.Text = "❌  Include Runtime in Treehouse"
+	toggle.Font = Enum.Font.GothamMedium
+	toggle.TextSize = 14
+	toggle.TextXAlignment = Enum.TextXAlignment.Left
+	toggle.TextColor3 = Color3.fromRGB(235, 235, 240)
+	toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+	toggle.AutoButtonColor = true
+	toggle.BorderSizePixel = 0
+	toggle.Position = UDim2.fromOffset(MARGIN, 96)
+	toggle.Size = UDim2.new(1, -2 * MARGIN, 0, 26)
+	toggle.ZIndex = 6
+	toggle.Parent = backdrop
+	corner(toggle, 8)
+	local togPad = Instance.new("UIPadding")
+	togPad.PaddingLeft = UDim.new(0, 10)
+	togPad.Parent = toggle
+
+	local toggleDesc = Instance.new("TextLabel")
+	toggleDesc.Name = "ToggleRuntimeDescrition"
+	toggleDesc.Text = "With an additional step to connect to your project src if you use any "
+		.. "sync plugin, you can get all runtime states for attributes or values.  "
+		.. "This is entirely local to your machine."
+	toggleDesc.Font = Enum.Font.Gotham
+	toggleDesc.TextSize = 11
+	toggleDesc.TextWrapped = true
+	toggleDesc.TextXAlignment = Enum.TextXAlignment.Left
+	toggleDesc.TextYAlignment = Enum.TextYAlignment.Top
+	toggleDesc.TextColor3 = Color3.fromRGB(165, 165, 175)
+	toggleDesc.BackgroundTransparency = 1
+	toggleDesc.Position = UDim2.fromOffset(MARGIN, 128)
+	toggleDesc.Size = UDim2.new(1, -2 * MARGIN, 0, 52)
+	toggleDesc.ZIndex = 6
+	toggleDesc.Parent = backdrop
+
+	-- HTML feature blurb, beneath the runtime toggle description
+	local htmlDesc = Instance.new("TextLabel")
+	htmlDesc.Name = "HtmlFeatureDescription"
+	htmlDesc.Text = "Local html features: Game hierarchy tree, housing all studio set "
+		.. "attributes with optional runtime attributes.  Categorize by service, "
+		.. "explore &amp; collapse tree, dynamic search to influence tree"
+	htmlDesc.Font = Enum.Font.Gotham
+	htmlDesc.TextSize = 11
+	htmlDesc.TextWrapped = true
+	htmlDesc.TextXAlignment = Enum.TextXAlignment.Left
+	htmlDesc.TextYAlignment = Enum.TextYAlignment.Top
+	htmlDesc.TextColor3 = Color3.fromRGB(150, 180, 215)
+	htmlDesc.BackgroundTransparency = 1
+	htmlDesc.Position = UDim2.fromOffset(MARGIN, 186)
+	htmlDesc.Size = UDim2.new(1, -2 * MARGIN, 0, 64)
+	htmlDesc.ZIndex = 6
+	htmlDesc.Parent = backdrop
+
+	local function setRuntimeToggle(on: boolean)
+		includeRuntime = on
+		toggle.Text = (on and "✅" or "❌") .. "  Include Runtime in Treehouse"
+		if opts.onToggleRuntime then
+			opts.onToggleRuntime(on)
+		end
+	end
+	toggle.Activated:Connect(function()
+		setRuntimeToggle(not includeRuntime)
+	end)
+
+	-- Clear Output, pinned to the bottom, full width
+	local clearOut = makeButton("ClearOutput", "Clear Output",
+		Color3.fromRGB(120, 120, 130), -- neutral gray
+		UDim2.new(1, -2 * MARGIN, 0, 40), UDim2.new(0, MARGIN, 1, -8), backdrop)
+	clearOut.AnchorPoint = Vector2.new(0, 1)
+
+	-- Status area: a ScrollingFrame holding the dynamic status text, the
+	-- ready-to-run command boxes (one per OS), and the runtime note. Children
+	-- are stacked by a UIListLayout; the canvas height tracks their total size.
+	local status = Instance.new("ScrollingFrame")
+	status.Name = "Status"
+	status.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+	status.BackgroundTransparency = 0.25
+	status.BorderSizePixel = 0
+	status.Position = UDim2.fromOffset(MARGIN, HEADER_H)
+	status.Size = UDim2.new(1, -2 * MARGIN, 1, -(HEADER_H + FOOTER_H))
+	status.CanvasSize = UDim2.new()
+	status.ScrollBarThickness = 8
+	status.ZIndex = 6
+	status.Parent = backdrop
+	corner(status, 8)
+	local spad = Instance.new("UIPadding")
+	spad.PaddingLeft = UDim.new(0, 8)
+	spad.PaddingRight = UDim.new(0, 8)
+	spad.PaddingTop = UDim.new(0, 6)
+	spad.PaddingBottom = UDim.new(0, 6)
+	spad.Parent = status
+	local slist = Instance.new("UIListLayout")
+	slist.FillDirection = Enum.FillDirection.Vertical
+	slist.SortOrder = Enum.SortOrder.LayoutOrder
+	slist.Padding = UDim.new(0, 6)
+	slist.Parent = status
+
+	local statusText = Instance.new("TextLabel")
+	statusText.Name = "StatusText"
+	statusText.Text = ""
+	statusText.Font = Enum.Font.Gotham
+	statusText.TextSize = 13
+	statusText.TextWrapped = true
+	statusText.TextXAlignment = Enum.TextXAlignment.Left
+	statusText.TextYAlignment = Enum.TextYAlignment.Top
+	statusText.TextColor3 = Color3.fromRGB(225, 225, 230)
+	statusText.BackgroundTransparency = 1
+	statusText.Size = UDim2.new(1, 0, 0, 0)
+	statusText.AutomaticSize = Enum.AutomaticSize.Y
+	statusText.LayoutOrder = 1
+	statusText.ZIndex = 6
+	statusText.Parent = status
+
+	-- Hint above the command boxes
+	local cmdHint = Instance.new("TextLabel")
+	cmdHint.Name = "CommandHint"
+	cmdHint.Text = "Copy the line for your system, paste it into Terminal (Mac) / "
+		.. "Command Prompt (Windows), and press Enter:"
+	cmdHint.Font = Enum.Font.GothamMedium
+	cmdHint.TextSize = 12
+	cmdHint.TextWrapped = true
+	cmdHint.TextXAlignment = Enum.TextXAlignment.Left
+	cmdHint.TextYAlignment = Enum.TextYAlignment.Top
+	cmdHint.TextColor3 = Color3.fromRGB(240, 200, 120)
+	cmdHint.BackgroundTransparency = 1
+	cmdHint.Size = UDim2.new(1, 0, 0, 0)
+	cmdHint.AutomaticSize = Enum.AutomaticSize.Y
+	cmdHint.LayoutOrder = 2
+	cmdHint.ZIndex = 6
+	cmdHint.Parent = status
+
+	-- A label + selectable command box. The box is editable only so selection
+	-- works and you can tweak the path; selecting never clears it.
+	local function commandBox(order: number, labelText: string, command: string)
+		local lbl = Instance.new("TextLabel")
+		lbl.Text = labelText
+		lbl.Font = Enum.Font.GothamBold
+		lbl.TextSize = 12
+		lbl.TextXAlignment = Enum.TextXAlignment.Left
+		lbl.TextColor3 = Color3.fromRGB(200, 200, 210)
+		lbl.BackgroundTransparency = 1
+		lbl.Size = UDim2.new(1, 0, 0, 16)
+		lbl.LayoutOrder = order
+		lbl.ZIndex = 6
+		lbl.Parent = status
+
+		local box = Instance.new("TextBox")
+		box.Name = (labelText:gsub("[^%w]", "")) .. "Command"
+		box.Text = command
+		box.ClearTextOnFocus = false
+		box.TextEditable = true
+		box.MultiLine = true
+		box.Font = Enum.Font.Code
+		box.TextSize = 13
+		box.TextXAlignment = Enum.TextXAlignment.Left
+		box.TextYAlignment = Enum.TextYAlignment.Top
+		box.TextWrapped = true
+		box.TextColor3 = Color3.fromRGB(235, 235, 240)
+		box.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
+		box.BorderSizePixel = 0
+		box.Size = UDim2.new(1, 0, 0, 0)
+		box.AutomaticSize = Enum.AutomaticSize.Y
+		box.LayoutOrder = order + 1
+		box.ZIndex = 6
+		box.Parent = status
+		corner(box, 6)
+		local bpad = Instance.new("UIPadding")
+		bpad.PaddingLeft = UDim.new(0, 6)
+		bpad.PaddingRight = UDim.new(0, 6)
+		bpad.PaddingTop = UDim.new(0, 5)
+		bpad.PaddingBottom = UDim.new(0, 5)
+		bpad.Parent = box
+		return box
+	end
+
+	commandBox(3, "macOS / Linux", "cd ~/Treehouse &amp;&amp; python3 mailbox/server.py")
+	commandBox(5, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; python mailbox\\server.py')
+
+	-- Runtime note (✅/❌), updated when the toggle changes.
+	local runtimeText = Instance.new("TextLabel")
+	runtimeText.Name = "RuntimeText"
+	runtimeText.Text = ""
+	runtimeText.Font = Enum.Font.Gotham
+	runtimeText.TextSize = 13
+	runtimeText.TextWrapped = true
+	runtimeText.TextXAlignment = Enum.TextXAlignment.Left
+	runtimeText.TextYAlignment = Enum.TextYAlignment.Top
+	runtimeText.TextColor3 = Color3.fromRGB(225, 225, 230)
+	runtimeText.BackgroundTransparency = 1
+	runtimeText.Size = UDim2.new(1, 0, 0, 0)
+	runtimeText.AutomaticSize = Enum.AutomaticSize.Y
+	runtimeText.LayoutOrder = 7
+	runtimeText.ZIndex = 6
+	runtimeText.Parent = status
+
+	-- Drive the scroll canvas from the laid-out content height so it always scrolls.
+	local function syncCanvas()
+		status.CanvasSize = UDim2.new(0, 0, 0, slist.AbsoluteContentSize.Y + 16)
+	end
+	slist:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(syncCanvas)
+	syncCanvas()
+
+	local function setStatus(text: string, isError: boolean?)
+		statusText.Text = text
+		statusText.TextColor3 = isError and Color3.fromRGB(255, 120, 120) or Color3.fromRGB(225, 225, 230)
+		status.CanvasPosition = Vector2.new(0, 0) -- show the start of each new message
+	end
+
+	local function setRuntimeText(text: string)
+		runtimeText.Text = text
+	end
+
+	-- Scroll to the bottom (used after toggling runtime so the note is visible).
+	local function scrollStatusToBottom()
+		task.wait() -- let the new content lay out so the canvas size is final
+		local maxY = math.max(0, status.AbsoluteCanvasSize.Y - status.AbsoluteWindowSize.Y)
+		status.CanvasPosition = Vector2.new(0, maxY)
+	end
+
+	genAttr.Activated:Connect(function()
+		if opts.onGenerateAttribute then
+			opts.onGenerateAttribute(setStatus)
+		else
+			print("[AttributeTool] Generate Attribute Tree clicked")
+		end
+	end)
+	genValue.Activated:Connect(function()
+		if opts.onGenerateValue then
+			opts.onGenerateValue(setStatus)
+		else
+			print("[AttributeTool] Generate ValueBase Tree clicked")
+		end
+	end)
+	clearOut.Activated:Connect(function()
+		setStatus("")
+	end)
+
+	return {
+		root = backdrop,
+		setStatus = setStatus,
+		setRuntimeText = setRuntimeText,
+		scrollStatusToBottom = scrollStatusToBottom,
+		setRuntimeToggle = setRuntimeToggle,
+		getRuntime = function() return includeRuntime end,
+	}
+end
+
+-- StarterGui usage: if this script is a LocalScript under StarterGui, auto-build.
+if script:IsA("LocalScript") then
+	local sg = Instance.new("ScreenGui")
+	sg.Name = "AttributeToolGui"
+	sg.IgnoreGuiInset = true
+	sg.ResetOnSpawn = false
+	sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	sg.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+	M.build(sg)
+end
+
+return M
+</ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX2"><Properties><string name="Name">Dumpers</string><ProtectedString name="Source">--[[
+	Dumpers.luau  (ModuleScript)
+	---------------------------
+	Read-only DataModel walkers that return the exact text formats the Python
+	generators parse:
+	  • Dumpers.AttributeDump()  -&gt; attribute dump string
+	  • Dumpers.ValueBaseDump()  -&gt; ValueBase dump string
+	No instances are modified. Used by the plugin; can also be called from the
+	Command Bar: print(require(path).AttributeDump())
+--]]
+
+local Dumpers = {}
+
+local SERVICES = {
+	"Workspace", "ReplicatedStorage", "ReplicatedFirst", "ServerStorage",
+	"ServerScriptService", "StarterGui", "StarterPack", "StarterPlayer",
+	"Lighting", "SoundService", "Players", "Teams", "Chat", "MaterialService",
+}
+
+-- value + its type label, matching the dumps: `value (type)`
+local function fmt(v): (string, string)
+	if v == nil then
+		return "nil", "nil"
+	end
+	local t = typeof(v)
+	if t == "string" then
+		return '"' .. v .. '"', "string"
+	elseif t == "Instance" then
+		return v:GetFullName(), "Instance"
+	end
+	local ok, s = pcall(tostring, v)
+	return (ok and s or "&lt;?&gt;"), t
+end
+
+local function services(): { Instance }
+	local out = {}
+	for _, name in ipairs(SERVICES) do
+		local svc = game:FindFirstChild(name)
+		if not svc then
+			local ok, s = pcall(function() return game:GetService(name) end)
+			if ok then svc = s end
+		end
+		if svc then
+			table.insert(out, svc)
+		end
+	end
+	return out
+end
+
+local function sortKids(a: Instance, b: Instance): boolean
+	if a.Name == b.Name then
+		return a.ClassName &lt; b.ClassName
+	end
+	return a.Name &lt; b.Name
+end
+
+-- mark `inst` and all ancestors (up to, not including, game) as included
+local function include(set: { [Instance]: boolean }, inst: Instance)
+	local node = inst
+	while node and node ~= game do
+		set[node] = true
+		node = node.Parent
+	end
+end
+
+----------------------------------------------------------------------
+function Dumpers.AttributeDump(): string
+	local included: { [Instance]: boolean } = {}
+	local count = 0
+	for _, svc in ipairs(services()) do
+		local stack = { svc }
+		while #stack &gt; 0 do
+			local inst = table.remove(stack)
+			local ok, attrs = pcall(function() return inst:GetAttributes() end)
+			if ok and attrs and next(attrs) ~= nil then
+				count += 1
+				include(included, inst)
+			end
+			local okc, kids = pcall(function() return inst:GetChildren() end)
+			if okc then
+				for _, c in ipairs(kids) do
+					stack[#stack + 1] = c
+				end
+			end
+		end
+	end
+
+	local lines = {}
+	local function emit(s) lines[#lines + 1] = s end
+	emit("==== ATTRIBUTE DUMP ====")
+	emit("Total attributed instances found: " .. count)
+	emit(string.rep("=", 70))
+	emit("")
+
+	local function walk(inst: Instance, depth: number)
+		local indent = string.rep("  ", depth)
+		emit(indent .. inst.Name .. " [" .. inst.ClassName .. "]")
+		local attrs = inst:GetAttributes()
+		if next(attrs) ~= nil then
+			local keys = {}
+			for k in pairs(attrs) do keys[#keys + 1] = k end
+			table.sort(keys)
+			for _, k in ipairs(keys) do
+				local vs, vt = fmt(attrs[k])
+				emit(indent .. "  - " .. k .. " = " .. vs .. " (" .. vt .. ")")
+			end
+		end
+		local kids = {}
+		for _, c in ipairs(inst:GetChildren()) do
+			if included[c] then kids[#kids + 1] = c end
+		end
+		table.sort(kids, sortKids)
+		for _, c in ipairs(kids) do walk(c, depth + 1) end
+	end
+
+	for _, svc in ipairs(services()) do
+		if included[svc] then walk(svc, 0); emit("") end
+	end
+	return table.concat(lines, "\n")
+end
+
+----------------------------------------------------------------------
+function Dumpers.ValueBaseDump(): string
+	local included: { [Instance]: boolean } = {}
+	local count = 0
+	for _, svc in ipairs(services()) do
+		local stack = { svc }
+		while #stack &gt; 0 do
+			local inst = table.remove(stack)
+			if inst:IsA("ValueBase") then
+				count += 1
+				include(included, inst)
+			end
+			local okc, kids = pcall(function() return inst:GetChildren() end)
+			if okc then
+				for _, c in ipairs(kids) do
+					stack[#stack + 1] = c
+				end
+			end
+		end
+	end
+
+	local lines = {}
+	local function emit(s) lines[#lines + 1] = s end
+	emit("==== VALUEBASE DUMP (every IntValue/StringValue/ObjectValue/etc.) ====")
+	emit("Total ValueBase objects found: " .. count)
+	emit("Each Value is a node:  Name [ClassName] = value (type)")
+	emit("The Name is your codebase-search token.")
+	emit(string.rep("=", 70))
+	emit("")
+
+	local function walk(inst: Instance, depth: number)
+		local indent = string.rep("  ", depth)
+		local line = indent .. inst.Name .. " [" .. inst.ClassName .. "]"
+		if inst:IsA("ValueBase") then
+			local vs, vt = fmt((inst :: any).Value)
+			line = line .. " = " .. vs .. " (" .. vt .. ")"
+		end
+		emit(line)
+		local kids = {}
+		for _, c in ipairs(inst:GetChildren()) do
+			if included[c] then kids[#kids + 1] = c end
+		end
+		table.sort(kids, sortKids)
+		for _, c in ipairs(kids) do walk(c, depth + 1) end
+	end
+
+	for _, svc in ipairs(services()) do
+		if included[svc] then walk(svc, 0); emit("") end
+	end
+	return table.concat(lines, "\n")
+end
+
+return Dumpers
+</ProtectedString></Properties></Item></Item>
+</roblox>

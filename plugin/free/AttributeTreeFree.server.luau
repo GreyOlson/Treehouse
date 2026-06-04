@@ -1,0 +1,511 @@
+--[[
+	AttributeTree[Free]  -  barebones in-Studio attribute / ValueBase viewer
+	------------------------------------------------------------------------
+	The FREE tier. Reads the live DataModel and lists, per service, either every
+	attributed instance OR every ValueBase object - you choose when to scan and
+	which one. Deliberately barebones: a flat, read-only, per-service list. NO
+	dynamic search box, NO collapsing, NO live filtering (that's the paid tier).
+
+	What you DO get:
+	  • Scan Attributes  /  Scan ValueBase  (you decide when to run each)
+	  • Service picker buttons (Workspace, Lighting, ReplicatedStorage, …) -
+	    only the services that actually contain data are shown
+	  • A scrolling list of the selected service's contents
+
+	Fully self-contained / memory-contained: one Script, nothing required, no
+	mailbox, no HTTP, no assets beyond the shared toolbar icon.
+
+	The PAID tier (AttributeTree.rbxm) adds the local HTML export with dynamic
+	search, collapse, and filtering, plus the network diagrams.
+]]
+
+local ICON = "rbxassetid://126503186724852" -- shared across both tiers
+
+-- Services the free tier lets you pick between (only those with data are shown).
+local SELECTABLE = {
+	"Workspace", "Lighting", "ReplicatedStorage", "ServerStorage",
+	"ServerScriptService", "StarterGui", "StarterPlayer",
+}
+
+local BG       = Color3.fromRGB(40, 40, 48)
+local PANEL    = Color3.fromRGB(28, 28, 34)
+local HEADER   = Color3.fromRGB(120, 170, 235) -- service heading text
+local BTN_OFF  = Color3.fromRGB(60, 60, 72)    -- inactive buttons
+-- Selected buttons follow the PAID tier's access colors.
+local ACCENT_ATTR  = Color3.fromRGB(120, 170, 235) -- attribute = blue
+local ACCENT_VALUE = Color3.fromRGB(235, 120, 120) -- ValueBase = red
+local PATHCOL  = Color3.fromRGB(235, 235, 240) -- instance / object path
+local ATTRCOL  = Color3.fromRGB(180, 205, 165) -- attribute / value lines
+local DIM      = Color3.fromRGB(150, 150, 160) -- summary / empty state
+local UPGRADE  = Color3.fromRGB(240, 200, 120) -- upsell text
+
+local function placeName(): string
+	local ok, info = pcall(function()
+		return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+	end)
+	if ok and typeof(info) == "table" and info.Name and #info.Name > 0 then
+		return info.Name
+	end
+	return game.Name
+end
+
+-- value -> "value (type)", matching the dump style
+local function fmt(v): string
+	if v == nil then return "nil (nil)" end
+	local t = typeof(v)
+	if t == "string" then return '"' .. v .. '" (string)' end
+	local ok, s = pcall(tostring, v)
+	return (ok and s or "<?>") .. " (" .. t .. ")"
+end
+
+local function sortKids(a: Instance, b: Instance): boolean
+	if a.Name == b.Name then return a.ClassName < b.ClassName end
+	return a.Name < b.Name
+end
+
+-- A display line. `name` is the searchable token: the attribute name in
+-- attributes mode, or the object name in ValueBase mode (nil on path rows).
+type Line = { text: string, color: Color3, bold: boolean, name: string? }
+
+-- Build the attribute lines for one service. Returns { lines, nInst, nAttr }.
+local function buildAttributes(svc: Instance)
+	local lines: { Line } = {}
+	local nInst, nAttr = 0, 0
+	local prefix = svc.Name .. "."
+
+	local function walk(inst: Instance)
+		local ok, attrs = pcall(function() return inst:GetAttributes() end)
+		if ok and attrs and next(attrs) ~= nil then
+			nInst += 1
+			local path = inst:GetFullName()
+			if path:sub(1, #prefix) == prefix then path = path:sub(#prefix + 1) end
+			lines[#lines + 1] = { text = path, color = PATHCOL, bold = false }
+			local keys = {}
+			for k in pairs(attrs) do keys[#keys + 1] = k end
+			table.sort(keys)
+			for _, k in ipairs(keys) do
+				nAttr += 1
+				lines[#lines + 1] =
+					{ text = "      " .. k .. " = " .. fmt(attrs[k]), color = ATTRCOL, bold = false, name = k }
+			end
+		end
+		local okc, kids = pcall(function() return inst:GetChildren() end)
+		if okc then
+			table.sort(kids, sortKids)
+			for _, c in ipairs(kids) do walk(c) end
+		end
+	end
+	walk(svc)
+	return { lines = lines, nInst = nInst, nAttr = nAttr }
+end
+
+-- Build the ValueBase lines for one service. Returns { lines, nInst, nAttr }
+-- (nAttr reused as the ValueBase count so the summary code stays uniform).
+local function buildValues(svc: Instance)
+	local lines: { Line } = {}
+	local nVal = 0
+	local prefix = svc.Name .. "."
+
+	local function walk(inst: Instance)
+		if inst:IsA("ValueBase") then
+			nVal += 1
+			local path = inst:GetFullName()
+			if path:sub(1, #prefix) == prefix then path = path:sub(#prefix + 1) end
+			local valStr = fmt((inst :: any).Value)
+			-- searchable token covers BOTH the object name and its value, so
+			-- e.g. a StringValue named "StringValue" holding "Yo" is found by
+			-- searching either "stringvalue" or "yo".
+			lines[#lines + 1] =
+				{ text = path .. "  [" .. inst.ClassName .. "]", color = PATHCOL, bold = false,
+				  name = inst.Name .. " " .. valStr }
+			lines[#lines + 1] =
+				{ text = "      = " .. valStr, color = ATTRCOL, bold = false }
+		end
+		local okc, kids = pcall(function() return inst:GetChildren() end)
+		if okc then
+			table.sort(kids, sortKids)
+			for _, c in ipairs(kids) do walk(c) end
+		end
+	end
+	walk(svc)
+	return { lines = lines, nInst = nVal, nAttr = nVal }
+end
+
+-- ── toolbar + widget ────────────────────────────────────────────────
+local toolbar = plugin:CreateToolbar("Treehouse")
+local button = toolbar:CreateButton(
+	"Attribute Explorer (Free)",
+	"Treehouse (Free): list attributes or ValueBase objects, per service",
+	ICON
+)
+button.ClickableWhenViewportHidden = true
+
+local widget = plugin:CreateDockWidgetPluginGui(
+	"TreehouseFree",
+	DockWidgetPluginGuiInfo.new(
+		Enum.InitialDockState.Float,
+		false, true,  -- start disabled, and OVERRIDE the restored state so it
+		              -- never auto-opens on Studio launch (only opens on click)
+		440, 560,     -- default size
+		320, 360      -- min size
+	)
+)
+widget.Name = "TreehouseFree"
+widget.Title = "Treehouse - Attribute Explorer (Free)"
+
+local built = false
+local function buildChrome()
+	if built then return end
+	built = true
+
+	local backdrop = Instance.new("Frame")
+	backdrop.Name = "Backdrop"
+	backdrop.Size = UDim2.fromScale(1, 1)
+	backdrop.BackgroundColor3 = BG
+	backdrop.BorderSizePixel = 0
+	backdrop.Parent = widget
+
+	-- Fixed header (auto-sizes to its contents); the scroll fills below it.
+	local header = Instance.new("Frame")
+	header.Name = "Header"
+	header.BackgroundTransparency = 1
+	header.Position = UDim2.fromOffset(0, 0)
+	header.Size = UDim2.new(1, 0, 0, 0)
+	header.AutomaticSize = Enum.AutomaticSize.Y
+	header.Parent = backdrop
+	local hpad = Instance.new("UIPadding")
+	hpad.PaddingLeft = UDim.new(0, 8)
+	hpad.PaddingRight = UDim.new(0, 8)
+	hpad.PaddingTop = UDim.new(0, 8)
+	hpad.Parent = header
+	local hlist = Instance.new("UIListLayout")
+	hlist.FillDirection = Enum.FillDirection.Vertical
+	hlist.SortOrder = Enum.SortOrder.LayoutOrder
+	hlist.Padding = UDim.new(0, 6)
+	hlist.Parent = header
+
+	-- 1) Title = place name
+	local title = Instance.new("TextLabel")
+	title.Name = "Title"
+	title.Text = placeName()
+	title.Font = Enum.Font.GothamBold
+	title.TextScaled = true
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.BackgroundTransparency = 1
+	title.Size = UDim2.new(1, 0, 0, 30)
+	title.LayoutOrder = 1
+	title.Parent = header
+	local tc = Instance.new("UITextSizeConstraint")
+	tc.MaxTextSize = 24
+	tc.Parent = title
+
+	-- 2) Upgrade text (NOT in the scroll frame)
+	local upgrade = Instance.new("TextLabel")
+	upgrade.Name = "UpgradeText"
+	upgrade.Text = "This is the free tier, upgrade to the paid plugin with additional "
+		.. "setup for local html file with dynamic search, collapse, filtering "
+		.. "capabilities, and optional runtime attribute tree."
+	upgrade.Font = Enum.Font.Gotham
+	upgrade.TextSize = 12
+	upgrade.TextWrapped = true
+	upgrade.TextXAlignment = Enum.TextXAlignment.Left
+	upgrade.TextColor3 = UPGRADE
+	upgrade.BackgroundTransparency = 1
+	upgrade.Size = UDim2.new(1, 0, 0, 0)
+	upgrade.AutomaticSize = Enum.AutomaticSize.Y
+	upgrade.LayoutOrder = 2
+	upgrade.Parent = header
+
+	-- 3) Scan-mode buttons (you decide when, and which)
+	local modeRow = Instance.new("Frame")
+	modeRow.Name = "ModeRow"
+	modeRow.BackgroundTransparency = 1
+	modeRow.Size = UDim2.new(1, 0, 0, 46)
+	modeRow.LayoutOrder = 3
+	modeRow.Parent = header
+
+	local function modeButton(name: string, text: string, x: number)
+		local b = Instance.new("TextButton")
+		b.Name = name
+		b.Text = text
+		b.Font = Enum.Font.GothamMedium
+		b.TextScaled = true
+		b.TextWrapped = true
+		b.TextColor3 = Color3.fromRGB(255, 255, 255)
+		b.BackgroundColor3 = BTN_OFF
+		b.AutoButtonColor = true
+		b.BorderSizePixel = 0
+		b.Size = UDim2.new(0.5, -3, 1, 0)
+		b.Position = UDim2.new(x, x == 0 and 0 or 3, 0, 0)
+		b.Parent = modeRow
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0, 8)
+		c.Parent = b
+		local con = Instance.new("UITextSizeConstraint")
+		con.MaxTextSize = 15
+		con.Parent = b
+		return b
+	end
+	local btnAttr = modeButton("ScanAttributes", "Generate Attribute Treehouse", 0)
+	local btnValue = modeButton("ScanValueBase", "Generate Value* Treehouse", 0.5)
+
+	-- 4) Search box - jumps the list to the first matching attribute name
+	local search = Instance.new("TextBox")
+	search.Name = "Search"
+	search.PlaceholderText = "search by name or value - press Enter to jump…"
+	search.Text = ""
+	search.ClearTextOnFocus = false
+	search.Font = Enum.Font.Code
+	search.TextSize = 13
+	search.TextXAlignment = Enum.TextXAlignment.Left
+	search.TextColor3 = Color3.fromRGB(235, 235, 240)
+	search.PlaceholderColor3 = DIM
+	search.BackgroundColor3 = PANEL
+	search.BorderSizePixel = 0
+	search.Size = UDim2.new(1, 0, 0, 28)
+	search.LayoutOrder = 4
+	search.Parent = header
+	local scp = Instance.new("UIPadding")
+	scp.PaddingLeft = UDim.new(0, 8)
+	scp.PaddingRight = UDim.new(0, 8)
+	scp.Parent = search
+	local scc = Instance.new("UICorner")
+	scc.CornerRadius = UDim.new(0, 6)
+	scc.Parent = search
+
+	-- 5) Summary line
+	local summary = Instance.new("TextLabel")
+	summary.Name = "Summary"
+	summary.Text = "Pick Scan Attributes or Scan ValueBase to begin."
+	summary.Font = Enum.Font.Gotham
+	summary.TextSize = 12
+	summary.TextXAlignment = Enum.TextXAlignment.Left
+	summary.TextColor3 = DIM
+	summary.BackgroundTransparency = 1
+	summary.Size = UDim2.new(1, 0, 0, 16)
+	summary.LayoutOrder = 5
+	summary.Parent = header
+
+	-- 6) Service picker (UIGridLayout) - only services with data appear here
+	local grid = Instance.new("Frame")
+	grid.Name = "Services"
+	grid.BackgroundTransparency = 1
+	grid.Size = UDim2.new(1, 0, 0, 0)
+	grid.AutomaticSize = Enum.AutomaticSize.Y
+	grid.LayoutOrder = 6
+	grid.Parent = header
+	local glayout = Instance.new("UIGridLayout")
+	glayout.CellSize = UDim2.fromOffset(102, 26)
+	glayout.CellPadding = UDim2.fromOffset(6, 6)
+	glayout.SortOrder = Enum.SortOrder.LayoutOrder
+	glayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	glayout.Parent = grid
+
+	-- The scrolling list of the selected service's contents
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Name = "List"
+	scroll.BackgroundColor3 = PANEL
+	scroll.BorderSizePixel = 0
+	scroll.CanvasSize = UDim2.new()
+	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scroll.ScrollBarThickness = 8
+	scroll.Parent = backdrop
+	local rc = Instance.new("UICorner")
+	rc.CornerRadius = UDim.new(0, 8)
+	rc.Parent = scroll
+	local spad = Instance.new("UIPadding")
+	spad.PaddingLeft = UDim.new(0, 8)
+	spad.PaddingRight = UDim.new(0, 8)
+	spad.PaddingTop = UDim.new(0, 6)
+	spad.PaddingBottom = UDim.new(0, 6)
+	spad.Parent = scroll
+	local slist = Instance.new("UIListLayout")
+	slist.SortOrder = Enum.SortOrder.LayoutOrder
+	slist.Padding = UDim.new(0, 2)
+	slist.Parent = scroll
+
+	-- Keep the scroll docked just below the (variable-height) header.
+	local function layoutScroll()
+		local h = header.AbsoluteSize.Y
+		scroll.Position = UDim2.fromOffset(8, h + 4)
+		scroll.Size = UDim2.new(1, -16, 1, -(h + 12))
+	end
+	header:GetPropertyChangedSignal("AbsoluteSize"):Connect(layoutScroll)
+	layoutScroll()
+
+	-- ── state + behavior ────────────────────────────────────────────
+	local store: { [string]: any } = {} -- serviceName -> { lines, nInst, nAttr }
+	local serviceButtons: { [string]: TextButton } = {}
+	local mode = "" -- "attributes" | "values"
+	local selected = ""
+	local currentAccent = ACCENT_ATTR -- the active mode's paid access color
+	local lineLabels: { TextLabel } = {} -- index aligned with the selected service's data.lines
+	local lastHighlight: TextLabel? = nil
+
+	local function clearScroll()
+		for _, c in ipairs(scroll:GetChildren()) do
+			if c:IsA("TextLabel") then c:Destroy() end
+		end
+	end
+
+	local function selectService(name: string)
+		selected = name
+		lineLabels = {}
+		lastHighlight = nil
+		for n, b in pairs(serviceButtons) do
+			b.BackgroundColor3 = (n == name) and currentAccent or BTN_OFF
+		end
+		clearScroll()
+		local data = store[name]
+		local order = 0
+		-- service heading row
+		order += 1
+		local head = Instance.new("TextLabel")
+		head.BackgroundTransparency = 1
+		head.Font = Enum.Font.GothamBold
+		head.TextSize = 15
+		head.TextColor3 = HEADER
+		head.TextXAlignment = Enum.TextXAlignment.Left
+		head.Size = UDim2.new(1, 0, 0, 20)
+		head.LayoutOrder = order
+		head.Text = name
+		head.Parent = scroll
+		for i, l in ipairs(data.lines) do
+			order += 1
+			local lbl = Instance.new("TextLabel")
+			lbl.BackgroundColor3 = Color3.fromRGB(90, 80, 35) -- shown only when highlighted
+			lbl.BackgroundTransparency = 1
+			lbl.Font = l.bold and Enum.Font.GothamBold or Enum.Font.Code
+			lbl.TextSize = 13
+			lbl.TextColor3 = l.color
+			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Top
+			lbl.TextWrapped = true
+			lbl.RichText = false
+			lbl.Size = UDim2.new(1, 0, 0, 0)
+			lbl.AutomaticSize = Enum.AutomaticSize.Y
+			lbl.LayoutOrder = order
+			lbl.Text = l.text
+			lbl.Parent = scroll
+			lineLabels[i] = lbl
+		end
+		if mode == "attributes" then
+			summary.Text = ("%s - %d attributed instances · %d attributes")
+				:format(name, data.nInst, data.nAttr)
+		else
+			summary.Text = ("%s - %d ValueBase objects"):format(name, data.nInst)
+		end
+	end
+
+	local function scan(which: string)
+		mode = which
+		currentAccent = (which == "attributes") and ACCENT_ATTR or ACCENT_VALUE
+		btnAttr.BackgroundColor3 = (which == "attributes") and ACCENT_ATTR or BTN_OFF
+		btnValue.BackgroundColor3 = (which == "values") and ACCENT_VALUE or BTN_OFF
+		summary.Text = "Scanning…"
+		task.wait() -- paint before the synchronous walk
+
+		store = {}
+		for _, b in pairs(serviceButtons) do b:Destroy() end
+		serviceButtons = {}
+		clearScroll()
+
+		local available = {}
+		for _, name in ipairs(SELECTABLE) do
+			local ok, svc = pcall(function() return game:GetService(name) end)
+			if ok and svc then
+				local data = (which == "attributes") and buildAttributes(svc) or buildValues(svc)
+				if data.nInst > 0 then
+					store[name] = data
+					available[#available + 1] = name
+				end
+			end
+		end
+
+		for i, name in ipairs(available) do
+			local b = Instance.new("TextButton")
+			b.Name = name
+			b.Text = name
+			b.Font = Enum.Font.GothamMedium
+			b.TextScaled = true
+			b.TextColor3 = Color3.fromRGB(255, 255, 255)
+			b.BackgroundColor3 = BTN_OFF
+			b.AutoButtonColor = true
+			b.BorderSizePixel = 0
+			b.LayoutOrder = i
+			b.Parent = grid
+			local c = Instance.new("UICorner")
+			c.CornerRadius = UDim.new(0, 6)
+			c.Parent = b
+			local con = Instance.new("UITextSizeConstraint")
+			con.MaxTextSize = 12
+			con.Parent = b
+			b.Activated:Connect(function() selectService(name) end)
+			serviceButtons[name] = b
+		end
+
+		if #available > 0 then
+			selectService(available[1])
+		else
+			local label = (which == "attributes") and "attributes" or "ValueBase objects"
+			summary.Text = "No " .. label .. " found in the selectable services."
+		end
+	end
+
+	-- Scroll the list so row `idx` of the current service is at the top, and
+	-- highlight it. Yields one frame so the freshly-built layout has positions.
+	local function jumpTo(idx: number)
+		local lbl = lineLabels[idx]
+		if not lbl then return end
+		task.wait() -- let the UIListLayout / AutomaticSize settle
+		if lastHighlight and lastHighlight.Parent then
+			lastHighlight.BackgroundTransparency = 1
+		end
+		lbl.BackgroundTransparency = 0.25
+		lastHighlight = lbl
+		local y = lbl.AbsolutePosition.Y - scroll.AbsolutePosition.Y + scroll.CanvasPosition.Y - 6
+		scroll.CanvasPosition = Vector2.new(0, math.max(0, y))
+	end
+
+	-- Find the first appearance of the typed name across the scanned services
+	-- (in SELECTABLE order), switch to that service, and jump to it.
+	local function doSearch()
+		local raw = search.Text
+		local q = raw:lower():gsub("%s+", "")
+		if q == "" then return end
+		if next(store) == nil then
+			summary.Text = "Scan Attributes or ValueBase first, then search."
+			return
+		end
+		for _, name in ipairs(SELECTABLE) do
+			local data = store[name]
+			if data then
+				for i, l in ipairs(data.lines) do
+					if l.name and l.name:lower():find(q, 1, true) then
+						if selected ~= name then
+							selectService(name)
+						end
+						jumpTo(i)
+						summary.Text = ('Found "%s" in %s'):format(raw, name)
+						return
+					end
+				end
+			end
+		end
+		local what = (mode == "values") and "value or name" or "attribute name"
+		summary.Text = ('No %s matching "%s" found.'):format(what, raw)
+	end
+
+	search.FocusLost:Connect(function(enterPressed: boolean)
+		if enterPressed then doSearch() end
+	end)
+
+	btnAttr.Activated:Connect(function() scan("attributes") end)
+	btnValue.Activated:Connect(function() scan("values") end)
+end
+
+button.Click:Connect(function()
+	buildChrome()
+	widget.Enabled = not widget.Enabled
+end)

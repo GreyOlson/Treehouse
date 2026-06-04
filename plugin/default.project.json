@@ -1,0 +1,8 @@
+{
+  "name": "AttributeTreeTool",
+  "tree": {
+    "$path": "Plugin.server.luau",
+    "AttributeToolGui": { "$path": "AttributeToolGui.luau" },
+    "Dumpers": { "$path": "Dumpers.luau" }
+  }
+}

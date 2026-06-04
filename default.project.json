@@ -1,0 +1,19 @@
+{
+  "name": "AttributeTreePluginDev",
+  "tree": {
+    "$className": "DataModel",
+    "Workspace": {
+      "$className": "Workspace",
+      "$ignoreUnknownInstances": true
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$ignoreUnknownInstances": true,
+      "AttributeTreeTool": {
+        "$className": "Folder",
+        "Dumpers": { "$path": "plugin/Dumpers.luau" },
+        "AttributeToolGui": { "$path": "plugin/AttributeToolGui.luau" }
+      }
+    }
+  }
+}
