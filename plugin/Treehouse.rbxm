@@ -57,8 +57,20 @@ local HTTP_WARNING =
 
 -- Whether the "Include Runtime in Treehouse" toggle is on (driven by the GUI).
 local includeRuntime = false
-local mailboxUp = false -- set true when an open-time ping reaches the mailbox
-local ui                  -- GUI handle (assigned after Gui.build below)
+local hasPython = true   -- GUI "I have Python installed" toggle; if false, use uv
+local mailboxUp = false  -- set true when an open-time ping reaches the mailbox
+local ui                 -- GUI handle (assigned after Gui.build below)
+
+-- The terminal commands shown in the GUI boxes, switching between the user's
+-- own Python and uv (which provisions Python) based on the hasPython toggle.
+local function commandsFor(): (string, string)
+	if hasPython then
+		return "cd ~/Treehouse &amp;&amp; python3 mailbox/server.py",
+			'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; python mailbox\\server.py'
+	end
+	return "cd ~/Treehouse &amp;&amp; uv run mailbox/server.py",
+		'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; uv run mailbox\\server.py'
+end
 
 -- Build the setup text. Steps are numbered dynamically: if "Allow HTTP Requests"
 -- is already enabled, step 1 is skipped and the rest shift down a number. The
@@ -93,7 +105,12 @@ local function buildSetup(): string
 			.. "   Allow HTTP Requests.  (the easy one)")
 	end
 
-	step("Install Python 3 (nothing else to install): python.org/downloads")
+	if not hasPython then
+		step("No Python? Install uv once - it runs Treehouse and fetches Python\n"
+			.. "   for you (nothing else to install). See https://astral.sh/uv :\n"
+			.. "      macOS:    curl -LsSf https://astral.sh/uv/install.sh | sh\n"
+			.. "      Windows:  (in PowerShell) irm https://astral.sh/uv/install.ps1 | iex")
+	end
 	step("Open the Treehouse folder you downloaded and double-click the launcher:\n"
 		.. "      macOS:    Start Treehouse (Mac).command\n"
 		.. "      Windows:  Start Treehouse (Windows).bat\n"
@@ -145,11 +162,13 @@ local function currentGuide(): string
 	return buildSetup()
 end
 
--- Re-check whether the mailbox is up, then refresh the idle status + runtime note.
+-- Re-check whether the mailbox is up, then refresh the guide, runtime note, and
+-- the OS command boxes.
 local function refresh()
 	mailboxUp = pingMailbox()
 	ui.setStatus(currentGuide())
 	ui.setRuntimeText(runtimeBlock())
+	ui.setCommands(commandsFor())
 end
 
 -- True if Studio's "Allow HTTP Requests" is on. Otherwise warns and returns false
@@ -228,12 +247,20 @@ ui = Gui.build(widget, {
 		ui.setRuntimeText(runtimeBlock())
 		ui.scrollStatusToBottom() -- reveal the runtime note at the bottom
 	end,
+	-- "I have Python installed" toggle: re-render the guide and swap the command
+	-- boxes between python and `uv run`.
+	onTogglePython = function(checked)
+		hasPython = checked
+		ui.setStatus(currentGuide())
+		ui.setCommands(commandsFor())
+	end,
 })
 
--- Greet with the setup explainer + runtime note (mailboxUp is false until the
--- first ping on open).
+-- Greet with the setup explainer + runtime note + OS commands (mailboxUp is
+-- false until the first ping on open).
 ui.setStatus(currentGuide())
 ui.setRuntimeText(runtimeBlock())
+ui.setCommands(commandsFor())
 
 -- Re-check the mailbox each time the widget is opened: if it answers, the
 -- guide collapses to "✅ Mailbox already running."
@@ -468,6 +495,40 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	slist.Padding = UDim.new(0, 6)
 	slist.Parent = status
 
+	-- "Do you have Python installed?" toggle. Drives the setup guide + command
+	-- boxes: when off, the guide adds a one-line "install uv" step (uv fetches
+	-- Python for you) and the commands switch to `uv run`.
+	local hasPython = true
+	local pyToggle = Instance.new("TextButton")
+	pyToggle.Name = "TogglePythonInstalled"
+	pyToggle.Text = "✅ I already have Python installed"
+	pyToggle.Font = Enum.Font.GothamMedium
+	pyToggle.TextSize = 13
+	pyToggle.TextXAlignment = Enum.TextXAlignment.Left
+	pyToggle.TextColor3 = Color3.fromRGB(235, 235, 240)
+	pyToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+	pyToggle.AutoButtonColor = true
+	pyToggle.BorderSizePixel = 0
+	pyToggle.Size = UDim2.new(1, 0, 0, 28)
+	pyToggle.AutomaticSize = Enum.AutomaticSize.Y
+	pyToggle.LayoutOrder = 0
+	pyToggle.ZIndex = 6
+	pyToggle.Parent = status
+	corner(pyToggle, 6)
+	local pyPad = Instance.new("UIPadding")
+	pyPad.PaddingLeft = UDim.new(0, 8)
+	pyPad.PaddingTop = UDim.new(0, 5)
+	pyPad.PaddingBottom = UDim.new(0, 5)
+	pyPad.Parent = pyToggle
+
+	local function setPythonToggle(on: boolean)
+		hasPython = on
+		pyToggle.Text = on and "✅ I already have Python installed"
+			or "❌ No Python - use uv (it installs Python for you)"
+		if opts.onTogglePython then opts.onTogglePython(on) end
+	end
+	pyToggle.Activated:Connect(function() setPythonToggle(not hasPython) end)
+
 	local statusText = Instance.new("TextLabel")
 	statusText.Name = "StatusText"
 	statusText.Text = ""
@@ -546,8 +607,13 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		return box
 	end
 
-	commandBox(3, "macOS / Linux", "cd ~/Treehouse &amp;&amp; python3 mailbox/server.py")
-	commandBox(5, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; python mailbox\\server.py')
+	local macBox = commandBox(3, "macOS / Linux", "cd ~/Treehouse &amp;&amp; python3 mailbox/server.py")
+	local winBox = commandBox(5, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; python mailbox\\server.py')
+
+	local function setCommands(mac: string, win: string)
+		macBox.Text = mac
+		winBox.Text = win
+	end
 
 	-- Runtime note (✅/❌), updated when the toggle changes.
 	local runtimeText = Instance.new("TextLabel")
@@ -612,6 +678,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		root = backdrop,
 		setStatus = setStatus,
 		setRuntimeText = setRuntimeText,
+		setCommands = setCommands,
 		scrollStatusToBottom = scrollStatusToBottom,
 		setRuntimeToggle = setRuntimeToggle,
 		getRuntime = function() return includeRuntime end,

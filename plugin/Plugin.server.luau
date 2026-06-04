@@ -55,8 +55,20 @@ local HTTP_WARNING =
 
 -- Whether the "Include Runtime in Treehouse" toggle is on (driven by the GUI).
 local includeRuntime = false
-local mailboxUp = false -- set true when an open-time ping reaches the mailbox
-local ui                  -- GUI handle (assigned after Gui.build below)
+local hasPython = true   -- GUI "I have Python installed" toggle; if false, use uv
+local mailboxUp = false  -- set true when an open-time ping reaches the mailbox
+local ui                 -- GUI handle (assigned after Gui.build below)
+
+-- The terminal commands shown in the GUI boxes, switching between the user's
+-- own Python and uv (which provisions Python) based on the hasPython toggle.
+local function commandsFor(): (string, string)
+	if hasPython then
+		return "cd ~/Treehouse && python3 mailbox/server.py",
+			'cd /d "%USERPROFILE%\\Treehouse" && python mailbox\\server.py'
+	end
+	return "cd ~/Treehouse && uv run mailbox/server.py",
+		'cd /d "%USERPROFILE%\\Treehouse" && uv run mailbox\\server.py'
+end
 
 -- Build the setup text. Steps are numbered dynamically: if "Allow HTTP Requests"
 -- is already enabled, step 1 is skipped and the rest shift down a number. The
@@ -91,7 +103,12 @@ local function buildSetup(): string
 			.. "   Allow HTTP Requests.  (the easy one)")
 	end
 
-	step("Install Python 3 (nothing else to install): python.org/downloads")
+	if not hasPython then
+		step("No Python? Install uv once - it runs Treehouse and fetches Python\n"
+			.. "   for you (nothing else to install). See https://astral.sh/uv :\n"
+			.. "      macOS:    curl -LsSf https://astral.sh/uv/install.sh | sh\n"
+			.. "      Windows:  (in PowerShell) irm https://astral.sh/uv/install.ps1 | iex")
+	end
 	step("Open the Treehouse folder you downloaded and double-click the launcher:\n"
 		.. "      macOS:    Start Treehouse (Mac).command\n"
 		.. "      Windows:  Start Treehouse (Windows).bat\n"
@@ -143,11 +160,13 @@ local function currentGuide(): string
 	return buildSetup()
 end
 
--- Re-check whether the mailbox is up, then refresh the idle status + runtime note.
+-- Re-check whether the mailbox is up, then refresh the guide, runtime note, and
+-- the OS command boxes.
 local function refresh()
 	mailboxUp = pingMailbox()
 	ui.setStatus(currentGuide())
 	ui.setRuntimeText(runtimeBlock())
+	ui.setCommands(commandsFor())
 end
 
 -- True if Studio's "Allow HTTP Requests" is on. Otherwise warns and returns false
@@ -226,12 +245,20 @@ ui = Gui.build(widget, {
 		ui.setRuntimeText(runtimeBlock())
 		ui.scrollStatusToBottom() -- reveal the runtime note at the bottom
 	end,
+	-- "I have Python installed" toggle: re-render the guide and swap the command
+	-- boxes between python and `uv run`.
+	onTogglePython = function(checked)
+		hasPython = checked
+		ui.setStatus(currentGuide())
+		ui.setCommands(commandsFor())
+	end,
 })
 
--- Greet with the setup explainer + runtime note (mailboxUp is false until the
--- first ping on open).
+-- Greet with the setup explainer + runtime note + OS commands (mailboxUp is
+-- false until the first ping on open).
 ui.setStatus(currentGuide())
 ui.setRuntimeText(runtimeBlock())
+ui.setCommands(commandsFor())
 
 -- Re-check the mailbox each time the widget is opened: if it answers, the
 -- guide collapses to "✅ Mailbox already running."

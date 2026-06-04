@@ -220,6 +220,40 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	slist.Padding = UDim.new(0, 6)
 	slist.Parent = status
 
+	-- "Do you have Python installed?" toggle. Drives the setup guide + command
+	-- boxes: when off, the guide adds a one-line "install uv" step (uv fetches
+	-- Python for you) and the commands switch to `uv run`.
+	local hasPython = true
+	local pyToggle = Instance.new("TextButton")
+	pyToggle.Name = "TogglePythonInstalled"
+	pyToggle.Text = "✅ I already have Python installed"
+	pyToggle.Font = Enum.Font.GothamMedium
+	pyToggle.TextSize = 13
+	pyToggle.TextXAlignment = Enum.TextXAlignment.Left
+	pyToggle.TextColor3 = Color3.fromRGB(235, 235, 240)
+	pyToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+	pyToggle.AutoButtonColor = true
+	pyToggle.BorderSizePixel = 0
+	pyToggle.Size = UDim2.new(1, 0, 0, 28)
+	pyToggle.AutomaticSize = Enum.AutomaticSize.Y
+	pyToggle.LayoutOrder = 0
+	pyToggle.ZIndex = 6
+	pyToggle.Parent = status
+	corner(pyToggle, 6)
+	local pyPad = Instance.new("UIPadding")
+	pyPad.PaddingLeft = UDim.new(0, 8)
+	pyPad.PaddingTop = UDim.new(0, 5)
+	pyPad.PaddingBottom = UDim.new(0, 5)
+	pyPad.Parent = pyToggle
+
+	local function setPythonToggle(on: boolean)
+		hasPython = on
+		pyToggle.Text = on and "✅ I already have Python installed"
+			or "❌ No Python - use uv (it installs Python for you)"
+		if opts.onTogglePython then opts.onTogglePython(on) end
+	end
+	pyToggle.Activated:Connect(function() setPythonToggle(not hasPython) end)
+
 	local statusText = Instance.new("TextLabel")
 	statusText.Name = "StatusText"
 	statusText.Text = ""
@@ -298,8 +332,13 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		return box
 	end
 
-	commandBox(3, "macOS / Linux", "cd ~/Treehouse && python3 mailbox/server.py")
-	commandBox(5, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" && python mailbox\\server.py')
+	local macBox = commandBox(3, "macOS / Linux", "cd ~/Treehouse && python3 mailbox/server.py")
+	local winBox = commandBox(5, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" && python mailbox\\server.py')
+
+	local function setCommands(mac: string, win: string)
+		macBox.Text = mac
+		winBox.Text = win
+	end
 
 	-- Runtime note (✅/❌), updated when the toggle changes.
 	local runtimeText = Instance.new("TextLabel")
@@ -364,6 +403,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		root = backdrop,
 		setStatus = setStatus,
 		setRuntimeText = setRuntimeText,
+		setCommands = setCommands,
 		scrollStatusToBottom = scrollStatusToBottom,
 		setRuntimeToggle = setRuntimeToggle,
 		getRuntime = function() return includeRuntime end,

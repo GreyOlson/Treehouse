@@ -1,0 +1,12 @@
+[project]
+name = "treehouse-mailbox"
+version = "0.1.0"
+description = "Local mailbox + HTML generators for the Treehouse Roblox attribute / value explorer plugin."
+readme = "README.md"
+requires-python = ">=3.9"
+# Standard library only - no third-party dependencies.
+dependencies = []
+
+# This file exists so `uv run mailbox/server.py` works for users who don't have
+# Python installed: uv reads requires-python, fetches a matching Python, and runs
+# the stdlib-only mailbox. Users who already have Python can ignore uv entirely.
