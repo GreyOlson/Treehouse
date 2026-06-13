@@ -1860,546 +1860,6 @@ Workspace [Workspace]
         HumanoidRootPart [Pose]
           LowerTorso [Pose]
             UpperTorso [Pose]
-              Ease [Folder]
-                Params [Folder]
-                  Direction [StringValue] = "InOut" (string)
-                Type [StringValue] = "Sine" (string)
-              Head [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-              LeftUpperArm [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-                LeftLowerArm [Pose]
-                  Ease [Folder]
-                    Params [Folder]
-                      Direction [StringValue] = "InOut" (string)
-                    Type [StringValue] = "Sine" (string)
-                  LeftHand [Pose]
-                    Ease [Folder]
-                      Params [Folder]
-                        Direction [StringValue] = "InOut" (string)
-                      Type [StringValue] = "Sine" (string)
-              RightUpperArm [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-                RightLowerArm [Pose]
-                  Ease [Folder]
-                    Params [Folder]
-                      Direction [StringValue] = "InOut" (string)
-                    Type [StringValue] = "Sine" (string)
-                  RightHand [Pose]
-                    Ease [Folder]
-                      Params [Folder]
-                        Direction [StringValue] = "InOut" (string)
-                      Type [StringValue] = "Sine" (string)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Ease [Folder]
-                Params [Folder]
-                  Direction [StringValue] = "InOut" (string)
-                Type [StringValue] = "Sine" (string)
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-                LeftLowerArm [Pose]
-                  Ease [Folder]
-                    Params [Folder]
-                      Direction [StringValue] = "InOut" (string)
-                    Type [StringValue] = "Sine" (string)
-                  LeftHand [Pose]
-                    Ease [Folder]
-                      Params [Folder]
-                        Direction [StringValue] = "InOut" (string)
-                      Type [StringValue] = "Sine" (string)
-              RightUpperArm [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-                RightLowerArm [Pose]
-                  Ease [Folder]
-                    Params [Folder]
-                      Direction [StringValue] = "InOut" (string)
-                    Type [StringValue] = "Sine" (string)
-                  RightHand [Pose]
-                    Ease [Folder]
-                      Params [Folder]
-                        Direction [StringValue] = "InOut" (string)
-                      Type [StringValue] = "Sine" (string)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Ease [Folder]
-                Params [Folder]
-                  Direction [StringValue] = "InOut" (string)
-                Type [StringValue] = "Sine" (string)
-              Head [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-              LeftUpperArm [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-                LeftLowerArm [Pose]
-                  Ease [Folder]
-                    Params [Folder]
-                      Direction [StringValue] = "InOut" (string)
-                    Type [StringValue] = "Sine" (string)
-                  LeftHand [Pose]
-                    Ease [Folder]
-                      Params [Folder]
-                        Direction [StringValue] = "InOut" (string)
-                      Type [StringValue] = "Sine" (string)
-              RightUpperArm [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-                RightLowerArm [Pose]
-                  Ease [Folder]
-                    Params [Folder]
-                      Direction [StringValue] = "InOut" (string)
-                    Type [StringValue] = "Sine" (string)
-                  RightHand [Pose]
-                    Ease [Folder]
-                      Params [Folder]
-                        Direction [StringValue] = "InOut" (string)
-                      Type [StringValue] = "Sine" (string)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Ease [Folder]
-                Params [Folder]
-                  Direction [StringValue] = "InOut" (string)
-                Type [StringValue] = "Sine" (string)
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-                LeftLowerArm [Pose]
-                  Ease [Folder]
-                    Params [Folder]
-                      Direction [StringValue] = "InOut" (string)
-                    Type [StringValue] = "Sine" (string)
-                  LeftHand [Pose]
-                    Ease [Folder]
-                      Params [Folder]
-                        Direction [StringValue] = "InOut" (string)
-                      Type [StringValue] = "Sine" (string)
-              RightUpperArm [Pose]
-                Ease [Folder]
-                  Params [Folder]
-                    Direction [StringValue] = "InOut" (string)
-                  Type [StringValue] = "Sine" (string)
-                RightLowerArm [Pose]
-                  Ease [Folder]
-                    Params [Folder]
-                      Direction [StringValue] = "InOut" (string)
-                    Type [StringValue] = "Sine" (string)
-                  RightHand [Pose]
-                    Ease [Folder]
-                      Params [Folder]
-                        Direction [StringValue] = "InOut" (string)
-                      Type [StringValue] = "Sine" (string)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
-              Head [Pose]
-                xSIXxNull [IntValue] = 0 (number)
-              LeftUpperArm [Pose]
-                LeftLowerArm [Pose]
-                  LeftHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              RightUpperArm [Pose]
-                RightLowerArm [Pose]
-                  RightHand [Pose]
-                    xSIXxNull [IntValue] = 0 (number)
-                  xSIXxNull [IntValue] = 0 (number)
-                xSIXxNull [IntValue] = 0 (number)
-              xSIXxNull [IntValue] = 0 (number)
-            xSIXxNull [IntValue] = 0 (number)
-          xSIXxNull [IntValue] = 0 (number)
-        xSIXxNull [IntValue] = 0 (number)
-      Keyframe [Keyframe]
-        HumanoidRootPart [Pose]
-          LowerTorso [Pose]
-            UpperTorso [Pose]
               Head [Pose]
                 xSIXxNull [IntValue] = 0 (number)
               LeftUpperArm [Pose]
@@ -2968,6 +2428,327 @@ Workspace [Workspace]
         HumanoidRootPart [Pose]
           LowerTorso [Pose]
             UpperTorso [Pose]
+              Ease [Folder]
+                Params [Folder]
+                  Direction [StringValue] = "InOut" (string)
+                Type [StringValue] = "Sine" (string)
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+                LeftLowerArm [Pose]
+                  Ease [Folder]
+                    Params [Folder]
+                      Direction [StringValue] = "InOut" (string)
+                    Type [StringValue] = "Sine" (string)
+                  LeftHand [Pose]
+                    Ease [Folder]
+                      Params [Folder]
+                        Direction [StringValue] = "InOut" (string)
+                      Type [StringValue] = "Sine" (string)
+              RightUpperArm [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+                RightLowerArm [Pose]
+                  Ease [Folder]
+                    Params [Folder]
+                      Direction [StringValue] = "InOut" (string)
+                    Type [StringValue] = "Sine" (string)
+                  RightHand [Pose]
+                    Ease [Folder]
+                      Params [Folder]
+                        Direction [StringValue] = "InOut" (string)
+                      Type [StringValue] = "Sine" (string)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Ease [Folder]
+                Params [Folder]
+                  Direction [StringValue] = "InOut" (string)
+                Type [StringValue] = "Sine" (string)
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+                LeftLowerArm [Pose]
+                  Ease [Folder]
+                    Params [Folder]
+                      Direction [StringValue] = "InOut" (string)
+                    Type [StringValue] = "Sine" (string)
+                  LeftHand [Pose]
+                    Ease [Folder]
+                      Params [Folder]
+                        Direction [StringValue] = "InOut" (string)
+                      Type [StringValue] = "Sine" (string)
+              RightUpperArm [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+                RightLowerArm [Pose]
+                  Ease [Folder]
+                    Params [Folder]
+                      Direction [StringValue] = "InOut" (string)
+                    Type [StringValue] = "Sine" (string)
+                  RightHand [Pose]
+                    Ease [Folder]
+                      Params [Folder]
+                        Direction [StringValue] = "InOut" (string)
+                      Type [StringValue] = "Sine" (string)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Ease [Folder]
+                Params [Folder]
+                  Direction [StringValue] = "InOut" (string)
+                Type [StringValue] = "Sine" (string)
+              Head [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+              LeftUpperArm [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+                LeftLowerArm [Pose]
+                  Ease [Folder]
+                    Params [Folder]
+                      Direction [StringValue] = "InOut" (string)
+                    Type [StringValue] = "Sine" (string)
+                  LeftHand [Pose]
+                    Ease [Folder]
+                      Params [Folder]
+                        Direction [StringValue] = "InOut" (string)
+                      Type [StringValue] = "Sine" (string)
+              RightUpperArm [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+                RightLowerArm [Pose]
+                  Ease [Folder]
+                    Params [Folder]
+                      Direction [StringValue] = "InOut" (string)
+                    Type [StringValue] = "Sine" (string)
+                  RightHand [Pose]
+                    Ease [Folder]
+                      Params [Folder]
+                        Direction [StringValue] = "InOut" (string)
+                      Type [StringValue] = "Sine" (string)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
               Head [Pose]
                 xSIXxNull [IntValue] = 0 (number)
               LeftUpperArm [Pose]
@@ -3052,6 +2833,225 @@ Workspace [Workspace]
             xSIXxNull [IntValue] = 0 (number)
           xSIXxNull [IntValue] = 0 (number)
         xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Head [Pose]
+                xSIXxNull [IntValue] = 0 (number)
+              LeftUpperArm [Pose]
+                LeftLowerArm [Pose]
+                  LeftHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              RightUpperArm [Pose]
+                RightLowerArm [Pose]
+                  RightHand [Pose]
+                    xSIXxNull [IntValue] = 0 (number)
+                  xSIXxNull [IntValue] = 0 (number)
+                xSIXxNull [IntValue] = 0 (number)
+              xSIXxNull [IntValue] = 0 (number)
+            xSIXxNull [IntValue] = 0 (number)
+          xSIXxNull [IntValue] = 0 (number)
+        xSIXxNull [IntValue] = 0 (number)
+      Keyframe [Keyframe]
+        HumanoidRootPart [Pose]
+          LowerTorso [Pose]
+            UpperTorso [Pose]
+              Ease [Folder]
+                Params [Folder]
+                  Direction [StringValue] = "InOut" (string)
+                Type [StringValue] = "Sine" (string)
+              Head [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+              LeftUpperArm [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+                LeftLowerArm [Pose]
+                  Ease [Folder]
+                    Params [Folder]
+                      Direction [StringValue] = "InOut" (string)
+                    Type [StringValue] = "Sine" (string)
+                  LeftHand [Pose]
+                    Ease [Folder]
+                      Params [Folder]
+                        Direction [StringValue] = "InOut" (string)
+                      Type [StringValue] = "Sine" (string)
+              RightUpperArm [Pose]
+                Ease [Folder]
+                  Params [Folder]
+                    Direction [StringValue] = "InOut" (string)
+                  Type [StringValue] = "Sine" (string)
+                RightLowerArm [Pose]
+                  Ease [Folder]
+                    Params [Folder]
+                      Direction [StringValue] = "InOut" (string)
+                    Type [StringValue] = "Sine" (string)
+                  RightHand [Pose]
+                    Ease [Folder]
+                      Params [Folder]
+                        Direction [StringValue] = "InOut" (string)
+                      Type [StringValue] = "Sine" (string)
       Keyframe [Keyframe]
         HumanoidRootPart [Pose]
           LowerTorso [Pose]

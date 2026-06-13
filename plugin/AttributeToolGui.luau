@@ -113,12 +113,16 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	genRow.Size = UDim2.new(1, -2 * MARGIN, 0, 46)
 	genRow.Parent = backdrop
 
+	-- three generate buttons, evenly split across the row (text scales to fit)
 	local genAttr = makeButton("GenerateAttributeTree", "Generate Attribute Treehouse",
 		Color3.fromRGB(120, 170, 235), -- medium-light blue
-		UDim2.new(0.5, -3, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 15, 8)
+		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 14, 8)
 	local genValue = makeButton("GenerateValueBaseTree", "Generate Value* Treehouse",
 		Color3.fromRGB(235, 120, 120), -- medium-light red
-		UDim2.new(0.5, -3, 1, 0), UDim2.new(0.5, 3, 0, 0), genRow, 15, 8)
+		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(1 / 3, 2, 0, 0), genRow, 14, 8)
+	local genCollision = makeButton("GenerateCollisionTree", "Generate Collision Treehouse",
+		Color3.fromRGB(120, 205, 165), -- medium-light teal
+		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(2 / 3, 4, 0, 0), genRow, 14, 8)
 
 	-- Runtime toggle, between the generate buttons and the status area
 	local includeRuntime = false
@@ -176,9 +180,12 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	htmlDesc.ZIndex = 6
 	htmlDesc.Parent = backdrop
 
+	-- assigned once srcToggle exists (further down); shows/hides it with the runtime toggle
+	local onRuntimeChanged: ((boolean) -> ())? = nil
 	local function setRuntimeToggle(on: boolean)
 		includeRuntime = on
 		toggle.Text = (on and "✅" or "❌") .. "  Include Runtime in Treehouse"
+		if onRuntimeChanged then onRuntimeChanged(on) end
 		if opts.onToggleRuntime then
 			opts.onToggleRuntime(on)
 		end
@@ -284,7 +291,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	cmdHint.BackgroundTransparency = 1
 	cmdHint.Size = UDim2.new(1, 0, 0, 0)
 	cmdHint.AutomaticSize = Enum.AutomaticSize.Y
-	cmdHint.LayoutOrder = 2
+	cmdHint.LayoutOrder = 4 -- below the runtime status (2) + src toggle (3)
 	cmdHint.ZIndex = 6
 	cmdHint.Parent = status
 
@@ -332,12 +339,63 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		return box
 	end
 
-	local macBox = commandBox(3, "macOS / Linux", "cd ~/Treehouse && python3 mailbox/server.py")
-	local winBox = commandBox(5, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" && python mailbox\\server.py')
+	local macBox = commandBox(5, "macOS / Linux", "cd ~/Treehouse && python3 mailbox/server.py")
+	local winBox = commandBox(7, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" && python mailbox\\server.py')
 
 	local function setCommands(mac: string, win: string)
 		macBox.Text = mac
 		winBox.Text = win
+	end
+
+	-- "Connect your project src" toggle. The user can tick it manually, and the
+	-- plugin auto-ticks it when the mailbox reports a valid TREE_SRC. Only shown
+	-- while "Include Runtime in Treehouse" is on. (LayoutOrder 7, above the detail.)
+	local srcConnected = false
+	local srcToggle = Instance.new("TextButton")
+	srcToggle.Name = "ToggleSrcConnected"
+	srcToggle.Text = "❌  Connect your project src (fills the * / ** markers)"
+	srcToggle.Font = Enum.Font.GothamMedium
+	srcToggle.TextSize = 13
+	srcToggle.TextXAlignment = Enum.TextXAlignment.Left
+	srcToggle.TextColor3 = Color3.fromRGB(235, 235, 240)
+	srcToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+	srcToggle.AutoButtonColor = true
+	srcToggle.BorderSizePixel = 0
+	srcToggle.Size = UDim2.new(1, 0, 0, 28)
+	srcToggle.AutomaticSize = Enum.AutomaticSize.Y
+	srcToggle.LayoutOrder = 3 -- above the command boxes (runtime status is 2)
+	srcToggle.ZIndex = 6
+	srcToggle.Visible = false
+	srcToggle.Parent = status
+	corner(srcToggle, 6)
+	local srcPad = Instance.new("UIPadding")
+	srcPad.PaddingLeft = UDim.new(0, 8)
+	srcPad.PaddingTop = UDim.new(0, 5)
+	srcPad.PaddingBottom = UDim.new(0, 5)
+	srcPad.Parent = srcToggle
+
+	-- Reflect the connected/not state (label only; the actual markers come from the
+	-- mailbox's TREE_SRC). `auto` true means the mailbox detected a real src.
+	local function renderSrcToggle(auto: boolean?, path: string?)
+		if srcConnected then
+			srcToggle.Text = "✅  Project src connected"
+				.. (auto and path and path ~= "" and ("  (" .. path .. ")") or "")
+		else
+			srcToggle.Text = "❌  Connect your project src (fills the * / ** markers)"
+		end
+	end
+	local function setSrcToggle(on: boolean, auto: boolean?, path: string?)
+		srcConnected = on
+		renderSrcToggle(auto, path)
+	end
+	srcToggle.Activated:Connect(function()
+		srcConnected = not srcConnected
+		renderSrcToggle(false, nil)
+		if opts.onToggleSrc then opts.onToggleSrc(srcConnected) end
+	end)
+	-- show the src toggle only while runtime is included (wired into setRuntimeToggle)
+	onRuntimeChanged = function(on: boolean)
+		srcToggle.Visible = on
 	end
 
 	-- Runtime note (✅/❌), updated when the toggle changes.
@@ -353,7 +411,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	runtimeText.BackgroundTransparency = 1
 	runtimeText.Size = UDim2.new(1, 0, 0, 0)
 	runtimeText.AutomaticSize = Enum.AutomaticSize.Y
-	runtimeText.LayoutOrder = 7
+	runtimeText.LayoutOrder = 2 -- runtime status sits ABOVE the command boxes
 	runtimeText.ZIndex = 6
 	runtimeText.Parent = status
 
@@ -395,6 +453,13 @@ function M.build(host: Instance, opts: { [string]: any }?)
 			print("[AttributeTool] Generate ValueBase Tree clicked")
 		end
 	end)
+	genCollision.Activated:Connect(function()
+		if opts.onGenerateCollision then
+			opts.onGenerateCollision(setStatus)
+		else
+			print("[AttributeTool] Generate Collision Tree clicked")
+		end
+	end)
 	clearOut.Activated:Connect(function()
 		setStatus("")
 	end)
@@ -407,6 +472,8 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		scrollStatusToBottom = scrollStatusToBottom,
 		setRuntimeToggle = setRuntimeToggle,
 		getRuntime = function() return includeRuntime end,
+		setSrcToggle = setSrcToggle,           -- (on, auto?, path?) - reflect src-connected state
+		getSrcConnected = function() return srcConnected end,
 	}
 end
 

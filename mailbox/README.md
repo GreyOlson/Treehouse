@@ -3,7 +3,7 @@
 > Status: implemented in `server.py` (stdlib only). Run it alongside Rojo.
 >
 > ```
-> ATTRTREE_SRC=/path/to/YourGame/src python3 mailbox/server.py
+> TREE_SRC=/path/to/YourGame/src python3 mailbox/server.py
 > ```
 >
 > Endpoints `POST /refresh/attributes` and `POST /refresh/values` write the body
@@ -24,7 +24,7 @@ does the rest.
    - `POST /refresh/values`     → write body to `../working/ValueBaseTree.luau`
 3. After writing the `.luau`, run the matching generators via `subprocess`
    (`generators/build_attribute_tree.py` + `build_network_diagram.py`, or the
-   ValueBase pair). Pass `ATTRTREE_SRC` so the runtime markers resolve.
+   ValueBase pair). Pass `TREE_SRC` so the runtime markers resolve.
 4. `webbrowser.open(...)` the resulting `working/*.html` (tree + network) so a
    fresh tab shows the updated data.
 5. Reply with a short status string the plugin GUI can echo (counts, "opened").

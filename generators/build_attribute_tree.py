@@ -49,11 +49,11 @@ PROJECT_ROOT = os.path.dirname(HERE)                        # AttributeTreePlugi
 WORKING = os.path.join(PROJECT_ROOT, "working")             # dumps in, HTML out
 
 # Point this at the Rojo `src/` of the game you're analyzing. It lives OUTSIDE
-# this plugin repo, so set the ATTRTREE_SRC env var, e.g.
-#   ATTRTREE_SRC=/path/to/YourGame/src  python3 generators/build_attribute_tree.py
+# this plugin repo, so set the TREE_SRC env var, e.g.
+#   TREE_SRC=/path/to/YourGame/src  python3 generators/build_attribute_tree.py
 # The default below assumes the game repo sits next to the Plugins folder.
 SRC_DIR = os.environ.get(
-    "ATTRTREE_SRC",
+    "TREE_SRC",
     os.path.join(PROJECT_ROOT, "..", "..", "TsunamiGame", "src"),
 )
 DUMP_PATH = os.path.join(WORKING, "AttributeTree.luau")

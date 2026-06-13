@@ -1,8 +1,8 @@
-# AttributeTreePlugin
+# TreeHouse by TheAmazeman & Claude
+# Dedicated to Tsunami Game by Virtual Valley Games
 
 A game-agnostic developer tool for mapping every Roblox **attribute** and
-**ValueBase object** in a place, rendering them as interactive HTML, and planning
-a Value→attribute migration. Extracted from the TsunamiGame `Trees/` tooling into
+**ValueBase object** in a place, rendering them as interactive HTML. Perfect for managing large amounts of attributes, planning a Value→attribute migration, or to explore your game's codebase by attributes. Extracted from the TsunamiGame `Trees/` tooling into
 a standalone project so it can be reused across games and eventually shipped as a
 Studio plugin.
 
@@ -40,13 +40,13 @@ config and the render engine, so **keep all four in `generators/` together.**
 2. Set `PROJECT_NAME` at the top of `generators/build_attribute_tree.py` (drives
    every page title; defaults to `"PROJECT_NAME"` and prints a reminder).
 3. Point the runtime-marker scan at the analyzed game's Rojo source via the
-   `ATTRTREE_SRC` env var:
+   `TREE_SRC` env var:
 
    ```
-   ATTRTREE_SRC=/path/to/YourGame/src python3 generators/build_attribute_tree.py
-   ATTRTREE_SRC=/path/to/YourGame/src python3 generators/build_valuebase_tree.py
-   ATTRTREE_SRC=/path/to/YourGame/src python3 generators/build_network_diagram.py
-   ATTRTREE_SRC=/path/to/YourGame/src python3 generators/build_value_network_diagram.py
+   TREE_SRC=/path/to/YourGame/src python3 generators/build_attribute_tree.py
+   TREE_SRC=/path/to/YourGame/src python3 generators/build_valuebase_tree.py
+   TREE_SRC=/path/to/YourGame/src python3 generators/build_network_diagram.py
+   TREE_SRC=/path/to/YourGame/src python3 generators/build_value_network_diagram.py
    ```
 
    (Defaults to `../../TsunamiGame/src` relative to the plugin if unset.)

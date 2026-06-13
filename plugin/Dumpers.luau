@@ -171,4 +171,86 @@ function Dumpers.ValueBaseDump(): string
 	return table.concat(lines, "\n")
 end
 
+----------------------------------------------------------------------
+-- Collision: a part is "flagged" if any collision setting is non-default.
+-- Returns the offending {name, value} pairs (in a stable order) or nil.
+local function collisionFlags(inst: Instance): { { any } }?
+	if not inst:IsA("BasePart") then
+		return nil
+	end
+	local flags = {}
+	-- CanCollide / CanTouch are always present on BasePart; the rest may not exist
+	-- on every part type, so read them through pcall and skip if absent.
+	if inst.CanCollide == false then flags[#flags + 1] = { "CanCollide", false } end
+	if inst.CanTouch == false then flags[#flags + 1] = { "CanTouch", false } end
+	if inst.CanQuery == false then flags[#flags + 1] = { "CanQuery", false } end
+	local okA, audio = pcall(function() return (inst :: any).AudioCanCollide end)
+	if okA and audio == false then flags[#flags + 1] = { "AudioCanCollide", false } end
+	local okG, group = pcall(function() return inst.CollisionGroup end)
+	if okG and group ~= "Default" then flags[#flags + 1] = { "CollisionGroup", group } end
+	local okF, fidelity = pcall(function() return (inst :: any).CollisionFidelity end)
+	if okF and fidelity ~= Enum.CollisionFidelity.Default then
+		flags[#flags + 1] = { "CollisionFidelity", fidelity }
+	end
+	if #flags == 0 then
+		return nil
+	end
+	return flags
+end
+
+function Dumpers.CollisionDump(): string
+	local included: { [Instance]: boolean } = {}
+	local flagsOf: { [Instance]: { { any } } } = {}
+	local count = 0
+	for _, svc in ipairs(services()) do
+		local stack = { svc }
+		while #stack > 0 do
+			local inst = table.remove(stack)
+			local flags = collisionFlags(inst)
+			if flags then
+				count += 1
+				flagsOf[inst] = flags
+				include(included, inst)
+			end
+			local okc, kids = pcall(function() return inst:GetChildren() end)
+			if okc then
+				for _, c in ipairs(kids) do
+					stack[#stack + 1] = c
+				end
+			end
+		end
+	end
+
+	local lines = {}
+	local function emit(s) lines[#lines + 1] = s end
+	emit("==== COLLISION DUMP (parts with non-default collision settings) ====")
+	emit("Total flagged parts found: " .. count)
+	emit("CanCollide/CanTouch/AudioCanCollide=false, CollisionGroup or CollisionFidelity != Default.")
+	emit(string.rep("=", 70))
+	emit("")
+
+	local function walk(inst: Instance, depth: number)
+		local indent = string.rep("  ", depth)
+		emit(indent .. inst.Name .. " [" .. inst.ClassName .. "]")
+		local flags = flagsOf[inst]
+		if flags then
+			for _, fl in ipairs(flags) do
+				local vs, vt = fmt(fl[2])
+				emit(indent .. "  - " .. fl[1] .. " = " .. vs .. " (" .. vt .. ")")
+			end
+		end
+		local kids = {}
+		for _, c in ipairs(inst:GetChildren()) do
+			if included[c] then kids[#kids + 1] = c end
+		end
+		table.sort(kids, sortKids)
+		for _, c in ipairs(kids) do walk(c, depth + 1) end
+	end
+
+	for _, svc in ipairs(services()) do
+		if included[svc] then walk(svc, 0); emit("") end
+	end
+	return table.concat(lines, "\n")
+end
+
 return Dumpers

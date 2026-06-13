@@ -59,17 +59,22 @@ local HTTP_WARNING =
 local includeRuntime = false
 local hasPython = true   -- GUI "I have Python installed" toggle; if false, use uv
 local mailboxUp = false  -- set true when an open-time ping reaches the mailbox
+local srcConnected = false -- "project src connected" toggle (auto from /health, or manual)
+local srcPath = ""        -- the TREE_SRC the mailbox reported, if any
 local ui                 -- GUI handle (assigned after Gui.build below)
 
--- The terminal commands shown in the GUI boxes, switching between the user's
--- own Python and uv (which provisions Python) based on the hasPython toggle.
+-- The all-in-one terminal command shown in the GUI boxes: cd into the Treehouse
+-- folder and run the mailbox. Switches python &lt;-&gt; uv (the hasPython toggle), and
+-- when runtime is included it also sets TREE_SRC up front (edit the placeholder
+-- path) so the whole thing is one copy-paste.
 local function commandsFor(): (string, string)
-	if hasPython then
-		return "cd ~/Treehouse &amp;&amp; python3 mailbox/server.py",
-			'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; python mailbox\\server.py'
-	end
-	return "cd ~/Treehouse &amp;&amp; uv run mailbox/server.py",
-		'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; uv run mailbox\\server.py'
+	local runner = hasPython and "python3" or "uv run"
+	local winRunner = hasPython and "python" or "uv run"
+	local macSrc = includeRuntime and 'TREE_SRC="/path/to/YourProject/src" ' or ""
+	local winSrc = includeRuntime and 'set "TREE_SRC=C:\\path\\YourProject\\src" &amp;&amp; ' or ""
+	local mac = "cd ~/Treehouse &amp;&amp; " .. macSrc .. runner .. " mailbox/server.py"
+	local win = 'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; ' .. winSrc .. winRunner .. " mailbox\\server.py"
+	return mac, win
 end
 
 -- Build the setup text. Steps are numbered dynamically: if "Allow HTTP Requests"
@@ -130,26 +135,35 @@ end
 -- The "Include Runtime in Treehouse" section. Rendered LAST and ALWAYS (whether
 -- the mailbox is up or not), so toggling the checkbox always changes what's on
 -- screen. ✅ shows the full src-connection steps; ❌ shows a short hint.
+-- Short runtime status, shown ABOVE the command boxes. The actual src-setting now
+-- lives inside the copy-paste command (TREE_SRC=...), so this is just a status line.
 local function runtimeBlock(): string
-	if includeRuntime then
-		return "✅ Runtime in Treehouse - INCLUDED\n"
-			.. "Connect your project src so the * / ** runtime markers fill in.\n"
-			.. "Set ATTRTREE_SRC to your project's Rojo src/ before starting the mailbox:\n"
-			.. "      Windows:  set ATTRTREE_SRC=C:\\path\\YourProject\\src\n"
-			.. "      macOS:    ATTRTREE_SRC=/path/YourProject/src python3 mailbox/server.py"
+	if not includeRuntime then
+		return "❌ Runtime in Treehouse - not included\n"
+			.. 'Tick "Include Runtime in Treehouse" above to also capture runtime states.'
 	end
-	return "❌ Runtime in Treehouse - not included\n"
-		.. 'Tick "Include Runtime in Treehouse" above to also capture runtime\n'
-		.. "attribute / value states (adds the src-connection step above)."
+	if srcConnected then
+		return "✅ Runtime INCLUDED - project src connected"
+			.. (srcPath ~= "" and ("  (" .. srcPath .. ")") or "") .. "\n"
+			.. "The * (set in code) and ** markers will fill in from your code."
+	end
+	return "✅ Runtime INCLUDED - edit the src path in the command below, then run it.\n"
+		.. "Point TREE_SRC at your game's synced source folder (a Rojo src/, etc.).\n"
+		.. "No synced code? Skip it - everything still works, the * / ** markers just won't show."
 end
 
--- Ping the mailbox's health endpoint. Returns true if it answered, which means
--- Python + the mailbox are up. False on connect-fail or if HTTP is disabled.
-local function pingMailbox(): boolean
-	local ok = pcall(function()
-		HttpService:GetAsync(MAILBOX .. "/health", true) -- nocache: always a fresh check
+-- Ping the mailbox's health endpoint. Returns (up, srcPath): up=true if it
+-- answered (mailbox + Python are running); srcPath is the TREE_SRC it reported
+-- (empty when none). False/"" on connect-fail or if HTTP is disabled.
+local function pingMailbox(): (boolean, string)
+	local ok, body = pcall(function()
+		return HttpService:GetAsync(MAILBOX .. "/health", true) -- nocache: fresh check
 	end)
-	return ok
+	if not ok then
+		return false, ""
+	end
+	local detected = tostring(body):match("src=([^\r\n]*)") or ""
+	return true, detected
 end
 
 -- The idle status text: a short "already running" note when the mailbox
@@ -163,9 +177,18 @@ local function currentGuide(): string
 end
 
 -- Re-check whether the mailbox is up, then refresh the guide, runtime note, and
--- the OS command boxes.
+-- the OS command boxes. If the mailbox reports a valid TREE_SRC, auto-tick the
+-- "project src connected" toggle (a manual tick otherwise stays as the user set it).
 local function refresh()
-	mailboxUp = pingMailbox()
+	local up, detected = pingMailbox()
+	mailboxUp = up
+	if detected ~= "" then
+		srcConnected = true
+		srcPath = detected
+		ui.setSrcToggle(true, true, detected) -- auto-detected
+	else
+		ui.setSrcToggle(srcConnected, false, "") -- keep manual state, re-render label
+	end
 	ui.setStatus(currentGuide())
 	ui.setRuntimeText(runtimeBlock())
 	ui.setCommands(commandsFor())
@@ -188,41 +211,69 @@ local function kb(bytes: number): number
 	return math.floor(bytes / 1024 + 0.5)
 end
 
--- POST a dump to the mailbox, reporting each stage in the status line.
-local function post(endpoint: string, label: string, body: string, setStatus)
-	local url = MAILBOX .. endpoint .. "?project=" .. HttpService:UrlEncode(PROJECT)
-	local _, lines = body:gsub("\n", "")
-	setStatus(("Dumped %d %s lines (%d KB).\nPOSTing to %s …"):format(lines, label, kb(#body), url))
-	task.wait() -- paint before the (blocking) request
+-- Roblox caps a single PostAsync body at 1024 KB; stay well under it and split
+-- bigger dumps (e.g. a collision dump with thousands of parts) into ordered chunks
+-- the mailbox reassembles. PostAsync is blocking, so chunks arrive in order.
+-- NOTE: requires the UPDATED mailbox (server.py) running - restart it after updating.
+local MAX_CHUNK = 512 * 1024
 
+local function sendOnce(url: string, body: string): (boolean, string, number)
 	local t0 = os.clock()
 	local ok, resp = pcall(function()
 		return HttpService:PostAsync(url, body, Enum.HttpContentType.TextPlain)
 	end)
-	local secs = os.clock() - t0
-	local msg = tostring(resp)
-	local low = msg:lower()
+	return ok, tostring(resp), os.clock() - t0
+end
 
+-- Translate a PostAsync result into the status line (success echo or a friendly
+-- error). Only called for the FINAL request (a single shot, or the last chunk).
+local function report(ok: boolean, msg: string, secs: number, url: string, setStatus)
+	local low = msg:lower()
 	if ok then
 		mailboxUp = true
-		-- the mailbox echoes e.g. "wrote N bytes -&gt; X.luau, opened A.html, B.html"
 		setStatus(("Done in %.1fs. Treehouse replied:\n%s\nCheck your browser for the refreshed pages.")
 			:format(secs, msg))
 	elseif low:find("not enabled") then
-		-- HttpEnabled read stale / toggled off mid-session.
 		setStatus(HTTP_WARNING, true)
 	elseif low:find("connectfail") or low:find("connect") or low:find("refused") then
 		mailboxUp = false
-		setStatus(
-			("Couldn't reach Treehouse at %s - the mailbox isn't running yet.\n\n"):format(url)
-			.. currentGuide(),
-			true)
+		setStatus(("Couldn't reach Treehouse at %s - the mailbox isn't running yet.\n\n"):format(url)
+			.. currentGuide(), true)
 	elseif low:find("timedout") or low:find("timeout") then
 		setStatus(("Treehouse at %s timed out after %.0fs.\nIt may still be running the generators - wait, then retry.")
 			:format(url, secs), true)
 	else
-		-- e.g. a 500 from a generator that failed server-side.
 		setStatus(("Treehouse error from %s:\n%s"):format(url, msg), true)
+	end
+end
+
+-- POST a dump to the mailbox, reporting each stage in the status line.
+local function post(endpoint: string, label: string, body: string, setStatus)
+	local base = MAILBOX .. endpoint .. "?project=" .. HttpService:UrlEncode(PROJECT)
+	local _, lines = body:gsub("\n", "")
+
+	if #body &lt;= MAX_CHUNK then
+		setStatus(("Dumped %d %s lines (%d KB).\nPOSTing to %s …"):format(lines, label, kb(#body), base))
+		task.wait() -- paint before the (blocking) request
+		local ok, msg, secs = sendOnce(base, body)
+		report(ok, msg, secs, base, setStatus)
+		return
+	end
+
+	-- too big for one request: send ordered chunks under a shared id.
+	local id = HttpService:GenerateGUID(false)
+	local total = math.ceil(#body / MAX_CHUNK)
+	for i = 1, total do
+		local chunk = body:sub((i - 1) * MAX_CHUNK + 1, i * MAX_CHUNK)
+		local url = ("%s&amp;id=%s&amp;chunk=%d&amp;chunks=%d"):format(base, id, i, total)
+		setStatus(("Dumped %d %s lines (%d KB). Sending chunk %d/%d…"):format(lines, label, kb(#body), i, total))
+		task.wait()
+		local ok, msg, secs = sendOnce(url, chunk)
+		if (not ok) or i == total then
+			-- a mid-chunk failure stops the run; the last chunk carries the generator reply
+			report(ok, msg, secs, url, setStatus)
+			if not ok then return end
+		end
 	end
 end
 
@@ -241,11 +292,19 @@ ui = Gui.build(widget, {
 		local dump = Dumpers.ValueBaseDump()
 		post("/refresh/values", "value", dump, setStatus)
 	end,
-	-- "Include Runtime in Treehouse" toggle: update the runtime note (✅/❌).
+	onGenerateCollision = function(setStatus)
+		if not httpReady(setStatus) then return end
+		setStatus("Walking the DataModel for parts with non-default collision settings…")
+		task.wait()
+		local dump = Dumpers.CollisionDump()
+		post("/refresh/collisions", "collision", dump, setStatus)
+	end,
+	-- "Include Runtime in Treehouse" toggle: update the runtime status AND the
+	-- command boxes (they add/drop the TREE_SRC= prefix with the runtime toggle).
 	onToggleRuntime = function(checked)
 		includeRuntime = checked
 		ui.setRuntimeText(runtimeBlock())
-		ui.scrollStatusToBottom() -- reveal the runtime note at the bottom
+		ui.setCommands(commandsFor())
 	end,
 	-- "I have Python installed" toggle: re-render the guide and swap the command
 	-- boxes between python and `uv run`.
@@ -253,6 +312,12 @@ ui = Gui.build(widget, {
 		hasPython = checked
 		ui.setStatus(currentGuide())
 		ui.setCommands(commandsFor())
+	end,
+	-- "Connect your project src" toggle: user ticked it manually (auto-tick happens
+	-- in refresh() from the mailbox's /health). Just refresh the runtime note.
+	onToggleSrc = function(checked)
+		srcConnected = checked
+		ui.setRuntimeText(runtimeBlock())
 	end,
 })
 
@@ -388,12 +453,16 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	genRow.Size = UDim2.new(1, -2 * MARGIN, 0, 46)
 	genRow.Parent = backdrop
 
+	-- three generate buttons, evenly split across the row (text scales to fit)
 	local genAttr = makeButton("GenerateAttributeTree", "Generate Attribute Treehouse",
 		Color3.fromRGB(120, 170, 235), -- medium-light blue
-		UDim2.new(0.5, -3, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 15, 8)
+		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 14, 8)
 	local genValue = makeButton("GenerateValueBaseTree", "Generate Value* Treehouse",
 		Color3.fromRGB(235, 120, 120), -- medium-light red
-		UDim2.new(0.5, -3, 1, 0), UDim2.new(0.5, 3, 0, 0), genRow, 15, 8)
+		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(1 / 3, 2, 0, 0), genRow, 14, 8)
+	local genCollision = makeButton("GenerateCollisionTree", "Generate Collision Treehouse",
+		Color3.fromRGB(120, 205, 165), -- medium-light teal
+		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(2 / 3, 4, 0, 0), genRow, 14, 8)
 
 	-- Runtime toggle, between the generate buttons and the status area
 	local includeRuntime = false
@@ -451,9 +520,12 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	htmlDesc.ZIndex = 6
 	htmlDesc.Parent = backdrop
 
+	-- assigned once srcToggle exists (further down); shows/hides it with the runtime toggle
+	local onRuntimeChanged: ((boolean) -&gt; ())? = nil
 	local function setRuntimeToggle(on: boolean)
 		includeRuntime = on
 		toggle.Text = (on and "✅" or "❌") .. "  Include Runtime in Treehouse"
+		if onRuntimeChanged then onRuntimeChanged(on) end
 		if opts.onToggleRuntime then
 			opts.onToggleRuntime(on)
 		end
@@ -559,7 +631,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	cmdHint.BackgroundTransparency = 1
 	cmdHint.Size = UDim2.new(1, 0, 0, 0)
 	cmdHint.AutomaticSize = Enum.AutomaticSize.Y
-	cmdHint.LayoutOrder = 2
+	cmdHint.LayoutOrder = 4 -- below the runtime status (2) + src toggle (3)
 	cmdHint.ZIndex = 6
 	cmdHint.Parent = status
 
@@ -607,12 +679,63 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		return box
 	end
 
-	local macBox = commandBox(3, "macOS / Linux", "cd ~/Treehouse &amp;&amp; python3 mailbox/server.py")
-	local winBox = commandBox(5, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; python mailbox\\server.py')
+	local macBox = commandBox(5, "macOS / Linux", "cd ~/Treehouse &amp;&amp; python3 mailbox/server.py")
+	local winBox = commandBox(7, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; python mailbox\\server.py')
 
 	local function setCommands(mac: string, win: string)
 		macBox.Text = mac
 		winBox.Text = win
+	end
+
+	-- "Connect your project src" toggle. The user can tick it manually, and the
+	-- plugin auto-ticks it when the mailbox reports a valid TREE_SRC. Only shown
+	-- while "Include Runtime in Treehouse" is on. (LayoutOrder 7, above the detail.)
+	local srcConnected = false
+	local srcToggle = Instance.new("TextButton")
+	srcToggle.Name = "ToggleSrcConnected"
+	srcToggle.Text = "❌  Connect your project src (fills the * / ** markers)"
+	srcToggle.Font = Enum.Font.GothamMedium
+	srcToggle.TextSize = 13
+	srcToggle.TextXAlignment = Enum.TextXAlignment.Left
+	srcToggle.TextColor3 = Color3.fromRGB(235, 235, 240)
+	srcToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+	srcToggle.AutoButtonColor = true
+	srcToggle.BorderSizePixel = 0
+	srcToggle.Size = UDim2.new(1, 0, 0, 28)
+	srcToggle.AutomaticSize = Enum.AutomaticSize.Y
+	srcToggle.LayoutOrder = 3 -- above the command boxes (runtime status is 2)
+	srcToggle.ZIndex = 6
+	srcToggle.Visible = false
+	srcToggle.Parent = status
+	corner(srcToggle, 6)
+	local srcPad = Instance.new("UIPadding")
+	srcPad.PaddingLeft = UDim.new(0, 8)
+	srcPad.PaddingTop = UDim.new(0, 5)
+	srcPad.PaddingBottom = UDim.new(0, 5)
+	srcPad.Parent = srcToggle
+
+	-- Reflect the connected/not state (label only; the actual markers come from the
+	-- mailbox's TREE_SRC). `auto` true means the mailbox detected a real src.
+	local function renderSrcToggle(auto: boolean?, path: string?)
+		if srcConnected then
+			srcToggle.Text = "✅  Project src connected"
+				.. (auto and path and path ~= "" and ("  (" .. path .. ")") or "")
+		else
+			srcToggle.Text = "❌  Connect your project src (fills the * / ** markers)"
+		end
+	end
+	local function setSrcToggle(on: boolean, auto: boolean?, path: string?)
+		srcConnected = on
+		renderSrcToggle(auto, path)
+	end
+	srcToggle.Activated:Connect(function()
+		srcConnected = not srcConnected
+		renderSrcToggle(false, nil)
+		if opts.onToggleSrc then opts.onToggleSrc(srcConnected) end
+	end)
+	-- show the src toggle only while runtime is included (wired into setRuntimeToggle)
+	onRuntimeChanged = function(on: boolean)
+		srcToggle.Visible = on
 	end
 
 	-- Runtime note (✅/❌), updated when the toggle changes.
@@ -628,7 +751,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	runtimeText.BackgroundTransparency = 1
 	runtimeText.Size = UDim2.new(1, 0, 0, 0)
 	runtimeText.AutomaticSize = Enum.AutomaticSize.Y
-	runtimeText.LayoutOrder = 7
+	runtimeText.LayoutOrder = 2 -- runtime status sits ABOVE the command boxes
 	runtimeText.ZIndex = 6
 	runtimeText.Parent = status
 
@@ -670,6 +793,13 @@ function M.build(host: Instance, opts: { [string]: any }?)
 			print("[AttributeTool] Generate ValueBase Tree clicked")
 		end
 	end)
+	genCollision.Activated:Connect(function()
+		if opts.onGenerateCollision then
+			opts.onGenerateCollision(setStatus)
+		else
+			print("[AttributeTool] Generate Collision Tree clicked")
+		end
+	end)
 	clearOut.Activated:Connect(function()
 		setStatus("")
 	end)
@@ -682,6 +812,8 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		scrollStatusToBottom = scrollStatusToBottom,
 		setRuntimeToggle = setRuntimeToggle,
 		getRuntime = function() return includeRuntime end,
+		setSrcToggle = setSrcToggle,           -- (on, auto?, path?) - reflect src-connected state
+		getSrcConnected = function() return srcConnected end,
 	}
 end
 
@@ -856,6 +988,88 @@ function Dumpers.ValueBaseDump(): string
 			line = line .. " = " .. vs .. " (" .. vt .. ")"
 		end
 		emit(line)
+		local kids = {}
+		for _, c in ipairs(inst:GetChildren()) do
+			if included[c] then kids[#kids + 1] = c end
+		end
+		table.sort(kids, sortKids)
+		for _, c in ipairs(kids) do walk(c, depth + 1) end
+	end
+
+	for _, svc in ipairs(services()) do
+		if included[svc] then walk(svc, 0); emit("") end
+	end
+	return table.concat(lines, "\n")
+end
+
+----------------------------------------------------------------------
+-- Collision: a part is "flagged" if any collision setting is non-default.
+-- Returns the offending {name, value} pairs (in a stable order) or nil.
+local function collisionFlags(inst: Instance): { { any } }?
+	if not inst:IsA("BasePart") then
+		return nil
+	end
+	local flags = {}
+	-- CanCollide / CanTouch are always present on BasePart; the rest may not exist
+	-- on every part type, so read them through pcall and skip if absent.
+	if inst.CanCollide == false then flags[#flags + 1] = { "CanCollide", false } end
+	if inst.CanTouch == false then flags[#flags + 1] = { "CanTouch", false } end
+	if inst.CanQuery == false then flags[#flags + 1] = { "CanQuery", false } end
+	local okA, audio = pcall(function() return (inst :: any).AudioCanCollide end)
+	if okA and audio == false then flags[#flags + 1] = { "AudioCanCollide", false } end
+	local okG, group = pcall(function() return inst.CollisionGroup end)
+	if okG and group ~= "Default" then flags[#flags + 1] = { "CollisionGroup", group } end
+	local okF, fidelity = pcall(function() return (inst :: any).CollisionFidelity end)
+	if okF and fidelity ~= Enum.CollisionFidelity.Default then
+		flags[#flags + 1] = { "CollisionFidelity", fidelity }
+	end
+	if #flags == 0 then
+		return nil
+	end
+	return flags
+end
+
+function Dumpers.CollisionDump(): string
+	local included: { [Instance]: boolean } = {}
+	local flagsOf: { [Instance]: { { any } } } = {}
+	local count = 0
+	for _, svc in ipairs(services()) do
+		local stack = { svc }
+		while #stack &gt; 0 do
+			local inst = table.remove(stack)
+			local flags = collisionFlags(inst)
+			if flags then
+				count += 1
+				flagsOf[inst] = flags
+				include(included, inst)
+			end
+			local okc, kids = pcall(function() return inst:GetChildren() end)
+			if okc then
+				for _, c in ipairs(kids) do
+					stack[#stack + 1] = c
+				end
+			end
+		end
+	end
+
+	local lines = {}
+	local function emit(s) lines[#lines + 1] = s end
+	emit("==== COLLISION DUMP (parts with non-default collision settings) ====")
+	emit("Total flagged parts found: " .. count)
+	emit("CanCollide/CanTouch/AudioCanCollide=false, CollisionGroup or CollisionFidelity != Default.")
+	emit(string.rep("=", 70))
+	emit("")
+
+	local function walk(inst: Instance, depth: number)
+		local indent = string.rep("  ", depth)
+		emit(indent .. inst.Name .. " [" .. inst.ClassName .. "]")
+		local flags = flagsOf[inst]
+		if flags then
+			for _, fl in ipairs(flags) do
+				local vs, vt = fmt(fl[2])
+				emit(indent .. "  - " .. fl[1] .. " = " .. vs .. " (" .. vt .. ")")
+			end
+		end
 		local kids = {}
 		for _, c in ipairs(inst:GetChildren()) do
 			if included[c] then kids[#kids + 1] = c end

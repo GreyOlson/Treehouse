@@ -342,12 +342,31 @@ local function buildChrome()
 	local mode = "" -- "attributes" | "values"
 	local selected = ""
 	local currentAccent = ACCENT_ATTR -- the active mode's paid access color
-	local lineLabels: { TextLabel } = {} -- index aligned with the selected service's data.lines
-	local lastHighlight: TextLabel? = nil
+	-- Rows are read-only TextBoxes (NOT TextLabels): Roblox only lets users select
+	-- and copy text from a TextBox. TextEditable=false keeps them un-editable while
+	-- still allowing click-to-select + Ctrl/Cmd+C in Studio.
+	local lineLabels: { TextBox } = {} -- index aligned with the selected service's data.lines
+	local lastHighlight: TextBox? = nil
+
+	-- Build a read-only, selectable text row with the shared output styling.
+	local function makeRow(): TextBox
+		local box = Instance.new("TextBox")
+		box.TextEditable = false
+		box.ClearTextOnFocus = false
+		box.MultiLine = true
+		box.TextWrapped = true
+		box.BackgroundColor3 = Color3.fromRGB(90, 80, 35) -- shown only when highlighted
+		box.BackgroundTransparency = 1
+		box.TextXAlignment = Enum.TextXAlignment.Left
+		box.TextYAlignment = Enum.TextYAlignment.Top
+		box.Size = UDim2.new(1, 0, 0, 0)
+		box.AutomaticSize = Enum.AutomaticSize.Y
+		return box
+	end
 
 	local function clearScroll()
 		for _, c in ipairs(scroll:GetChildren()) do
-			if c:IsA("TextLabel") then c:Destroy() end
+			if c:IsA("TextLabel") or c:IsA("TextBox") then c:Destroy() end
 		end
 	end
 
@@ -363,30 +382,19 @@ local function buildChrome()
 		local order = 0
 		-- service heading row
 		order += 1
-		local head = Instance.new("TextLabel")
-		head.BackgroundTransparency = 1
+		local head = makeRow()
 		head.Font = Enum.Font.GothamBold
 		head.TextSize = 15
 		head.TextColor3 = HEADER
-		head.TextXAlignment = Enum.TextXAlignment.Left
-		head.Size = UDim2.new(1, 0, 0, 20)
 		head.LayoutOrder = order
 		head.Text = name
 		head.Parent = scroll
 		for i, l in ipairs(data.lines) do
 			order += 1
-			local lbl = Instance.new("TextLabel")
-			lbl.BackgroundColor3 = Color3.fromRGB(90, 80, 35) -- shown only when highlighted
-			lbl.BackgroundTransparency = 1
+			local lbl = makeRow()
 			lbl.Font = l.bold and Enum.Font.GothamBold or Enum.Font.Code
 			lbl.TextSize = 13
 			lbl.TextColor3 = l.color
-			lbl.TextXAlignment = Enum.TextXAlignment.Left
-			lbl.TextYAlignment = Enum.TextYAlignment.Top
-			lbl.TextWrapped = true
-			lbl.RichText = false
-			lbl.Size = UDim2.new(1, 0, 0, 0)
-			lbl.AutomaticSize = Enum.AutomaticSize.Y
 			lbl.LayoutOrder = order
 			lbl.Text = l.text
 			lbl.Parent = scroll

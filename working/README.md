@@ -20,6 +20,6 @@ analyzing.
 
 The generators also scan the analyzed game's Rojo `src/` to derive the `*`/`**`
 runtime markers. That source lives in the game's own repo, not here — point the
-generators at it with the `ATTRTREE_SRC` env var (see the root README). If you
+generators at it with the `TREE_SRC` env var (see the root README). If you
 analyze multiple games, give each its own `working/` (or subfolder) to avoid
 mixing dumps.

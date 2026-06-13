@@ -36,7 +36,7 @@ Local Plugin*, or copy it into your local Plugins folder
 
 ## Run the loop
 
-1. Start the mailbox: `ATTRTREE_SRC=/path/to/YourGame/src python3 ../mailbox/server.py`
+1. Start the mailbox: `TREE_SRC=/path/to/YourGame/src python3 ../mailbox/server.py`
 2. In Studio: Game Settings → Security → **Allow HTTP Requests** on.
 3. Open the plugin (toolbar → Attribute Tool), click **Generate Attribute Tree**
    or **Generate ValueBase Tree**. The status line reports progress; the browser

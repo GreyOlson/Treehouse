@@ -1,5 +1,5 @@
 ==== ATTRIBUTE DUMP ====
-Total attributed instances found: 3804
+Total attributed instances found: 3455
 ======================================================================
 
 Workspace [Workspace]
@@ -36,7 +36,6 @@ Workspace [Workspace]
           SurfaceGui [SurfaceGui]
             TextLabel [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
       MapTeleports [Folder]
         Portal [Part]
           - Hierarchy = "Workspace.Backrooms.ScriptImportance" (string)
@@ -551,16 +550,16 @@ Workspace [Workspace]
           - NumberRequirement = 10 (number)
           - Purpose = "UnlockKills" (string)
         Pedastol [Part]
-          - GearItem = "TrollGun" (string)
-          - NumberRequirement = 10 (number)
+          - GearItem = "FreezeRay" (string)
+          - NumberRequirement = 100 (number)
           - Purpose = "CollectKills" (string)
         Pedastol [Part]
           - GearItem = "HotPotato" (string)
           - NumberRequirement = 25 (number)
           - Purpose = "CollectKills" (string)
         Pedastol [Part]
-          - GearItem = "FreezeRay" (string)
-          - NumberRequirement = 100 (number)
+          - GearItem = "TrollGun" (string)
+          - NumberRequirement = 10 (number)
           - Purpose = "CollectKills" (string)
       Stats [Folder]
         ActivationTeller [Model]
@@ -569,30 +568,24 @@ Workspace [Workspace]
               Frame [Frame]
                 Stat [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
         KillTeller [Model]
           Display [Part]
             StatGui [SurfaceGui]
               Frame [Frame]
                 Stat [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
         RatioTeller [Model]
           Display [Part]
             StatGui [SurfaceGui]
               Frame [Frame]
                 Stat [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
   CommonTsunamiGameModels [Folder]
     BackRoomsHallway [Folder]
       BackRoomsCollision [Part]
@@ -619,7 +612,6 @@ Workspace [Workspace]
           JoinGroup [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     MAP_CHOOSE [Folder]
       Map1 [Folder]
         - Hierarchy = "Workspace.CommonTsunamiGameModels.MAP_CHOOSE" (string)
@@ -656,13 +648,11 @@ Workspace [Workspace]
         Frame [Frame]
           Title [TextLabel]
             - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.SourceSansBold (EnumItem)
     s_distributionData [Part]
       GraphGui [SurfaceGui]
         Frame [Frame]
           Title [TextLabel]
             - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.SourceSansBold (EnumItem)
   GAME_ASSETS [Folder]
     DefaultPlacementTools [Folder]
       ElectricBox [Tool]
@@ -818,7 +808,6 @@ Workspace [Workspace]
         BinocularGui [ScreenGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       BlowDryer [Tool]
         - AllowedInVault = "SquidCorp" (string)
         - GearBarColor = 0.501961, 0.705882, 0.768627 (Color3)
@@ -1061,7 +1050,6 @@ Workspace [Workspace]
         SurfaceGui [SurfaceGui]
           TextLabel [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     GrowLabRoom [Folder]
       PhysicalBoxes [Model]
         Box [Model]
@@ -1071,10 +1059,6 @@ Workspace [Workspace]
         Box [Model]
           - BoxSize = "Square" (string)
         Box [Model]
-          - BoxSize = "Square" (string)
-        Box [Model]
-          - BoxSize = "Square" (string)
-        Box [Model]
           - BoxSize = "Tall" (string)
         Box [Model]
           - BoxSize = "Square" (string)
@@ -1084,6 +1068,10 @@ Workspace [Workspace]
           - BoxSize = "Square" (string)
         Box [Model]
           - BoxSize = "Tall" (string)
+        Box [Model]
+          - BoxSize = "Square" (string)
+        Box [Model]
+          - BoxSize = "Square" (string)
     MinecartArea [Folder]
       SameBuild [Folder]
         Props [Folder]
@@ -1191,36 +1179,33 @@ Workspace [Workspace]
     FeatureVotes [Folder]
       FeatureVotePart [Part]
         - FeatureVote = "GearClub" (string)
-        - SurfaceGui = true (boolean)
-      FeatureVotePart [Part]
-        - FeatureVote = "CoinChipper" (string)
-      FeatureVotePart [Part]
-        - FeatureVote = "ExtendMap2" (string)
-        - SurfaceGui = true (boolean)
-      FeatureVotePart [Part]
-        - FeatureVote = "CoinChipper" (string)
-        - SurfaceGui = true (boolean)
       FeatureVotePart [Part]
         - FeatureVote = "GearClub" (string)
+        - SurfaceGui = true (boolean)
       FeatureVotePart [Part]
         - FeatureVote = "ExtendMap2" (string)
+      FeatureVotePart [Part]
+        - FeatureVote = "CoinChipper" (string)
+      FeatureVotePart [Part]
+        - FeatureVote = "CoinChipper" (string)
+        - SurfaceGui = true (boolean)
+      FeatureVotePart [Part]
+        - FeatureVote = "ExtendMap2" (string)
+        - SurfaceGui = true (boolean)
     LobbyScriptImportance [Folder]
       LobbyAdvertisingPortals [Model]
         FromTheDevelopers [Part]
           Teller [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         GalleryGame1 [Part]
           - GameName = "" (string)
           PlayGui [SurfaceGui]
             Frame [Frame]
               DeleteTitle [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               PlayButton [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
         GalleryGame2 [Part]
           - GameName = "" (string)
@@ -1228,10 +1213,8 @@ Workspace [Workspace]
             Frame [Frame]
               DeleteTitle [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               PlayButton [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
         GalleryGame3 [Part]
           - GameName = "" (string)
@@ -1239,10 +1222,8 @@ Workspace [Workspace]
             Frame [Frame]
               DeleteTitle [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               PlayButton [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
         GalleryGame4 [Part]
           - GameName = "" (string)
@@ -1250,10 +1231,8 @@ Workspace [Workspace]
             Frame [Frame]
               DeleteTitle [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               PlayButton [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
         GalleryGame5 [Part]
           - GameName = "" (string)
@@ -1261,10 +1240,8 @@ Workspace [Workspace]
             Frame [Frame]
               DeleteTitle [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               PlayButton [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
       LooseStones [Folder]
         - Hierarchy = "Workspace.ScriptImportance" (string)
@@ -1371,7 +1348,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1379,7 +1355,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1387,7 +1362,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1395,7 +1369,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1403,7 +1376,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1411,7 +1383,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1419,7 +1390,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1427,7 +1397,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1435,7 +1404,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1443,7 +1411,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1451,7 +1418,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1459,7 +1425,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1467,7 +1432,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1475,7 +1439,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1483,7 +1446,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1491,7 +1453,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1499,7 +1460,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1507,7 +1467,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1515,7 +1474,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1523,7 +1481,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1531,7 +1488,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1539,7 +1495,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1547,7 +1502,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1555,7 +1509,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1563,7 +1516,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1571,7 +1523,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1579,7 +1530,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1587,7 +1537,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1595,7 +1544,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1603,7 +1551,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1611,7 +1558,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1619,7 +1565,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1627,7 +1572,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1635,7 +1579,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1643,7 +1586,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1651,7 +1593,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1659,7 +1600,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1667,7 +1607,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1675,7 +1614,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1683,7 +1621,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1691,7 +1628,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1699,7 +1635,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1707,7 +1642,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1715,7 +1649,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1723,7 +1656,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1731,7 +1663,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1739,7 +1670,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1747,7 +1677,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1755,7 +1684,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1763,7 +1691,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1771,7 +1698,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1779,7 +1705,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1787,7 +1712,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1795,7 +1719,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1803,7 +1726,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1811,7 +1733,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1819,7 +1740,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1827,7 +1747,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1835,7 +1754,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1843,7 +1761,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1851,7 +1768,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1859,7 +1775,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1867,7 +1782,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1875,7 +1789,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1883,7 +1796,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1891,7 +1803,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1899,7 +1810,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1907,7 +1817,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1915,7 +1824,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1923,7 +1831,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1931,7 +1838,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1939,7 +1845,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1947,7 +1852,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1955,7 +1859,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1963,7 +1866,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1971,7 +1873,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1979,7 +1880,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1987,7 +1887,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -1995,7 +1894,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2003,7 +1901,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2011,7 +1908,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2019,7 +1915,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2027,7 +1922,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2035,7 +1929,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2043,7 +1936,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2051,7 +1943,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2059,7 +1950,6 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Giver [Model]
             GearGiver [Part]
               - GearName = "" (string)
@@ -2067,14 +1957,12 @@ Workspace [Workspace]
               GiverGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
       UpdateLogRoom [Folder]
         InviteFriends [Part]
           SurfaceGui [SurfaceGui]
             Frame [Frame]
               InviteButton [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
         LobbyClothing [Folder]
           ResearcherMen1 [Model]
@@ -2084,7 +1972,6 @@ Workspace [Workspace]
                   Buy [TextButton]
                     - ClothingName = "ResearcherMen1" (string)
                     - CurrentFont = "DenkOne" (string)
-                    - OldFont = Enum.Font.Bangers (EnumItem)
           ResearcherMen2 [Model]
             PurchaseButton [Part]
               BuyGui [SurfaceGui]
@@ -2092,7 +1979,6 @@ Workspace [Workspace]
                   Buy [TextButton]
                     - ClothingName = "ResearcherMen2" (string)
                     - CurrentFont = "DenkOne" (string)
-                    - OldFont = Enum.Font.Bangers (EnumItem)
           ResearcherWomen1 [Model]
             PurchaseButton [Part]
               BuyGui [SurfaceGui]
@@ -2100,7 +1986,6 @@ Workspace [Workspace]
                   Buy [TextButton]
                     - ClothingName = "ResearcherWomen1" (string)
                     - CurrentFont = "DenkOne" (string)
-                    - OldFont = Enum.Font.Bangers (EnumItem)
           ResearcherWomen2 [Model]
             PurchaseButton [Part]
               BuyGui [SurfaceGui]
@@ -2108,50 +1993,36 @@ Workspace [Workspace]
                   Buy [TextButton]
                     - ClothingName = "ResearcherWomen2" (string)
                     - CurrentFont = "DenkOne" (string)
-                    - OldFont = Enum.Font.Bangers (EnumItem)
         StatScreen [Part]
           StatGui [SurfaceGui]
             Frame [Frame]
               StatFrame [Frame]
                 StatName1 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatName2 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatName3 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatName4 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatName5 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatName6 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatValue1 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatValue2 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatValue3 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatValue4 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatValue5 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 StatValue6 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
     MapSelectionRoom [Model]
       - Hierarchy = "Workspace.Lobby" (string)
       - Map1 = true (boolean)
@@ -2185,20 +2056,16 @@ Workspace [Workspace]
               Frame [Frame]
                 Buy [TextButton]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Robux [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
           DescSign [Part]
             DescGui [SurfaceGui]
               Frame [Frame]
                 Teller [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
         BoxingRingGamepassModel [Model]
           - GamepassName = "BoxingRing" (string)
         GiantPotionGamepassModel [Model]
@@ -2209,20 +2076,16 @@ Workspace [Workspace]
               Frame [Frame]
                 Buy [TextButton]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Robux [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
           DescSign [Part]
             DescGui [SurfaceGui]
               Frame [Frame]
                 Teller [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
         LighthouseGamepassModel [Model]
           - GamepassName = "Lighthouse" (string)
           Build [Model]
@@ -2283,21 +2146,17 @@ Workspace [Workspace]
               Frame [Frame]
                 BuySmall [TextButton]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
           DescSign [Part]
             DescGui [SurfaceGui]
               Frame [Frame]
                 DescClick [TextButton]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
         Risk2XGamepassModel [Model]
           - GamepassName = "Risk2X" (string)
           BuySign [Part]
@@ -2306,20 +2165,16 @@ Workspace [Workspace]
               Frame [Frame]
                 Buy [TextButton]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Robux [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
           DescSign [Part]
             DescGui [SurfaceGui]
               Frame [Frame]
                 Teller [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
         TridentGamepassModel [Model]
           - GamepassName = "Trident" (string)
           BuySign [Part]
@@ -2328,20 +2183,16 @@ Workspace [Workspace]
               Frame [Frame]
                 Buy [TextButton]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Robux [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
           DescSign [Part]
             DescGui [SurfaceGui]
               Frame [Frame]
                 Teller [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
           TridentStats [Part]
             DescGui [SurfaceGui]
               Frame [Frame]
@@ -2349,14 +2200,11 @@ Workspace [Workspace]
                   Deaths [ImageLabel]
                     Teller [TextLabel]
                       - CurrentFont = "DenkOne" (string)
-                      - OldFont = Enum.Font.Bangers (EnumItem)
                   Gods [ImageLabel]
                     Teller [TextLabel]
                       - CurrentFont = "DenkOne" (string)
-                      - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
         TsunamiStaffGamepassModel [Model]
           - GamepassName = "TsunamiStaff" (string)
           BuySign [Part]
@@ -2365,20 +2213,16 @@ Workspace [Workspace]
               Frame [Frame]
                 Buy [TextButton]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Robux [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
           DescSign [Part]
             DescGui [SurfaceGui]
               Frame [Frame]
                 Teller [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
           TsunamiStaffGamepassDisplay [Model]
             - Status = "TODO" (string)
         UnlimitedAFKModel [Model]
@@ -2391,17 +2235,13 @@ Workspace [Workspace]
               Frame [Frame]
                 Buy [TextButton]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Robux [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Teller [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                 Title2 [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
     PhysicalTutorial [Folder]
       - Hierarchy = "Workspace.Lobby" (string)
       - Map1 = true (boolean)
@@ -2439,9 +2279,9 @@ Workspace [Workspace]
           - WinterColor = Pastel blue-green (BrickColor)
           - WinterMaterial = "Ice" (string)
           Water1 [Texture]
-            - Reverse = false (boolean)
-          Water1 [Texture]
             - Reverse = true (boolean)
+          Water1 [Texture]
+            - Reverse = false (boolean)
           Water3 [Texture]
             - Reverse = false (boolean)
           Water3 [Texture]
@@ -2493,9 +2333,9 @@ Workspace [Workspace]
           - WinterColor = Pastel blue-green (BrickColor)
           - WinterMaterial = "Ice" (string)
           Water1 [Texture]
-            - Reverse = true (boolean)
-          Water1 [Texture]
             - Reverse = false (boolean)
+          Water1 [Texture]
+            - Reverse = true (boolean)
           Water3 [Texture]
             - Reverse = false (boolean)
           Water3 [Texture]
@@ -2520,13 +2360,11 @@ Workspace [Workspace]
             Frame [Frame]
               Details [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
     PremiumLight [Model]
       Base [Part]
         Teller [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     SplashParticles [Folder]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -2545,21 +2383,18 @@ Workspace [Workspace]
             Frame [Frame]
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.ArialBold (EnumItem)
       Barricade [Model]
         Sign [MeshPart]
           EndGui [SurfaceGui]
             Frame [Frame]
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.ArialBold (EnumItem)
       BewareSign [Model]
         Sign [Part]
           SurfaceGui [SurfaceGui]
             Frame [Frame]
               TextLabel [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
       Campground [Folder]
         Laptop [Model]
           Part [Part]
@@ -2567,7 +2402,6 @@ Workspace [Workspace]
               Frame [Frame]
                 TextLabel [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Arial (EnumItem)
     Events [Folder]
       Map1Teleport [Model]
         Map1 [Folder]
@@ -2576,60 +2410,59 @@ Workspace [Workspace]
               TeleBillboard [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
     Gold [Folder]
-      GoldBar [MeshPart]
-        - GoldDebounce = 2 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 25 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 1 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 14 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 19 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 10 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 26 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 20 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 24 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 22 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 23 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 18 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 11 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 3 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 12 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 7 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 5 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 16 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 6 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 15 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 9 (number)
-      GoldBar [MeshPart]
-        - GoldDebounce = 17 (number)
       GoldBar [MeshPart]
         - GoldDebounce = 8 (number)
       GoldBar [MeshPart]
+        - GoldDebounce = 18 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 12 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 23 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 22 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 20 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 11 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 24 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 15 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 25 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 16 (number)
+      GoldBar [MeshPart]
         - GoldDebounce = 21 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 17 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 3 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 14 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 6 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 5 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 7 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 9 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 10 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 2 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 4 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 1 (number)
       GoldBar [MeshPart]
         - GoldDebounce = 13 (number)
       GoldBar [MeshPart]
-        - GoldDebounce = 4 (number)
+        - GoldDebounce = 19 (number)
+      GoldBar [MeshPart]
+        - GoldDebounce = 26 (number)
     Landscape [Folder]
       CactusFolder [Folder]
         Barrel [Folder]
@@ -2932,7 +2765,6 @@ Workspace [Workspace]
                 TeleBillboard [BillboardGui]
                   Teller [TextLabel]
                     - CurrentFont = "DenkOne" (string)
-                    - OldFont = Enum.Font.Bangers (EnumItem)
     SquidCorpAccessories [Folder]
       SquidCorpWalls [Folder]
         - Hierarchy = "Workspace.Outside.SquidCorpAccessories" (string)
@@ -2952,12 +2784,10 @@ Workspace [Workspace]
                 Frame [Frame]
                   Title [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.ArialBold (EnumItem)
         ResearcherFunfact [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
     EasterEggs [Folder]
       Barricade [Model]
         Sign [MeshPart]
@@ -2965,7 +2795,6 @@ Workspace [Workspace]
             Frame [Frame]
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.ArialBold (EnumItem)
     ReceptionRoom [Folder]
       EasterEggs [Folder]
         LeaveWork [Part]
@@ -2973,14 +2802,12 @@ Workspace [Workspace]
             Frame [Frame]
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
     ResearcherRoomBuild [Folder]
       GunShelf [Model]
         ResearcherTeller2 [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       ResearcherWindow [Folder]
         Thud [UnionOperation]
           - SoundName = "Thud" (string)
@@ -3003,49 +2830,41 @@ Workspace [Workspace]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       ExitSign [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       GrateAccessSign [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       GrateAccessSign [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       LabSign [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       ObservationDeck [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       ResearcherRoomSign [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       ReservoirAccessSign [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
   ScriptImportance [Model]
     Alien [Folder]
       - Hierarchy = "Workspace.ScriptImportance" (string)
@@ -3058,22 +2877,18 @@ Workspace [Workspace]
         TellerGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       UpdateTeller [Part]
         TellerGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       UpdateTeller [Part]
         TellerGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       UpdateTeller [Part]
         TellerGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     BlackMarket [Folder]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3087,20 +2902,15 @@ Workspace [Workspace]
                 PointsSelling [Frame]
                   High [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.Code (EnumItem)
                   Low [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.Code (EnumItem)
                 Time [Frame]
                   Mid [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.Code (EnumItem)
                   Teller [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.Code (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
       GraphBananaBoat [Model]
         GraphPrice [UnionOperation]
           GraphGui [SurfaceGui]
@@ -3108,19 +2918,14 @@ Workspace [Workspace]
               GraphFrame [Frame]
                 High [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Code (EnumItem)
                 Mid [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Code (EnumItem)
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Code (EnumItem)
                 Top [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Code (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
       GraphCrate [Model]
         GraphPartCratePrice [UnionOperation]
           GraphGui [SurfaceGui]
@@ -3129,20 +2934,15 @@ Workspace [Workspace]
                 PointsSelling [Frame]
                   High [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.Code (EnumItem)
                   Low [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.Code (EnumItem)
                 Time [Frame]
                   Mid [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.Code (EnumItem)
                   Teller [TextLabel]
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.Code (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
     BottomElevator [Part]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3179,17 +2979,17 @@ Workspace [Workspace]
         - CaveTier = 1 (number)
       CaveTeleports [Folder]
         CaveTeleport [Part]
-          - CaveNum = 4 (number)
-        CaveTeleport [Part]
           - CaveNum = 2 (number)
         CaveTeleport [Part]
-          - CaveNum = 1 (number)
-        CaveTeleport [Part]
-          - CaveNum = 5 (number)
+          - CaveNum = 4 (number)
         CaveTeleport [Part]
           - CaveNum = 6 (number)
         CaveTeleport [Part]
           - CaveNum = 3 (number)
+        CaveTeleport [Part]
+          - CaveNum = 1 (number)
+        CaveTeleport [Part]
+          - CaveNum = 5 (number)
     ChangeDefaultTeam [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3198,7 +2998,6 @@ Workspace [Workspace]
           Sign [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
     ChessPortal [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3244,26 +3043,21 @@ Workspace [Workspace]
               OneUseTeller [TextButton]
                 - CurrentFont = "DenkOne" (string)
                 - Message = "Use your level 100 tsunami from the tool in your backpack when ready." (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - ToolName = "Level100Tsunami" (string)
               Purchase [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
               Title [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         Display [Model]
           PromptBrick [MeshPart]
             DailyLevel100Billboard [BillboardGui]
               Teller [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         TellerBrick [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         TsunamiModelDisplay [Model]
           - HasMultipleCollides = true (boolean)
           WaveLevel_100_CrestCover_03B [MeshPart]
@@ -3393,26 +3187,21 @@ Workspace [Workspace]
               OneUseTeller [TextButton]
                 - CurrentFont = "DenkOne" (string)
                 - Message = "Use your level 10 tsunami from the tool in your backpack when ready." (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - ToolName = "Level10Tsunami" (string)
               Purchase [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
               Title [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         Display [Model]
           PromptBrick [UnionOperation]
             DailyLevel10Billboard [BillboardGui]
               Teller [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         TellerBrick [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         TsunamiModelDisplay [Model]
           - HasMultipleCollides = true (boolean)
           WaveLevel_10_CrestCover_03.001 [MeshPart]
@@ -3458,13 +3247,13 @@ Workspace [Workspace]
             - WinterColor = Pastel blue-green (BrickColor)
             - WinterMaterial = "Ice" (string)
             Water3 [Texture]
-              - Reverse = false (boolean)
+              - Reverse = true (boolean)
             Water3 [Texture]
-              - Reverse = true (boolean)
-            Water5 [Texture]
               - Reverse = false (boolean)
             Water5 [Texture]
               - Reverse = true (boolean)
+            Water5 [Texture]
+              - Reverse = false (boolean)
             Water5 [Texture]
               - Reverse = false (boolean)
           WaveLevel_10_Front_01.6 [MeshPart]
@@ -3475,9 +3264,9 @@ Workspace [Workspace]
             Water2 [Texture]
               - Reverse = false (boolean)
             Water3 [Texture]
-              - Reverse = true (boolean)
-            Water3 [Texture]
               - Reverse = false (boolean)
+            Water3 [Texture]
+              - Reverse = true (boolean)
             Water4 [Texture]
               - Reverse = false (boolean)
           WaveLevel_10_Front_02.6 [MeshPart]
@@ -3566,26 +3355,21 @@ Workspace [Workspace]
               OneUseTeller [TextButton]
                 - CurrentFont = "DenkOne" (string)
                 - Message = "Use your level 6 tsunami from the tool in your backpack when ready." (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - ToolName = "RemoteTsunami" (string)
               Purchase [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
               Title [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         Display [Model]
           PromptBrick [MeshPart]
             DailyLevel6Billboard [BillboardGui]
               Teller [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         TellerBrick [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         TsunamiModelDisplay [Folder]
           Tsunami6 [Model]
             - FadeTransparency = 0 (number)
@@ -3621,9 +3405,9 @@ Workspace [Workspace]
               - WinterColor = Pastel blue-green (BrickColor)
               - WinterMaterial = "Ice" (string)
               Water1 [Texture]
-                - Reverse = true (boolean)
-              Water1 [Texture]
                 - Reverse = false (boolean)
+              Water1 [Texture]
+                - Reverse = true (boolean)
               Water3 [Texture]
                 - Reverse = false (boolean)
               Water3 [Texture]
@@ -3757,20 +3541,16 @@ Workspace [Workspace]
               OneUseTeller [TextButton]
                 - CurrentFont = "DenkOne" (string)
                 - Message = "Use your life revive from the tool in your backpack when dead." (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - ToolName = "LifePotion" (string)
               Purchase [TextButton]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
                 - PlayButtonType = "Physical" (string)
               Title [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         TellerBrick [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     EarthRotate [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3781,14 +3561,12 @@ Workspace [Workspace]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
       LoadoutTeller [Part]
         DescGui [SurfaceGui]
           - ViewingDistance = 150 (number)
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     Elevator [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3797,7 +3575,6 @@ Workspace [Workspace]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     EraGear [Folder]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3808,19 +3585,14 @@ Workspace [Workspace]
               GraphFrame [Frame]
                 High [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Arial (EnumItem)
                 Mid [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Arial (EnumItem)
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Arial (EnumItem)
                 Top [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.Arial (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.Arial (EnumItem)
     EscapeeStorage1 [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3867,10 +3639,8 @@ Workspace [Workspace]
       TellerGui [BillboardGui]
         Teller [TextLabel]
           - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
         Teller2 [TextLabel]
           - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
     GearStorageBuild2 [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3884,12 +3654,10 @@ Workspace [Workspace]
         CurrentRoleGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.SourceSansBold (EnumItem)
       Teller [Part]
         RoleGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.SourceSansBold (EnumItem)
     GrowLabDoor [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -3900,7 +3668,6 @@ Workspace [Workspace]
         ProgressBar [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       ScaleableTsunami [Model]
         - FadeTransparency = 0 (number)
         - LifeTime = 0 (number)
@@ -3922,11 +3689,11 @@ Workspace [Workspace]
           Water1 [Texture]
             - Reverse = false (boolean)
           Water1 [Texture]
-            - Reverse = false (boolean)
-          Water1 [Texture]
-            - Reverse = false (boolean)
-          Water1 [Texture]
             - Reverse = true (boolean)
+          Water1 [Texture]
+            - Reverse = false (boolean)
+          Water1 [Texture]
+            - Reverse = false (boolean)
     MainTsunamiFloor [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -4203,7 +3970,6 @@ Workspace [Workspace]
         BillboardGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       SuperStructure [Folder]
         - RaycastItem = "UFOState" (string)
         - RaycastType = "Include" (string)
@@ -4222,12 +3988,10 @@ Workspace [Workspace]
         CrossingsBillboard [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       PointsEarnedText [Part]
         PointsEarnedBillboard [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       Portals [Folder]
         MothershipPortal [Model]
           MothershipTeleport [Part]
@@ -4235,12 +3999,10 @@ Workspace [Workspace]
             BillboardGui [BillboardGui]
               Teller [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
       UpdateTeller [Part]
         TellerGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     Researcher [Folder]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -4255,12 +4017,12 @@ Workspace [Workspace]
           - CollisionName = "Researcher" (string)
         ResearcherCollision [Part]
           - CollisionName = "Researcher" (string)
-          - DoorName = "ResearcherDoor2" (string)
-        ResearcherCollision [Part]
-          - CollisionName = "Researcher" (string)
           - DoorName = "ResearcherDoor1" (string)
         ResearcherCollision [Part]
           - CollisionName = "Researcher" (string)
+        ResearcherCollision [Part]
+          - CollisionName = "Researcher" (string)
+          - DoorName = "ResearcherDoor2" (string)
         ResearcherCollision [Part]
           - CollisionName = "Researcher" (string)
       ResearcherDoors [Folder]
@@ -4290,257 +4052,179 @@ Workspace [Workspace]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sarpanch" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
       MinigameFolder [Model]
         MinigameTimer1 [Part]
           TimerGui [SurfaceGui]
             Timer [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
         MinigameTimer2 [Part]
           TimerGui [SurfaceGui]
             Timer [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
       SquidCorpStats [Model]
         ResearchScreen [Part]
           StatsGui [SurfaceGui]
             GearServerStats [Frame]
               T0 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T1 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T10 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T11 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T12 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T13 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T14 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T15 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T16 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T17 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T18 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T19 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T2 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T20 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T3 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T4 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T5 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T6 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T7 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T8 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T9 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
             MiscServerStats [Frame]
               T1 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T2 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T3 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T4 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T5 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T6 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T7 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T8 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T9 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
             TextLabel [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
             TsunamiServerStats [Frame]
               T1 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T2 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T3 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T4 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T5 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T6 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
       SquidCorpTotalStats [Model]
         ResearchScreen [Part]
           StatsGui [SurfaceGui]
             GearTotalStats [Frame]
               T0 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T1 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T10 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T11 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T12 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T13 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T14 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T15 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T16 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T17 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T18 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T19 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T2 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T20 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T3 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T4 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T5 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T6 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T7 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T8 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T9 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
             TextLabel [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
             TsunamiTotalStats [Frame]
               T1 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T2 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T3 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T4 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T5 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T6 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T7 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T8 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               T9 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSans (EnumItem)
               Title [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
               Title2 [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
       TsunamiWarningScreen [Model]
         Screen [Part]
           SignGui [SurfaceGui]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
     ResearcherTeleports [Folder]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -4626,25 +4310,20 @@ Workspace [Workspace]
         TellerGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.SourceSansBold (EnumItem)
       ResearcherTeller3 [Part]
         TellerGui [SurfaceGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       RiskInfoPart [Part]
         RiskInfoGui [SurfaceGui]
           Frame [Frame]
             Risk [TextButton]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
               - PlayButtonType = "Physical" (string)
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
       StepCounter [Part]
         - ClickerName = "StepCounter1984" (string)
       TrackerCheckpoints [Model]
@@ -4657,7 +4336,6 @@ Workspace [Workspace]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     TapGlass [Folder]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -4672,25 +4350,21 @@ Workspace [Workspace]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.Arial (EnumItem)
       MedievalTimer [Part]
         TellerGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.Arial (EnumItem)
       RomanTimer [Part]
         TellerGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.Arial (EnumItem)
       VictorianTimer [Part]
         TellerGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.Arial (EnumItem)
     UnderGrate [Part]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -4707,7 +4381,6 @@ Workspace [Workspace]
               Buy [TextButton]
                 - ClothingName = "ResearcherMen1" (string)
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.ArialBold (EnumItem)
       ResearcherMen2 [Model]
         PurchaseButton [Part]
           BuyGui [SurfaceGui]
@@ -4715,7 +4388,6 @@ Workspace [Workspace]
               Buy [TextButton]
                 - ClothingName = "ResearcherMen2" (string)
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.ArialBold (EnumItem)
       ResearcherWomen1 [Model]
         PurchaseButton [Part]
           BuyGui [SurfaceGui]
@@ -4723,7 +4395,6 @@ Workspace [Workspace]
               Buy [TextButton]
                 - ClothingName = "ResearcherWomen1" (string)
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.ArialBold (EnumItem)
       ResearcherWomen2 [Model]
         PurchaseButton [Part]
           BuyGui [SurfaceGui]
@@ -4731,7 +4402,6 @@ Workspace [Workspace]
               Buy [TextButton]
                 - ClothingName = "ResearcherWomen2" (string)
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.ArialBold (EnumItem)
     WaterDischargePipeGroup [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -4752,7 +4422,6 @@ Workspace [Workspace]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     WinnersLoungeChessStuff [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -4762,112 +4431,79 @@ Workspace [Workspace]
             WhiteSideLetters [SurfaceGui]
               A [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               B [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               C [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               D [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               E [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               F [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               G [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               H [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
           Part [Part]
             BlackSideNumbers [SurfaceGui]
               1 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               2 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               3 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               4 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               5 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               6 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               7 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               8 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
           Part [Part]
             WhiteSideNumbers [SurfaceGui]
               1 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               2 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               3 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               4 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               5 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               6 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               7 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               8 [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
           Part [Part]
             BlackSideLetters [SurfaceGui]
               A [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               B [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               C [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               D [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               E [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               F [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               G [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               H [TextLabel]
                 - CurrentFont = "Patrick Hand" (string)
-                - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
       ChessPortalLounge [Model]
         BillboardPart [Part]
           TeleBillboard [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     WinnersShop [Model]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -5446,9 +5082,9 @@ Workspace [Workspace]
           - WinterColor = Pastel blue-green (BrickColor)
           - WinterMaterial = "Ice" (string)
           Water1 [Texture]
-            - Reverse = true (boolean)
-          Water1 [Texture]
             - Reverse = false (boolean)
+          Water1 [Texture]
+            - Reverse = true (boolean)
           Water1 [Texture]
             - Reverse = false (boolean)
           Water1 [Texture]
@@ -5516,30 +5152,25 @@ Workspace [Workspace]
         Frame [Frame]
           Title [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     TimeLoungeLayers [Folder]
       tellers [Folder]
         UpdateTeller [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         UpdateTeller [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         UpdateTeller [Part]
           TellerGui [BillboardGui]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     Timer [Part]
       TellerGui [SurfaceGui]
         Frame [Frame]
           Title [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
   WinnersLounge [Folder]
     - Hierarchy = "Workspace" (string)
     - Map1 = true (boolean)
@@ -5549,7 +5180,6 @@ Workspace [Workspace]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
   zzz_FUTURE_UPDATE_BASEPLATE [Model]
     SubscriptionGearItems [Folder]
       BouncyBall [Tool]
@@ -5677,36 +5307,29 @@ ReplicatedStorage [ReplicatedStorage]
               PieceNameGui [BillboardGui]
                 TextLabel [TextLabel]
                   - CurrentFont = "Patrick Hand" (string)
-                  - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
             King [Model]
               Checked [BillboardGui]
                 TextLabel [TextLabel]
                   - CurrentFont = "Patrick Hand" (string)
-                  - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
               PieceNameGui [BillboardGui]
                 TextLabel [TextLabel]
                   - CurrentFont = "Patrick Hand" (string)
-                  - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
             Knight [Model]
               PieceNameGui [BillboardGui]
                 TextLabel [TextLabel]
                   - CurrentFont = "Patrick Hand" (string)
-                  - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
             Pawn [Model]
               PieceNameGui [BillboardGui]
                 TextLabel [TextLabel]
                   - CurrentFont = "Patrick Hand" (string)
-                  - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
             Queen [Model]
               PieceNameGui [BillboardGui]
                 TextLabel [TextLabel]
                   - CurrentFont = "Patrick Hand" (string)
-                  - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
             Rook [Model]
               PieceNameGui [BillboardGui]
                 TextLabel [TextLabel]
                   - CurrentFont = "Patrick Hand" (string)
-                  - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
         TsunamiPackage [Folder]
           Tsunami100Client [Model]
             Build [Folder]
@@ -6738,21 +6361,16 @@ ReplicatedStorage [ReplicatedStorage]
       - Toggle = false (boolean)
       PlayerTeller [TextLabel]
         - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     MinigameResearchFrame [Frame]
       Cooldown [TextLabel]
         - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSansBold (EnumItem)
       Timer [TextLabel]
         - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSansBold (EnumItem)
       Title [TextLabel]
         - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSansBold (EnumItem)
     VendingProduct [Frame]
       TextButton [TextButton]
         - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSans (EnumItem)
     XBoxGui [SurfaceGui]
       Frame [Frame]
         GamepadX [ImageLabel]
@@ -6918,21 +6536,18 @@ ServerStorage [ServerStorage]
                   Frame [Frame]
                     Title [TextLabel]
                       - CurrentFont = "Sorponch" (string)
-                      - OldFont = Enum.Font.ArialBold (EnumItem)
             Barricade [Model]
               Sign [MeshPart]
                 EndGui [SurfaceGui]
                   Frame [Frame]
                     Title [TextLabel]
                       - CurrentFont = "Sorponch" (string)
-                      - OldFont = Enum.Font.ArialBold (EnumItem)
             Barricade [Model]
               Sign [MeshPart]
                 EndGui [SurfaceGui]
                   Frame [Frame]
                     Title [TextLabel]
                       - CurrentFont = "Sorponch" (string)
-                      - OldFont = Enum.Font.ArialBold (EnumItem)
       Lobby [Folder]
         LobbyLights [Folder]
           - Hierarchy = "Workspace.Lobby" (string)
@@ -9332,7 +8947,6 @@ ServerStorage [ServerStorage]
               Frame [Frame]
                 Details [TextLabel]
                   - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
       RaycastEnding [Model]
         - Hierarchy = "Workspace" (string)
         - Map2 = true (boolean)
@@ -9349,7 +8963,6 @@ ServerStorage [ServerStorage]
               TellerGui [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
             VoidStaircase [Folder]
               Barricade [Model]
                 Sign [MeshPart]
@@ -9357,7 +8970,6 @@ ServerStorage [ServerStorage]
                     Frame [Frame]
                       Title [TextLabel]
                         - CurrentFont = "Sorponch" (string)
-                        - OldFont = Enum.Font.ArialBold (EnumItem)
       Reservoir [Folder]
         - Hierarchy = "Workspace.ScriptImportance" (string)
         - Map2 = true (boolean)
@@ -9422,7 +9034,6 @@ ServerStorage [ServerStorage]
               Sign [BillboardGui]
                 Teller [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
         ClothingTeller2 [Part]
           - Hierarchy = "Workspace.ScriptImportance" (string)
           - Map2 = true (boolean)
@@ -9430,7 +9041,6 @@ ServerStorage [ServerStorage]
             Frame [Frame]
               Title [TextLabel]
                 - CurrentFont = "Sarpanch" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         FromUnknownCave [Part]
           - Hierarchy = "Workspace.ScriptImportance" (string)
           - Map2 = true (boolean)
@@ -9441,12 +9051,10 @@ ServerStorage [ServerStorage]
             CurrentRoleGui [BillboardGui]
               Teller [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Teller [Part]
             RoleGui [BillboardGui]
               Teller [TextLabel]
                 - CurrentFont = "Sorponch" (string)
-                - OldFont = Enum.Font.SourceSansBold (EnumItem)
         Key [MeshPart]
           - Hierarchy = "Workspace.ScriptImportance" (string)
           - Map2 = true (boolean)
@@ -9474,7 +9082,6 @@ ServerStorage [ServerStorage]
             BillboardGui [BillboardGui]
               Teller [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
           SuperStructure [Folder]
             - RaycastItem = "UFOState" (string)
             - RaycastType = "Include" (string)
@@ -9488,7 +9095,6 @@ ServerStorage [ServerStorage]
             CrossingsBillboard [BillboardGui]
               Teller [TextLabel]
                 - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
           Portals [Folder]
             MothershipPortal [Model]
               MothershipTeleport [Part]
@@ -9496,7 +9102,6 @@ ServerStorage [ServerStorage]
                 BillboardGui [BillboardGui]
                   Teller [TextLabel]
                     - CurrentFont = "DenkOne" (string)
-                    - OldFont = Enum.Font.Bangers (EnumItem)
         Researcher [Folder]
           - Hierarchy = "Workspace.ScriptImportance" (string)
           - Map2 = true (boolean)
@@ -9514,12 +9119,10 @@ ServerStorage [ServerStorage]
               TimerGui [SurfaceGui]
                 Timer [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
             MinigameTimer2 [Part]
               TimerGui [SurfaceGui]
                 Timer [TextLabel]
                   - CurrentFont = "Sorponch" (string)
-                  - OldFont = Enum.Font.SourceSansBold (EnumItem)
         ResearcherTeleports [Folder]
           - Hierarchy = "Workspace.ScriptImportance" (string)
           - Map2 = true (boolean)
@@ -9548,7 +9151,6 @@ ServerStorage [ServerStorage]
                   Buy [TextButton]
                     - ClothingName = "ResearcherMen1" (string)
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.ArialBold (EnumItem)
           ResearcherMen2 [Model]
             PurchaseButton [Part]
               BuyGui [SurfaceGui]
@@ -9556,7 +9158,6 @@ ServerStorage [ServerStorage]
                   Buy [TextButton]
                     - ClothingName = "ResearcherMen2" (string)
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.ArialBold (EnumItem)
           ResearcherWomen1 [Model]
             PurchaseButton [Part]
               BuyGui [SurfaceGui]
@@ -9564,7 +9165,6 @@ ServerStorage [ServerStorage]
                   Buy [TextButton]
                     - ClothingName = "ResearcherWomen1" (string)
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.ArialBold (EnumItem)
           ResearcherWomen2 [Model]
             PurchaseButton [Part]
               BuyGui [SurfaceGui]
@@ -9572,7 +9172,6 @@ ServerStorage [ServerStorage]
                   Buy [TextButton]
                     - ClothingName = "ResearcherWomen2" (string)
                     - CurrentFont = "Sorponch" (string)
-                    - OldFont = Enum.Font.ArialBold (EnumItem)
         WinnersShop [Model]
           - Hierarchy = "Workspace.ScriptImportance" (string)
           - Map2 = true (boolean)
@@ -9855,7 +9454,6 @@ ServerStorage [ServerStorage]
     PlacementHealthGui [BillboardGui]
       Namer [TextLabel]
         - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     RemoteButton [Tool]
       - AllowedInVault = "SquidCorp" (string)
       - TsunamiPressDebounce = 0 (number)
@@ -10163,14 +9761,12 @@ ServerStorage [ServerStorage]
     DamageGui [BillboardGui]
       Amt [TextLabel]
         - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     EconDot [Frame]
       - Order = 0 (number)
       - Timer = 0 (number)
     PlayerFrame [Frame]
       PlayerName [TextLabel]
         - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
   zzzTODO [Folder]
     ASAP [Folder]
       AnchorMesh [MeshPart]
@@ -10182,30 +9778,25 @@ ServerStorage [ServerStorage]
         TellerGui [BillboardGui]
           Teller [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
           Teller2 [TextLabel]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     GearClubDisplay [Model]
       BuyAccessSign [Part]
         AccessGui [SurfaceGui]
           Frame [Frame]
             BuyAccess [TextButton]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
               - PlayButtonType = "Physical" (string)
       GearClubTeller [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
       Teller2 [Part]
         DescGui [SurfaceGui]
           Frame [Frame]
             Teller [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     RockTypeModels [Folder]
       Btann [Folder]
         CaveSystem [Model]
@@ -10946,11 +10537,9 @@ ServerStorage [ServerStorage]
       SurfaceGui [SurfaceGui]
         TextLabel [TextLabel]
           - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
     SquidCorpOrange [Frame]
       Title [TextLabel]
         - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     TrollGunUpgradeWall [Part]
       - Hierarchy = "Workspace.ScriptImportance" (string)
       - Map1 = true (boolean)
@@ -10959,62 +10548,44 @@ ServerStorage [ServerStorage]
           ActicvationStats [Frame]
             Stat1 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             Stat2 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             Stat3 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
           KillStats [Frame]
             Stat1 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             Stat2 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             Stat3 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         Upgrades [Frame]
           CurrentGun [Frame]
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             UpgradeTeller1 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             UpgradeTeller2 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             UpgradeTeller3 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
           CurrentUpgrade [Frame]
             Cost [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             Title [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             UpgradeTeller1 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             UpgradeTeller2 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
             UpgradeTeller3 [TextLabel]
               - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
           UpgradeButton [TextButton]
             - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
   zzz_BUILDING_STORAGE [Folder]
     LightHouse_Test [Model]
       Updated_Lighthouse [Model]
@@ -11159,239 +10730,23 @@ StarterGui [StarterGui]
           - Level = 2 (number)
         ImageButton [ImageButton]
           - Level = 5 (number)
-  AdminGui [ScreenGui]
-    AdminFrames [Folder]
-      BanFrame [Frame]
-        Title [TextLabel]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.SourceSans (EnumItem)
-      GameStatsFrame [Frame]
-        Title [TextLabel]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.SourceSans (EnumItem)
-      PlayerSupportFrame [Frame]
-        PlayerName [TextBox]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.SourceSans (EnumItem)
-        PointAmount [TextBox]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.SourceSans (EnumItem)
-        Result [TextLabel]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.SourceSans (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.SourceSans (EnumItem)
-      QuestFrame [Frame]
-        QuestButtons [Frame]
-          Maps [Frame]
-            M1 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            M2 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-          ScrollingFrame [ScrollingFrame]
-            Q1 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q1Num [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q2 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q2Num [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q3 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q3Num [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q4 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q4Num [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q5 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q5Num [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q6 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            Q6Num [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-        TeleportButtons [Frame]
-          CheckPoints [Frame]
-            T1 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            T2 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            T3 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            T4 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            T5 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            T6 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            T7 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-          ScrollingFrame [ScrollingFrame]
-            TextButton [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            TextButton2 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            TextButton3 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            TextButton4 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            TextButton5 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            TextButton6 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-            TextButton7 [TextButton]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
-      TsunamiTestFrame [Frame]
-        Tsunami1 [TextButton]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Tsunami2 [TextButton]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Tsunami3 [TextButton]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Tsunami4 [TextButton]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Tsunami5 [TextButton]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
   AdvertisingGui [ScreenGui]
     VVGAdvertising [Folder]
       - SelectedGame = "" (string)
-      AdvertisingFrame [Frame]
-        Bar [Frame]
-          Title [TextLabel]
-            - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.ArialBold (EnumItem)
       AdvertisingTouchFrame [Frame]
-        Background [ImageLabel]
-          Title [TextLabel]
-            - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.Unknown (EnumItem)
         ExitButton [ImageButton]
           GamepadB [ImageLabel]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
         PlayButton [TextButton]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.Unknown (EnumItem)
           - PlayButtonType = "UI" (string)
-  ChessGui [ScreenGui]
-    AcceptChessWinFrame [Frame]
-      AcceptButton [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      DeclineButton [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Teller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-    CameraView [Frame]
-      TextLabel [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-    SecondsToMove [Frame]
-      Time [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      WhoseTurn [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-    Wave [Frame]
-      TextLabel [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      b [ImageButton]
-        LevelText [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
   CustomizationGui [ScreenGui]
     CustomizeFrame [Frame]
       BodyFrame [Frame]
         Confirm [TextButton]
           - PlayButtonType = "UI" (string)
-        Middle [Frame]
-          DragFrame [Frame]
-            NoUFOWarning [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-        Teller [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
       ExitButton [ImageButton]
         GamepadB [ImageButton]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-  CutsceneGui [ScreenGui]
-    SkipCutscene [Frame]
-      Skip [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        Teller [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-  DialogueGui [ScreenGui]
-    Dialogue [Frame]
-      Message [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.FredokaOne (EnumItem)
-      Options [Frame]
-        Response1 [TextButton]
-          - CurrentFont = "Patrick Hand" (string)
-          - OldFont = Enum.Font.PermanentMarker (EnumItem)
-        Response2 [TextButton]
-          - CurrentFont = "Patrick Hand" (string)
-          - OldFont = Enum.Font.PermanentMarker (EnumItem)
-        Response3 [TextButton]
-          - CurrentFont = "Patrick Hand" (string)
-          - OldFont = Enum.Font.PermanentMarker (EnumItem)
-        Response4 [TextButton]
-          - CurrentFont = "Patrick Hand" (string)
-          - OldFont = Enum.Font.PermanentMarker (EnumItem)
-      TitleFrame [Frame]
-        Namer [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.FredokaOne (EnumItem)
   EconomyGui [ScreenGui]
     LoadoutFrame [Frame]
       BuyNewLoadout [Frame]
@@ -11401,306 +10756,50 @@ StarterGui [StarterGui]
       ExitButton [ImageButton]
         GamepadB [ImageButton]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Tile [ImageButton]
-        Amount [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Health [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Num [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     StorageVaultFolder [Folder]
       StorageVault2Frame [Frame]
         ExitButton [ImageButton]
           GamepadB [ImageButton]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-        ScrollingFrame [ScrollingFrame]
-          FirstTimeTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          FirstTimeTeller2 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Tile [ImageButton]
-          Amount [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Health [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          WithdrawFrame [Frame]
-            Withdraw1 [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            WithdrawAll [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-        ToRemoveFolder [Folder]
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-        Top [Folder]
-          Frame [Frame]
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
       StorageVaultFrame [Frame]
         ExitButton [ImageButton]
           GamepadB [ImageButton]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-        ScrollingFrame [ScrollingFrame]
-          FirstTimeTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          FirstTimeTeller2 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Tile [ImageButton]
-          Amount [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Health [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          WithdrawFrame [Frame]
-            Withdraw1 [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            WithdrawAll [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-        ToRemoveFolder [Folder]
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          ImageButton [ImageButton]
-            Amount [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-            Health [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-        Top [Folder]
-          Frame [Frame]
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
   GameGui [ScreenGui]
     BuyClothingFrame [Frame]
       BuyIncludedVip [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
         - PlayButtonType = "UI" (string)
       BuyPants [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
         - PlayButtonType = "UI" (string)
       BuyShirt [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
         - PlayButtonType = "UI" (string)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Notification [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Teller1 [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Teller2 [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     ClickerMinigameFrame [Frame]
-      DecisionFrame [Frame]
-        AmtTeller [TextLabel]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.Arial (EnumItem)
-        Option1 [TextButton]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.Arial (EnumItem)
-        Option2 [TextButton]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.Arial (EnumItem)
-        Option3 [TextButton]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.Arial (EnumItem)
-        Teller [TextLabel]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.Arial (EnumItem)
-        Timer [TextLabel]
-          - CurrentFont = "Sorponch" (string)
-          - OldFont = Enum.Font.Arial (EnumItem)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-    CurrencyMain [Frame]
-      ChessBar [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      GoldBar [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      KillBar [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      RiskBar [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Eff [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        FriendBonus [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
     MerchFrame [Frame]
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      MerchLogo [ImageLabel]
-        Notifier [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
     MinigameFrame [Frame]
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSansBold (EnumItem)
     MustCrossProperly [Frame]
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
       TeleButton [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
         - PlayButtonType = "UI" (string)
-      Teller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-    QuestNotificationFrame [Frame]
-      QuestTeller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Teller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     ResearcherInfoScreen [Frame]
       BuyButton [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
         - PlayButtonType = "UI" (string)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Teller [TextLabel]
-        - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSansBold (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     ResearcherTaskFrame [Frame]
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
@@ -11708,62 +10807,18 @@ StarterGui [StarterGui]
       TaskFrame [ScrollingFrame]
         Task1 [Frame]
           ClaimReward [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PricePoint [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Uses [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         Task2 [Frame]
           ClaimReward [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PricePoint [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Uses [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     RiskInfoScreen [Frame]
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Teller [TextLabel]
-        - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSansBold (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     VendingMachineFrame [Frame]
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-    VersionGradient [Frame]
-      UpdateLog [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
   GearGui [ScreenGui]
     AcceptAccessFrame [Frame]
       CenterImageFrame [Frame]
@@ -11771,29 +10826,14 @@ StarterGui [StarterGui]
           ExitButton [ImageButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Grant [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Teller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     AcceptSpaceshipFrame [Frame]
       - SpaceshipNum = 0 (number)
       - SpaceshipOwnerId = 0 (number)
-      Accept [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
       CenterImageFrame [Frame]
         ItemImage [ImageLabel]
           ExitButton [ImageButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     Apartment [Folder]
       ApartmentCode [Frame]
         ExitButton [ImageButton]
@@ -11803,204 +10843,35 @@ StarterGui [StarterGui]
         ExitButton [ImageButton]
           GamepadB [ImageLabel]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-    ChargeUpFrame [Frame]
-      JumpPowerTeller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-    GearMain [Frame]
-      ExpFrame [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      GearBar [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      LevelFrame [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      RechargeBar [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      UFOControls [Frame]
-        DownTeller [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        UpTeller [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
     ManageAccessFrame [Frame]
       CenterImageFrame [Frame]
         ItemImage [ImageLabel]
           ExitButton [ImageButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Teleport [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     PurchaseAccessFrame [Frame]
       CenterImageFrame [Frame]
         ItemImage [ImageLabel]
           ExitButton [ImageButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Price [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Purchase [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Teller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Teller2 [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Warning [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-    SkillFrame [Frame]
-      JumpPowerTeller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     SpaceshipAccessFrame [ImageLabel]
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Launch [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      SeatYourself [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Teller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      Top [ImageLabel]
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-    SpaceshipCameraToggle [ImageButton]
-      Teller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-  HealthGui [ScreenGui]
-    HealthPacket [Frame]
-      ArmorBar [Frame]
-        Amt [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      HealthFrame [TextButton]
-        - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSans (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-    LifeRevival [TextButton]
-      - CurrentFont = "Sorponch" (string)
-      - OldFont = Enum.Font.SourceSans (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
   IntroCutsceneGui [ScreenGui]
     - MaxSpeed = 0.2 (number)
     - MaxSpeedTsunamiHit = 15 (number)
-    Play [TextButton]
-      - CurrentFont = "DenkOne" (string)
-      - OldFont = Enum.Font.Bangers (EnumItem)
     TutorialFrame [Frame]
       GamepadY [ImageLabel]
         - KeyCode = Enum.KeyCode.ButtonY (EnumItem)
   JournalGui [ScreenGui]
     JournalFolder [Folder]
       JournalBackground [ImageLabel]
-        PageLeft [Frame]
-          QuestPage1 [Folder]
-            Quest1 [Frame]
-              Desc [TextLabel]
-                - CurrentFont = "PatrickHand" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
-              TitleFrame [Frame]
-                Title [TextLabel]
-                  - CurrentFont = "PatrickHand" (string)
-                  - OldFont = Enum.Font.Unknown (EnumItem)
-            Quest2 [Frame]
-              Desc [TextLabel]
-                - CurrentFont = "PatrickHand" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
-              TitleFrame [Frame]
-                Title [TextLabel]
-                  - CurrentFont = "PatrickHand" (string)
-                  - OldFont = Enum.Font.Unknown (EnumItem)
-            Quest3 [Frame]
-              Desc [TextLabel]
-                - CurrentFont = "PatrickHand" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
-              TitleFrame [Frame]
-                Title [TextLabel]
-                  - CurrentFont = "PatrickHand" (string)
-                  - OldFont = Enum.Font.Unknown (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "PatrickHand" (string)
-            - OldFont = Enum.Font.Unknown (EnumItem)
         PageRight [Frame]
           ExitButton [ImageButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          QuestPage1 [Folder]
-            Quest4 [Frame]
-              Desc [TextLabel]
-                - CurrentFont = "PatrickHand" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
-              TitleFrame [Frame]
-                Title [TextLabel]
-                  - CurrentFont = "PatrickHand" (string)
-                  - OldFont = Enum.Font.Unknown (EnumItem)
-            Quest5 [Frame]
-              Desc [TextLabel]
-                - CurrentFont = "PatrickHand" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
-              TitleFrame [Frame]
-                Title [TextLabel]
-                  - CurrentFont = "PatrickHand" (string)
-                  - OldFont = Enum.Font.Unknown (EnumItem)
-            Quest6 [Frame]
-              Desc [TextLabel]
-                - CurrentFont = "PatrickHand" (string)
-                - OldFont = Enum.Font.Code (EnumItem)
-              TitleFrame [Frame]
-                Title [TextLabel]
-                  - CurrentFont = "PatrickHand" (string)
-                  - OldFont = Enum.Font.Unknown (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "PatrickHand" (string)
-            - OldFont = Enum.Font.Unknown (EnumItem)
   MenuGui [ScreenGui]
     Index [Folder]
       IndexFrame [Frame]
@@ -12022,18 +10893,6 @@ StarterGui [StarterGui]
                 - PlayButtonType = "UI" (string)
               Tasks [ImageButton]
                 - PlayButtonType = "UI" (string)
-          Top [Folder]
-            Frame [Frame]
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-                tbg [TextLabel]
-                  - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
-    PointGradient [Frame]
-      PointsAmt [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     RobuxTsunamis [Folder]
       Bounding [Frame]
         GridFrame [Frame]
@@ -12083,56 +10942,29 @@ StarterGui [StarterGui]
               - PlayButtonType = "UI" (string)
             TsunamiWarning [TextButton]
               - PlayButtonType = "UI" (string)
-        Top [Folder]
-          Frame [Frame]
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
       VolumeSettingsFrame [Frame]
         ExitButton [ImageButton]
           GamepadB [ImageLabel]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
         SettingsFrame [Frame]
           MuteGear [ImageButton]
-            Label [TextLabel]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
             Slider [ImageButton]
               GamepadLB [ImageLabel]
                 - KeyCode = "ButtonL1" (string)
               GamepadRB [ImageLabel]
                 - KeyCode = "ButtonR1" (string)
           MuteMusic [ImageButton]
-            Label [TextLabel]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
             Slider [ImageButton]
               GamepadLB [ImageLabel]
                 - KeyCode = "ButtonL1" (string)
               GamepadRB [ImageLabel]
                 - KeyCode = "ButtonR1" (string)
           MuteSfx [ImageButton]
-            Label [TextLabel]
-              - CurrentFont = "Sorponch" (string)
-              - OldFont = Enum.Font.SourceSansBold (EnumItem)
             Slider [ImageButton]
               GamepadLB [ImageLabel]
                 - KeyCode = "ButtonL1" (string)
               GamepadRB [ImageLabel]
                 - KeyCode = "ButtonR1" (string)
-        Top [Folder]
-          Frame [Frame]
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-  NotificationScreenGui [ScreenGui]
-    NotifyFrame [Frame]
-      ExitButton [TextButton]
-        - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.ArialBold (EnumItem)
-      Teller [TextLabel]
-        - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.Unknown (EnumItem)
   OnboardingGui [ScreenGui]
     TsunamiRewardFrame [Frame]
       Top [Folder]
@@ -12140,9 +10972,6 @@ StarterGui [StarterGui]
           ExitButton [ImageButton]
             GamepadB [ImageLabel]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     VisualTutorial [Frame]
       HowToPlay [Folder]
         TextFrame [Frame]
@@ -12153,370 +10982,92 @@ StarterGui [StarterGui]
     - Hierarchy = "StarterGui" (string)
     - Map1 = true (boolean)
     ChangePriceFrame [ImageLabel]
-      Confirm [ImageButton]
-        TextLabel [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      InputBox [TextBox]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      ItemNameFrame [Frame]
-        ItemName [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      Top [ImageLabel]
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
     ChangeSpeedFrame [ImageLabel]
-      Confirm [ImageButton]
-        TextLabel [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
       SettingsFrame [Frame]
         CharacterSpeed [ImageButton]
-          Label [TextLabel]
-            - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Slider [ImageButton]
             GamepadLB [ImageLabel]
               - KeyCode = "ButtonL1" (string)
             GamepadRB [ImageLabel]
               - KeyCode = "ButtonR1" (string)
         TsunamiSpeed [ImageButton]
-          Label [TextLabel]
-            - CurrentFont = "Sorponch" (string)
-            - OldFont = Enum.Font.SourceSansBold (EnumItem)
           Slider [ImageButton]
             GamepadLB [ImageLabel]
               - KeyCode = "ButtonL1" (string)
             GamepadRB [ImageLabel]
               - KeyCode = "ButtonR1" (string)
-      Top [ImageLabel]
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
   ResearcherGui [ScreenGui]
     ResearcherMenuFrame [Frame]
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
   ShopGui [ScreenGui]
     AlienShopFolder [Folder]
       Menu [Frame]
-        Container [Frame]
-          BuyUFO1 [Frame]
-            MenuChange [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-              TextLabel [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-          BuyUFO2 [Frame]
-            MenuChange [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-              TextLabel [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-          SellBananaCrates [Frame]
-            MenuChange [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-              TextLabel [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-          SellChromeBananas [Frame]
-            MenuChange [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-              TextLabel [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         Top [Frame]
           ExitButton [TextButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       Purchase [Frame]
-        Bullets [Frame]
-          Bullet [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Bullet [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Bullet [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Description [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Info [Frame]
-          Armor [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Recharge [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Speed [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Price [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
         Top [Frame]
           ExitButton [TextButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       Sell [Frame]
-        Bullets [Frame]
-          Bullet [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Info [Frame]
-          Description [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         Top [Frame]
           ExitButton [TextButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       TrapDoorMenu [Frame]
-        Container [Frame]
-          GiveChromeBanana [ImageButton]
-            TextLabel [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         Top [Frame]
           ExitButton [TextButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     BlackMarketFolder [Folder]
       Menu [Frame]
-        Container [Frame]
-          BuyBananaBoat [Frame]
-            MenuChange [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-              TextLabel [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-          BuyBananaCrate [Frame]
-            MenuChange [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-              TextLabel [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-          SellBanana [Frame]
-            MenuChange [TextButton]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-              TextLabel [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
         Top [Frame]
           ExitButton [TextButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       Purchase [Frame]
-        Bullets [Frame]
-          Bullet [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Bullet [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Bullet3 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Bullet4 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Description [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Info [Frame]
-          Price [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          RateInfo1 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          RateInfo2 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Supply [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         Top [Frame]
           ExitButton [TextButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       Sell [Frame]
-        Bullets [Frame]
-          Bullet [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Bullet [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Bullet3 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Bullet4 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Info [Frame]
-          Price [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          RateInfo1 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          RateInfo2 [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Supply [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         Top [Frame]
           ExitButton [TextButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     EraGearFolder [Folder]
       Purchase [ImageLabel]
         ExitButton [ImageButton]
           GamepadB [ImageButton]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-        Info [Frame]
-          Price [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          RateInfo [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-          Supply [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Rate [Frame]
-          Buy1 [ImageButton]
-            TextLabel [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
     GreekTempleFolder [Folder]
       Gods [ImageLabel]
         ExitButton [ImageButton]
           GamepadB [ImageButton]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-        Info [Frame]
-          GearName [TextLabel]
-            - CurrentFont = "Patrick Hand" (string)
-            - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
-          Info [TextLabel]
-            - CurrentFont = "Patrick Hand" (string)
-            - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
-          Price [TextLabel]
-            - CurrentFont = "Patrick Hand" (string)
-            - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
-        Rate [Frame]
-          Buy1 [ImageButton]
-            TextLabel [TextLabel]
-              - CurrentFont = "Patrick Hand" (string)
-              - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "Patrick Hand" (string)
-          - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
       Temple [ImageLabel]
         ExitButton [ImageButton]
           GamepadB [ImageButton]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-        Info [Frame]
-          GearName [TextLabel]
-            - CurrentFont = "Patrick Hand" (string)
-            - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
-          Info [TextLabel]
-            - CurrentFont = "Patrick Hand" (string)
-            - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
-          Price [TextLabel]
-            - CurrentFont = "Patrick Hand" (string)
-            - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
-        Rate [Frame]
-          Buy1 [ImageButton]
-            TextLabel [TextLabel]
-              - CurrentFont = "Patrick Hand" (string)
-              - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "Patrick Hand" (string)
-          - OldFont = Enum.Font.GrenzeGotisch (EnumItem)
     PointDepositBoxFolder [Folder]
       DepositFrame [Frame]
         Deposit [TextButton]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
           - PlayButtonType = "Physical" (string)
-          TextLabel [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         ExitButton [ImageButton]
           GamepadB [ImageButton]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-        Points [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        PointsDeposited [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        TextBox [TextBox]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Top [Folder]
-          Frame [Frame]
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
         Withdraw [TextButton]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
           - PlayButtonType = "Physical" (string)
-          TextLabel [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
     SquidCorpFolder [Folder]
       MainShopFrame [Frame]
         Content [Folder]
@@ -12524,12 +11075,8 @@ StarterGui [StarterGui]
             ItemFrame [Frame]
               BuyFrame [Frame]
                 Buy [TextButton]
-                  - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
                 Upgrade [TextButton]
-                  - CurrentFont = "DenkOne" (string)
-                  - OldFont = Enum.Font.Bangers (EnumItem)
                   - PlayButtonType = "Physical" (string)
         ExitButton [ImageButton]
           GamepadB [ImageButton]
@@ -12544,151 +11091,48 @@ StarterGui [StarterGui]
               - PlayButtonType = "UI" (string)
             Upgradeable [ImageButton]
               - PlayButtonType = "UI" (string)
-        Top [Folder]
-          Frame [Frame]
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-              tbg [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
       ShopButton [ImageButton]
         - PlayButtonType = "UI" (string)
     SurvivalShopFolder [Folder]
       PurchaseFrame [Frame]
-        Description [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Price [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
         Purchase [TextButton]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
           ExitButton [ImageButton]
             GamepadB [ImageButton]
               - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-          Teller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-        Title [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Use [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Warning [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
     TrashCompactorFolder [Folder]
       TrashCompactorFrame [Frame]
         BodyFrame [Frame]
           Confirm [TextButton]
             - PlayButtonType = "UI" (string)
-          Middle [Frame]
-            DragFrame [Frame]
-              NoTrashableItemsWarning [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-          Teller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         ExitButton [ImageButton]
           GamepadB [ImageButton]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-        Top [Folder]
-          Frame [Frame]
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
     UpgradeMachineFolder [Folder]
       UpgradeMachineFrame [Frame]
         BodyFrame [Frame]
           Confirm [TextButton]
             - PlayButtonType = "UI" (string)
-          Middle [Frame]
-            DragFrame [Frame]
-              NoUpgradeableItemsWarning [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-          Teller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         ExitButton [ImageButton]
           GamepadB [ImageButton]
             - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-        Top [Folder]
-          Frame [Frame]
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
   StoreGui [ScreenGui]
     BoughtGamepassFrame [Frame]
       Activate [TextButton]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
         - PlayButtonType = "UI" (string)
-      GameTeller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
-      GamepassTeller [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
     BuyBulkTsunamiFrame [Frame]
       BulkFrame [Frame]
         BulkFrame1 [Frame]
           BuyHalfOffLevel100Tsunami [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            ImageLabel [ImageLabel]
-              RobuxTeller [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PerTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         BulkFrame2 [Frame]
           BuyX5Level100Tsunami [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            ImageLabel [ImageLabel]
-              RobuxTeller [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PerTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         BulkFrame3 [Frame]
           BuyYearSupplyLevel100Tsunami [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            ImageLabel [ImageLabel]
-              RobuxTeller [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PerTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       tsunami [ImageLabel]
         - CurrentT = 0 (number)
         - PositionPixelY = 60 (number)
@@ -12699,42 +11143,13 @@ StarterGui [StarterGui]
       BulkFrame [Frame]
         BulkFrame1 [Frame]
           BuyX5Level6Remotes [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            ImageLabel [ImageLabel]
-              RobuxTeller [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PerTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         BulkFrame2 [Frame]
           BuyMonthSupplyLevel6Remotes [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            ImageLabel [ImageLabel]
-              RobuxTeller [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PerTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       tsunami [ImageLabel]
         - CurrentT = 0 (number)
         - PositionPixelY = 60 (number)
@@ -12745,42 +11160,13 @@ StarterGui [StarterGui]
       BulkFrame [Frame]
         BulkFrame1 [Frame]
           BuyX5Level10Tsunami [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            ImageLabel [ImageLabel]
-              RobuxTeller [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PerTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
         BulkFrame2 [Frame]
           BuyX10Level10Tsunami [TextButton]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
             - PlayButtonType = "UI" (string)
-            ImageLabel [ImageLabel]
-              RobuxTeller [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
-            Title [TextLabel]
-              - CurrentFont = "DenkOne" (string)
-              - OldFont = Enum.Font.Bangers (EnumItem)
-          PerTeller [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       tsunami [ImageLabel]
         - CurrentT = 0 (number)
         - PositionPixelY = 60 (number)
@@ -12796,9 +11182,6 @@ StarterGui [StarterGui]
         BuyResearcherGui [TextButton]
           - GamepassName = "Researcher" (string)
           - PlayButtonType = "UI" (string)
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
       ExitButton [ImageButton]
         GamepadB [ImageLabel]
           - KeyCode = Enum.KeyCode.ButtonB (EnumItem)
@@ -12811,9 +11194,6 @@ StarterGui [StarterGui]
               - RotationStart = 0 (number)
             Buy [TextButton]
               - ProductName = "X10Level10Tsunami" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             tsunami [ImageLabel]
               - CycleSpeed = 2 (number)
               - PositionEnd = 90 (number)
@@ -12825,9 +11205,6 @@ StarterGui [StarterGui]
               - RotationStart = 0 (number)
             Buy [TextButton]
               - ProductName = "X5Level100Tsunami" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             tsunami [ImageLabel]
               - CycleSpeed = 2 (number)
               - PositionEnd = 90 (number)
@@ -12839,9 +11216,6 @@ StarterGui [StarterGui]
               - RotationStart = 0 (number)
             Buy [TextButton]
               - ProductName = "X5Level10Tsunami" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             tsunami [ImageLabel]
               - CycleSpeed = 2 (number)
               - PositionEnd = 90 (number)
@@ -12853,9 +11227,6 @@ StarterGui [StarterGui]
               - RotationStart = 0 (number)
             Buy [TextButton]
               - ProductName = "X5Level6Remotes" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             tsunami [ImageLabel]
               - CycleSpeed = 2 (number)
               - PositionEnd = 90 (number)
@@ -12864,9 +11235,6 @@ StarterGui [StarterGui]
             BuyApartmentGui [TextButton]
               - GamepassName = "Apartment" (string)
               - PlayButtonType = "UI" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             apartment [ImageLabel]
               - CycleSpeed = 2.5 (number)
               - RotationEnd = -30 (number)
@@ -12879,9 +11247,6 @@ StarterGui [StarterGui]
             BuyBlowDryerGui [TextButton]
               - GamepassName = "BlowDryer" (string)
               - PlayButtonType = "UI" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             blowdryer [ImageLabel]
               - CycleSpeed = 0.5 (number)
               - RotationEnd = -60 (number)
@@ -12894,9 +11259,6 @@ StarterGui [StarterGui]
             BuyBoxingRing [TextButton]
               - GamepassName = "BoxingRing" (string)
               - PlayButtonType = "UI" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             figure [ImageLabel]
               - CycleSpeed = 1 (number)
               - RotationEnd = -30 (number)
@@ -12909,9 +11271,6 @@ StarterGui [StarterGui]
             BuyGiantPotionGui [TextButton]
               - GamepassName = "GiantPotion" (string)
               - PlayButtonType = "UI" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             giant [ImageLabel]
               - CycleSpeed = 2 (number)
               - RotationEnd = 0 (number)
@@ -12925,9 +11284,6 @@ StarterGui [StarterGui]
           BuyLevel100Tsunami [Frame]
             BuyLevel100TsunamiGui [TextButton]
               - ProductName = "Level100Tsunami" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             lvl100 [ImageLabel]
               - CycleSpeed = 4 (number)
               - RotationEnd = -50 (number)
@@ -12939,9 +11295,6 @@ StarterGui [StarterGui]
           BuyLevel10Tsunami [Frame]
             BuyLevel10TsunamiGui [TextButton]
               - ProductName = "Level10Tsunami" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             lvl10 [ImageLabel]
               - CycleSpeed = 4 (number)
               - RotationEnd = -50 (number)
@@ -12953,9 +11306,6 @@ StarterGui [StarterGui]
           BuyLevel6Tsunami [Frame]
             BuyLevel6TsunamiGui [TextButton]
               - ProductName = "Level6Tsunami" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             lvl6 [ImageLabel]
               - CycleSpeed = 4 (number)
               - RotationEnd = -50 (number)
@@ -12968,9 +11318,6 @@ StarterGui [StarterGui]
             Buy2XRiskGui [TextButton]
               - GamepassName = "Risk2X" (string)
               - PlayButtonType = "UI" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             points [ImageLabel]
               - CycleSpeed = 1 (number)
               - RotationEnd = -30 (number)
@@ -12979,9 +11326,6 @@ StarterGui [StarterGui]
             BuyTridentGui [TextButton]
               - GamepassName = "Trident" (string)
               - PlayButtonType = "UI" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             angle [ImageLabel]
               - CycleSpeed = 1 (number)
               - VisibleChange = true (boolean)
@@ -13002,9 +11346,6 @@ StarterGui [StarterGui]
             BuyTsunamiStaffGui [TextButton]
               - GamepassName = "TsunamiStaff" (string)
               - PlayButtonType = "UI" (string)
-              Title [TextLabel]
-                - CurrentFont = "DenkOne" (string)
-                - OldFont = Enum.Font.Bangers (EnumItem)
             staff [ImageLabel]
               - CycleSpeed = 0.7 (number)
               - RotationEnd = -60 (number)
@@ -13013,47 +11354,6 @@ StarterGui [StarterGui]
               - CycleSpeed = 2 (number)
               - PositionEnd = 40 (number)
               - PositionStart = -50 (number)
-      Top [Folder]
-        Frame [Frame]
-          Title [TextLabel]
-            - CurrentFont = "DenkOne" (string)
-            - OldFont = Enum.Font.Bangers (EnumItem)
-  TsunamiGui [ScreenGui]
-    CausedThisFrame [Frame]
-      Frame [Frame]
-        Anchors [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Cave [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Damage [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Distance [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Health [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Jump [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Kill [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Resurrections [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Speed [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-        Tridents [TextLabel]
-          - CurrentFont = "DenkOne" (string)
-          - OldFont = Enum.Font.Bangers (EnumItem)
-      Title [TextLabel]
-        - CurrentFont = "DenkOne" (string)
-        - OldFont = Enum.Font.Bangers (EnumItem)
 
 StarterPlayer [StarterPlayer]
   StarterCharacterScripts [StarterCharacterScripts]
@@ -13139,7 +11439,6 @@ StarterPlayer [StarterPlayer]
     UpdateLogLocal [LocalScript]
       UpdateLogEntryText [TextLabel]
         - CurrentFont = "Sorponch" (string)
-        - OldFont = Enum.Font.SourceSans (EnumItem)
 
 Lighting [Lighting]
   - RBX_LightingTechnologyUnifiedMigration = true (boolean)
