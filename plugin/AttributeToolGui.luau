@@ -60,7 +60,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	-- pixel heights; the status scroll fills everything between them and so
 	-- resizes automatically with the widget - no fixed sizes, nothing clips.
 	local MARGIN = 12
-	local HEADER_H = 256 -- title + generate row + runtime toggle + two descriptions
+	local HEADER_H = 288 -- title + generate row + runtime toggle + descriptions + disclaimer
 	local FOOTER_H = 56  -- clear-output row
 
 	-- shared button factory
@@ -145,11 +145,11 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	togPad.PaddingLeft = UDim.new(0, 10)
 	togPad.Parent = toggle
 
+	-- Runtime-toggle description. The "connect your src" hint disappears once runtime
+	-- is included; the disclaimer is always shown. (Single auto-sizing label so the
+	-- two never leave a gap.)
 	local toggleDesc = Instance.new("TextLabel")
 	toggleDesc.Name = "ToggleRuntimeDescrition"
-	toggleDesc.Text = "With an additional step to connect to your project src if you use any "
-		.. "sync plugin, you can get all runtime states for attributes or values.  "
-		.. "This is entirely local to your machine."
 	toggleDesc.Font = Enum.Font.Gotham
 	toggleDesc.TextSize = 11
 	toggleDesc.TextWrapped = true
@@ -158,16 +158,26 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	toggleDesc.TextColor3 = Color3.fromRGB(165, 165, 175)
 	toggleDesc.BackgroundTransparency = 1
 	toggleDesc.Position = UDim2.fromOffset(MARGIN, 128)
-	toggleDesc.Size = UDim2.new(1, -2 * MARGIN, 0, 52)
+	toggleDesc.Size = UDim2.new(1, -2 * MARGIN, 0, 0)
+	toggleDesc.AutomaticSize = Enum.AutomaticSize.Y
 	toggleDesc.ZIndex = 6
 	toggleDesc.Parent = backdrop
+	local CONNECT_HINT = "With an additional step to connect to your project src, you can get "
+		.. "detected runtime states for attributes or values."
+	local DISCLAIMER = "Plugin may not find every possible way to know or understand whether an "
+		.. "attribute or value was created at runtime*.  Use of this plugin is at your own risk."
+	local function renderToggleDesc()
+		-- hide the connect hint once runtime is included; always keep the disclaimer
+		toggleDesc.Text = includeRuntime and DISCLAIMER or (CONNECT_HINT .. "\n\n" .. DISCLAIMER)
+	end
+	renderToggleDesc()
 
 	-- HTML feature blurb, beneath the runtime toggle description
 	local htmlDesc = Instance.new("TextLabel")
 	htmlDesc.Name = "HtmlFeatureDescription"
-	htmlDesc.Text = "Local html features: Game hierarchy tree, housing all studio set "
-		.. "attributes with optional runtime attributes.  Categorize by service, "
-		.. "explore & collapse tree, dynamic search to influence tree"
+	htmlDesc.Text = "Generate for 2 pages to open.  One for a hierarchy map, the other "
+		.. "for a hierarchy tree.  Categorize by search, service, host instance type.  "
+		.. "Find the attribute you need and copy back text for code or hierarchy search."
 	htmlDesc.Font = Enum.Font.Gotham
 	htmlDesc.TextSize = 11
 	htmlDesc.TextWrapped = true
@@ -175,8 +185,9 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	htmlDesc.TextYAlignment = Enum.TextYAlignment.Top
 	htmlDesc.TextColor3 = Color3.fromRGB(150, 180, 215)
 	htmlDesc.BackgroundTransparency = 1
-	htmlDesc.Position = UDim2.fromOffset(MARGIN, 186)
-	htmlDesc.Size = UDim2.new(1, -2 * MARGIN, 0, 64)
+	htmlDesc.Position = UDim2.fromOffset(MARGIN, 222)
+	htmlDesc.Size = UDim2.new(1, -2 * MARGIN, 0, 0)
+	htmlDesc.AutomaticSize = Enum.AutomaticSize.Y
 	htmlDesc.ZIndex = 6
 	htmlDesc.Parent = backdrop
 
@@ -185,6 +196,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	local function setRuntimeToggle(on: boolean)
 		includeRuntime = on
 		toggle.Text = (on and "✅" or "❌") .. "  Include Runtime in Treehouse"
+		renderToggleDesc()  -- hide the connect hint when runtime is included
 		if onRuntimeChanged then onRuntimeChanged(on) end
 		if opts.onToggleRuntime then
 			opts.onToggleRuntime(on)
@@ -291,7 +303,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	cmdHint.BackgroundTransparency = 1
 	cmdHint.Size = UDim2.new(1, 0, 0, 0)
 	cmdHint.AutomaticSize = Enum.AutomaticSize.Y
-	cmdHint.LayoutOrder = 4 -- below the runtime status (2) + src toggle (3)
+	cmdHint.LayoutOrder = 5 -- below runtime status (2) + hide-path (3) + src toggle (4)
 	cmdHint.ZIndex = 6
 	cmdHint.Parent = status
 
@@ -339,18 +351,46 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		return box
 	end
 
-	local macBox = commandBox(5, "macOS / Linux", "cd ~/Treehouse && python3 mailbox/server.py")
-	local winBox = commandBox(7, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" && python mailbox\\server.py')
+	local macBox = commandBox(6, "macOS / Linux", "cd ~/Treehouse && python3 mailbox/server.py")
+	local winBox = commandBox(8, "Windows (Command Prompt)", 'cd /d "%USERPROFILE%\\Treehouse" && python mailbox\\server.py')
 
 	local function setCommands(mac: string, win: string)
 		macBox.Text = mac
 		winBox.Text = win
 	end
 
-	-- "Connect your project src" toggle. The user can tick it manually, and the
-	-- plugin auto-ticks it when the mailbox reports a valid TREE_SRC. Only shown
-	-- while "Include Runtime in Treehouse" is on. (LayoutOrder 7, above the detail.)
+	-- "Connect your project src" toggle (+ a privacy toggle right above it that hides
+	-- the local path). Both are auto-managed and shown only while "Include Runtime in
+	-- Treehouse" is on. The plugin auto-ticks "connected" when the mailbox reports a
+	-- valid TREE_SRC.
 	local srcConnected = false
+	local hidePath = false                 -- privacy: omit the local path from the line
+	local lastAuto: boolean? = false       -- remember the last reported auto/path so the
+	local lastPath: string? = nil          -- line can be re-rendered when hidePath flips
+
+	-- Privacy toggle: hides the local src path (e.g. while screen-recording).
+	local hidePathToggle = Instance.new("TextButton")
+	hidePathToggle.Name = "ToggleHideSrcPath"
+	hidePathToggle.Font = Enum.Font.GothamMedium
+	hidePathToggle.TextSize = 12
+	hidePathToggle.TextXAlignment = Enum.TextXAlignment.Left
+	hidePathToggle.TextColor3 = Color3.fromRGB(205, 205, 215)
+	hidePathToggle.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+	hidePathToggle.AutoButtonColor = true
+	hidePathToggle.BorderSizePixel = 0
+	hidePathToggle.Size = UDim2.new(1, 0, 0, 24)
+	hidePathToggle.AutomaticSize = Enum.AutomaticSize.Y
+	hidePathToggle.LayoutOrder = 3         -- directly above the src toggle (4)
+	hidePathToggle.ZIndex = 6
+	hidePathToggle.Visible = false
+	hidePathToggle.Parent = status
+	corner(hidePathToggle, 6)
+	local hpPad = Instance.new("UIPadding")
+	hpPad.PaddingLeft = UDim.new(0, 8)
+	hpPad.PaddingTop = UDim.new(0, 4)
+	hpPad.PaddingBottom = UDim.new(0, 4)
+	hpPad.Parent = hidePathToggle
+
 	local srcToggle = Instance.new("TextButton")
 	srcToggle.Name = "ToggleSrcConnected"
 	srcToggle.Text = "❌  Connect your project src (fills the * / ** markers)"
@@ -363,7 +403,7 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	srcToggle.BorderSizePixel = 0
 	srcToggle.Size = UDim2.new(1, 0, 0, 28)
 	srcToggle.AutomaticSize = Enum.AutomaticSize.Y
-	srcToggle.LayoutOrder = 3 -- above the command boxes (runtime status is 2)
+	srcToggle.LayoutOrder = 4 -- above the command boxes (runtime status is 2)
 	srcToggle.ZIndex = 6
 	srcToggle.Visible = false
 	srcToggle.Parent = status
@@ -374,28 +414,43 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	srcPad.PaddingBottom = UDim.new(0, 5)
 	srcPad.Parent = srcToggle
 
-	-- Reflect the connected/not state (label only; the actual markers come from the
-	-- mailbox's TREE_SRC). `auto` true means the mailbox detected a real src.
-	local function renderSrcToggle(auto: boolean?, path: string?)
+	-- Reflect the connected/not state. With "Hide src path" on, the path is omitted.
+	local function renderSrcToggle()
 		if srcConnected then
-			srcToggle.Text = "✅  Project src connected"
-				.. (auto and path and path ~= "" and ("  (" .. path .. ")") or "")
+			local showPath = (not hidePath) and lastAuto and lastPath ~= nil and lastPath ~= ""
+			srcToggle.Text = "✅  Project src connected" .. (showPath and ("  (" .. lastPath .. ")") or "")
 		else
 			srcToggle.Text = "❌  Connect your project src (fills the * / ** markers)"
 		end
 	end
 	local function setSrcToggle(on: boolean, auto: boolean?, path: string?)
 		srcConnected = on
-		renderSrcToggle(auto, path)
+		lastAuto = auto
+		lastPath = path
+		renderSrcToggle()
 	end
 	srcToggle.Activated:Connect(function()
 		srcConnected = not srcConnected
-		renderSrcToggle(false, nil)
+		lastAuto = false
+		lastPath = nil
+		renderSrcToggle()
 		if opts.onToggleSrc then opts.onToggleSrc(srcConnected) end
 	end)
-	-- show the src toggle only while runtime is included (wired into setRuntimeToggle)
+
+	local function renderHidePath()
+		hidePathToggle.Text = (hidePath and "✅" or "❌") .. "  Hide src path"
+	end
+	renderHidePath()
+	hidePathToggle.Activated:Connect(function()
+		hidePath = not hidePath
+		renderHidePath()
+		renderSrcToggle()
+	end)
+
+	-- show the src + privacy toggles only while runtime is included
 	onRuntimeChanged = function(on: boolean)
 		srcToggle.Visible = on
+		hidePathToggle.Visible = on
 	end
 
 	-- Runtime note (✅/❌), updated when the toggle changes.

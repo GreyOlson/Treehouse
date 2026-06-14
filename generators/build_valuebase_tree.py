@@ -114,6 +114,54 @@ def scan_value_writes(src_dir):
     return writes, nil_writes, refs
 
 
+# Heuristic: Value objects *created in code*. Two patterns:
+#   Instance.new("XxxValue")  -> the Name + Parent set just after it (search forward)
+#   config table  Type = "XxxValue"  -> the nearest Name in the same table entry
+# Fuzzy by nature -> opt-in in the UI.
+_DECL_INSTNEW = re.compile(r'Instance\.new\(\s*["\'](\w*Value)["\']')
+_DECL_CFGTYPE = re.compile(r'Type\s*=\s*["\'](\w*Value)["\']')
+_DECL_NAME = re.compile(r'\.?Name\s*=\s*["\']([^"\']+)["\']')
+_DECL_PARENT = re.compile(r'\.?Parent\s*=\s*([\w.\[\]"\']+)')
+
+
+def scan_code_declared_values(src_dir, src_base):
+    declared = {}  # name -> {"files": set, "type": str, "parent": str}
+
+    def add(name, vtype, parent, rel):
+        d = declared.setdefault(name, {"files": set(), "type": vtype, "parent": parent})
+        d["files"].add(rel)
+        if parent and not d["parent"]:
+            d["parent"] = parent
+
+    for root, _d, files in os.walk(src_dir):
+        for fn in files:
+            if not (fn.endswith(".luau") or fn.endswith(".lua")):
+                continue
+            path = os.path.join(root, fn)
+            try:
+                text = open(path, "r", encoding="utf-8", errors="replace").read()
+            except OSError:
+                continue
+            rel = os.path.relpath(path, src_base)
+            # Instance.new("XxxValue") -> Name + Parent set just afterwards
+            for m in _DECL_INSTNEW.finditer(text):
+                win = text[m.start():m.end() + 200]
+                nm = _DECL_NAME.search(win)
+                if not nm:
+                    continue
+                pm = _DECL_PARENT.search(win)
+                add(nm.group(1), m.group(1), pm.group(1) if pm else "", rel)
+            # config table  Type = "XxxValue" -> nearest Name (parent is data-driven)
+            for m in _DECL_CFGTYPE.finditer(text):
+                wstart = max(0, m.start() - 120)
+                win = text[wstart:m.end() + 40]
+                anchor = m.start() - wstart
+                names = sorted((abs(nm.start() - anchor), nm.group(1)) for nm in _DECL_NAME.finditer(win))
+                if names:
+                    add(names[0][1], m.group(1), "", rel)
+    return declared
+
+
 # ---------------------------------------------------------------------------
 # 2. Parse the Value dump into a tree.
 # ---------------------------------------------------------------------------
@@ -235,6 +283,17 @@ def main():
         for n in written_not_in_dump
     ]
 
+    # Heuristic "code-declared" candidates: Value objects created in code (Instance.new
+    # / config tables) whose name isn't in the dump and isn't already in the appendix.
+    # Opt-in in the UI (false-positive prone). Carries the inferred type + parent.
+    src_base = os.path.dirname(os.path.dirname(os.path.normpath(SRC_DIR))) or PROJECT_ROOT
+    declared = scan_code_declared_values(SRC_DIR, src_base)
+    already = value_names | set(written_not_in_dump)
+    for n in sorted(k for k in declared if k not in already):
+        d = declared[n]
+        appendix.append({"n": n, "m": "decl", "ctype": d["type"],
+                         "parent": d.get("parent", ""), "files": sorted(d["files"])})
+
     summary = {
         "project": PROJECT_NAME,
         "total_nodes": total_nodes,
@@ -273,7 +332,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     --bg:#0f1117; --panel:#161922; --row:#1b1f2a; --rowh:#232838;
     --ink:#e6e9f0; --dim:#9aa3b2; --line:#2a2f3d;
     --inst:#7cc4ff; --cls:#5f6b80; --val:#9ece6a; --type:#7a8294;
-    --star:#ffb454; --dstar:#ff6b6b; --badge:#272c3a; --vcls:#b794f6;
+    --star:#ffb454; --dstar:#ff6b6b; --badge:#272c3a; --vcls:#b794f6; --purple:#c084fc;
   }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--ink);
@@ -292,7 +351,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   label.tog{display:inline-flex;gap:5px;align-items:center;color:var(--dim);cursor:pointer;user-select:none}
   select{background:var(--row);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:6px;font:inherit}
   .legend{margin-left:auto;color:var(--dim);font-size:11px;display:flex;gap:14px;flex-wrap:wrap}
-  .legend .star{color:var(--star)} .legend .dstar{color:var(--dstar)}
+  .legend .star{color:var(--purple)} .legend .dstar{color:var(--dstar)}
   main{padding:8px 12px 60px}
   ul{list-style:none;margin:0;padding:0}
   li.node>ul{padding-left:16px;border-left:1px solid var(--line);margin-left:7px}
@@ -305,7 +364,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .cls{color:var(--cls);font-size:11px}
   .vcls{color:var(--vcls);font-size:11px}
   li.collapsed>ul{display:none}
-  .mk{font-weight:700} .mk.s{color:var(--star)} .mk.d{color:var(--dstar)} .mk.nc{color:#ff5555;margin-left:4px}
+  .mk{font-weight:700} .mk.s{color:var(--purple)} .mk.d{color:var(--dstar)} .mk.nc{color:#ff5555;margin-left:4px}
+  .mk.decl{color:var(--star);font-weight:700;margin-left:4px}   /* code-inferred = yellow * */
+  .fp{color:var(--star);opacity:.85;font-size:10px}
+  .ap.decloff{display:none}   /* code-inferred entries hidden until the toggle is on */
   .legend .ncl{color:#ff5555}
   .eq{color:var(--type)}
   .aval{color:var(--val);max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -329,10 +391,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     <button id="collapseAll">Collapse all</button>
     <label class="tog"><input type="checkbox" id="onlyMutated"/> only * / **</label>
     <label class="tog"><input type="checkbox" id="onlyStatic"/> only static (migration-ready)</label>
+    <label class="tog"><input type="checkbox" id="inclDecl"/> include code inferred <span class="fp">*may introduce false positives</span></label>
     <select id="classFilter"><option value="">all value types</option></select>
     <div class="legend">
       <span><b>no mark</b> = static default</span>
-      <span class="star"><b>*</b> = written in code</span>
+      <span class="star"><b>*</b> = code declared</span>
       <span class="dstar"><b>**</b> = set to nil in code</span>
       <span class="ncl"><b>***</b> = Instance ref, can't be an attribute</span>
     </div>
@@ -404,16 +467,28 @@ Object.keys(s.by_class).forEach(c=>{
   const o=document.createElement('option'); o.value=c; o.textContent=c+' ('+s.by_class[c]+')'; cf.appendChild(o);
 });
 
-// appendix
+// appendix (the * / ** "written, not in dump" entries + the opt-in "code-inferred" ones)
 const ap = document.getElementById('appendix');
+const apWritten = DATA.appendix.filter(a=>a.m!=='decl').length;
 let aph = '<h2>Written in code, no Value of that name in the dump <span class="count">'+
-  DATA.appendix.length+' &mdash; likely created at runtime, renamed, or a non-Value field</span></h2>';
+  apWritten+' &mdash; likely created at runtime, renamed, or a non-Value field</span></h2>';
 for(const a of DATA.appendix){
-  const mk = a.m==='**'?'<span class="mk d">**</span>':'<span class="mk s">*</span>';
-  aph += '<div class="ap" data-name="'+esc(a.n.toLowerCase())+'"><span class="iname">'+esc(a.n)+
-    '</span>'+mk+'<span class="files">'+esc(a.files.join('  &middot;  '))+'</span></div>';
+  if(a.m==='decl'){
+    const meta='['+esc(a.ctype)+']'+(a.parent ? '  &rarr; parent: '+esc(a.parent) : '');
+    aph += '<div class="ap decl decloff" data-name="'+esc(a.n.toLowerCase())+'"><span class="iname">'+esc(a.n)+
+      '</span><span class="mk decl" title="code-inferred: heuristically detected as created in code (Instance.new / config table)">*</span>'+
+      '<span class="files">'+meta+'  &middot;  '+esc(a.files.join('  &middot;  '))+'</span></div>';
+  } else {
+    const mk = a.m==='**'?'<span class="mk d">**</span>':'<span class="mk s">*</span>';
+    aph += '<div class="ap" data-name="'+esc(a.n.toLowerCase())+'"><span class="iname">'+esc(a.n)+
+      '</span>'+mk+'<span class="files">'+esc(a.files.join('  &middot;  '))+'</span></div>';
+  }
 }
 ap.innerHTML = aph;
+// "include code inferred" toggle: hidden by default (heuristic / false-positive prone)
+const inclDecl=document.getElementById('inclDecl');
+function applyDecl(){ ap.querySelectorAll('.ap.decl').forEach(d=>d.classList.toggle('decloff', !inclDecl.checked)); }
+inclDecl.onchange=applyDecl; applyDecl();
 
 // controls
 const tree = document.getElementById('tree');

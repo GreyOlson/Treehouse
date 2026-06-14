@@ -68,6 +68,9 @@ ROJO_ATTRS = {"RojoSyncMode", "PreserveParts"}
 SET_LITERAL_RE = re.compile(r':SetAttribute\(\s*"([^"]+)"')
 SET_LITERAL_NIL_RE = re.compile(r':SetAttribute\(\s*"([^"]+)"\s*,\s*nil\s*\)')
 SET_IDENT_RE = re.compile(r':SetAttribute\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*,')
+# GetAttribute("Name") - a read. Proves the attribute is touched by code even when
+# it's never SetAttribute'd in the scanned src (e.g. set elsewhere / by the engine).
+GET_LITERAL_RE = re.compile(r':GetAttribute\(\s*"([^"]+)"')
 CONST_ASSIGN_RE = lambda ident: re.compile(
     r'\b' + re.escape(ident) + r'\s*=\s*"([^"]+)"'
 )
@@ -76,7 +79,13 @@ CONST_ASSIGN_RE = lambda ident: re.compile(
 def scan_runtime_attributes(src_dir):
     runtime_set = {}      # name -> set(relative file paths where written)
     runtime_nil = set()   # names written with a literal nil
+    runtime_read = {}     # name -> set(files) where read via GetAttribute("...")
     ident_names = set()   # identifier args to SetAttribute (constants)
+
+    # Show appendix paths starting at the project folder (e.g. "TsunamiGame/src/...")
+    # instead of "../Workspace/..." - relative to the parent of the project folder
+    # (the folder that contains src), which saves a lot of characters per line.
+    src_base = os.path.dirname(os.path.dirname(os.path.normpath(src_dir))) or PROJECT_ROOT
 
     luau_files = []
     for root, _dirs, files in os.walk(src_dir):
@@ -93,11 +102,13 @@ def scan_runtime_attributes(src_dir):
         except OSError:
             continue
         file_texts[path] = text
-        rel = os.path.relpath(path, PROJECT_ROOT)
+        rel = os.path.relpath(path, src_base)
         for name in SET_LITERAL_RE.findall(text):
             runtime_set.setdefault(name, set()).add(rel)
         for name in SET_LITERAL_NIL_RE.findall(text):
             runtime_nil.add(name)
+        for name in GET_LITERAL_RE.findall(text):
+            runtime_read.setdefault(name, set()).add(rel)
         for ident in SET_IDENT_RE.findall(text):
             # ignore obvious non-constants like `self`, table indexes handled
             ident_names.add(ident)
@@ -113,10 +124,10 @@ def scan_runtime_attributes(src_dir):
             pat = re.compile(r':SetAttribute\(\s*' + re.escape(ident) + r'\s*,')
             for path, text in file_texts.items():
                 if pat.search(text):
-                    rel = os.path.relpath(path, PROJECT_ROOT)
+                    rel = os.path.relpath(path, src_base)
                     runtime_set.setdefault(name, set()).add(rel)
 
-    return runtime_set, runtime_nil
+    return runtime_set, runtime_nil, runtime_read
 
 
 # ---------------------------------------------------------------------------
@@ -242,7 +253,7 @@ def serialize(node, runtime_set, runtime_nil, stats):
 
 
 def main():
-    runtime_set, runtime_nil = scan_runtime_attributes(SRC_DIR)
+    runtime_set, runtime_nil, runtime_read = scan_runtime_attributes(SRC_DIR)
     roots, total_instances = parse_dump(DUMP_PATH)
 
     stats = {
@@ -256,18 +267,17 @@ def main():
     tree = [serialize(r, runtime_set, runtime_nil, stats) for r in roots]
 
     design_names = stats["design_names"]
-    runtime_names = set(runtime_set.keys())
+    read_names = set(runtime_read.keys())
+    runtime_names = set(runtime_set.keys()) | read_names   # any code reference (Set or Get)
 
-    # Appendix: runtime attribute names never seen at edit time in the dump.
+    # Appendix: names referenced in code (Set OR Get) but never seen at edit time in
+    # the dump. A read-only name (GetAttribute, never SetAttribute) is marked "r".
     runtime_only = sorted(runtime_names - design_names)
     appendix = []
     for name in runtime_only:
-        files = sorted(runtime_set.get(name, []))
-        appendix.append({
-            "n": name,
-            "m": "**" if name in runtime_nil else "*",
-            "files": files,
-        })
+        files = sorted(set(runtime_set.get(name, set())) | set(runtime_read.get(name, set())))
+        m = "**" if name in runtime_nil else ("*" if name in runtime_set else "r")
+        appendix.append({"n": name, "m": m, "files": files})
 
     summary = {
         "total_nodes": total_instances,
@@ -280,6 +290,7 @@ def main():
         "dstar_count": stats["dstar_count"],
         "real_attr_count": stats["real_attr_count"],
         "rojo_attr_count": stats["rojo_attr_count"],
+        "runtime": bool(runtime_set or runtime_nil),  # was the src/runtime scanned?
     }
 
     html_out = render_html(tree, appendix, summary)
@@ -306,14 +317,14 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>__PROJECT__ &mdash; Attribute Map</title>
+<title>__PROJECT__ | Attribute Map</title>
 <style>
   :root{
     --bg:#0f1117; --panel:#161922; --row:#1b1f2a; --rowh:#232838;
     --ink:#e6e9f0; --dim:#9aa3b2; --line:#2a2f3d;
     --inst:#7cc4ff; --cls:#5f6b80; --attr:#d7dbe3;
     --val:#9ece6a; --type:#7a8294; --star:#ffb454; --dstar:#ff6b6b;
-    --rojo:#5a5f6e; --accent:#7cc4ff; --badge:#272c3a;
+    --rojo:#5a5f6e; --accent:#7cc4ff; --badge:#272c3a; --purple:#c084fc;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
@@ -321,8 +332,27 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   header{position:sticky;top:0;z-index:10;background:var(--panel);
     border-bottom:1px solid var(--line);padding:12px 16px}
   h1{margin:0 0 6px;font-size:15px;font-weight:600;color:var(--ink)}
+  .hint{color:var(--dim);font-size:11px;margin:2px 0 6px}
+  .sub{color:var(--dim);font-size:11px;margin-bottom:6px}
+  .sub .num{color:var(--accent);font-weight:600}
+  #hiddencount{color:var(--accent);font-size:11px;margin-top:8px}
   .stats{color:var(--dim);font-size:11.5px;margin-bottom:8px}
   .stats b{color:var(--ink);font-weight:600}
+  .stats .star{color:var(--purple)} .stats .dstar{color:var(--dstar)}
+  /* tree action + marker-filter buttons, matching the Attribute Treehouse */
+  #treebtns{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0 8px}
+  .mbtn{background:var(--row);border:1px solid var(--line);color:var(--dim);
+    border-radius:5px;padding:2px 9px;font:inherit;font-size:11px;cursor:pointer;white-space:nowrap}
+  .mbtn:hover{background:var(--rowh);color:var(--ink)}
+  .mbtn.disabled{color:#6b7280;cursor:not-allowed;opacity:.7}      /* no runtime: greyed, no click */
+  .mbtn.disabled:hover{background:var(--row);color:#6b7280}
+  .mbtn.disabled .mk{color:#6b7280}
+  .mbtn .mk{font-weight:700}
+  .mbtn.star .mk{color:var(--purple)} .mbtn.dstar .mk{color:var(--dstar)} .mbtn.read .mk{color:#7aa2f7}
+  .mbtn.star.on{background:var(--purple);color:#0b0d12;border-color:var(--purple)}
+  .mbtn.dstar.on{background:var(--dstar);color:#0b0d12;border-color:var(--dstar)}
+  .mbtn.read.on{background:#7aa2f7;color:#0b0d12;border-color:#7aa2f7}
+  .mbtn.star.on .mk,.mbtn.dstar.on .mk,.mbtn.read.on .mk{color:#0b0d12}
   .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   input[type=search]{background:var(--row);border:1px solid var(--line);
     color:var(--ink);border-radius:6px;padding:6px 10px;font:inherit;width:280px}
@@ -332,7 +362,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   label.tog{display:inline-flex;gap:5px;align-items:center;color:var(--dim);
     cursor:pointer;user-select:none}
   .legend{margin-left:auto;color:var(--dim);font-size:11px;display:flex;gap:14px;flex-wrap:wrap}
-  .legend .star{color:var(--star)} .legend .dstar{color:var(--dstar)}
+  .legend .star{color:var(--purple)} .legend .dstar{color:var(--dstar)}
   main{padding:8px 12px 60px}
   ul{list-style:none;margin:0;padding:0}
   .tree>ul{padding-left:0}
@@ -349,7 +379,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .attr:hover{background:var(--rowh);border-radius:4px}
   .aname{color:var(--attr)}
   .mk{font-weight:700}
-  .mk.s{color:var(--star)} .mk.d{color:var(--dstar)}
+  .mk.s{color:var(--purple)} .mk.d{color:var(--dstar)}
+  .mk.r{color:#7aa2f7;font-weight:700}   /* read-only (GetAttribute) = blue * */
   .eq{color:var(--type)}
   .aval{color:var(--val)}
   .atype{color:var(--type);font-size:11px}
@@ -359,34 +390,54 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .hidden{display:none !important}
   .match>.row{background:#2c3350}
   .section{margin-top:20px;border-top:1px solid var(--line);padding-top:12px}
-  .section h2{font-size:13px;color:var(--star);margin:0 0 8px}
+  .section h2{font-size:13px;color:var(--star);margin:0 0 8px;cursor:pointer;user-select:none}
+  .aptw{display:inline-block;width:14px;color:var(--dim)}
+  #appendix.apcollapsed .ap{display:none}   /* collapsed src runtime attributes */
   .ap{padding:1px 4px 1px 18px;color:var(--attr)}
   .ap .files{color:var(--dim);font-size:10.5px;margin-left:6px}
   .count{color:var(--dim);font-size:11px;margin-left:6px}
   mark{background:#4a4020;color:#ffd479;border-radius:2px;padding:0 1px}
+  .attr{cursor:default}
+  /* hover tooltip + bottom-left Attribute Finder (ported from the Attribute Treehouse) */
+  #tip{position:fixed;z-index:50;pointer-events:none;display:none;background:#0b0d12;
+    border:1px solid var(--line);border-radius:6px;padding:7px 9px;max-width:520px;
+    box-shadow:0 6px 24px rgba(0,0,0,.5);color:var(--dim);font-size:11.5px}
+  #tip b{color:var(--accent)}
+  #toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;
+    display:none;background:#0b0d12;border:1px solid var(--accent);border-radius:6px;
+    padding:7px 12px;color:var(--ink);font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+  #attrhelper{position:fixed;left:14px;bottom:14px;z-index:55;background:#0b0d12;
+    border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12px;
+    box-shadow:0 6px 24px rgba(0,0,0,.5);max-width:96vw;width:max-content}
+  #attrhelper .ah-name{color:var(--ink);font-weight:700;margin-bottom:5px}
+  #attrhelper .ah-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+  #attrhelper .ah-cell{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+  #attrhelper .ah-cap{color:var(--dim);font-size:10.5px;text-align:left}
+  #attrhelper code{background:#11151c;border:1px solid var(--line);border-radius:5px;
+    padding:4px 8px;color:#56d4ff;cursor:pointer;white-space:nowrap}
+  #attrhelper code:hover{border-color:#56d4ff}
 </style>
 </head>
 <body>
 <header>
-  <h1>__PROJECT__ &mdash; Attribute Map</h1>
+  <h1>__PROJECT__ | Attribute Map</h1>
+  <div class="hint">The attribute map is true to game hierarchy.</div>
+  <div class="sub" id="sub"></div>
   <div class="stats" id="stats"></div>
+  <div id="treebtns"></div>
   <div class="controls">
-    <input type="search" id="search" placeholder="filter by instance or attribute name&hellip;"/>
-    <button id="expandAll">Expand all</button>
-    <button id="collapseAll">Collapse all</button>
-    <label class="tog"><input type="checkbox" id="onlyRuntime"/> only * / **</label>
-    <label class="tog"><input type="checkbox" id="hideRojo" checked/> hide [rojo]</label>
-    <div class="legend">
-      <span><b>no mark</b> = static (edit-time only)</span>
-      <span class="star"><b>*</b> = set at runtime</span>
-      <span class="dstar"><b>**</b> = can be nil after set</span>
-    </div>
+    <input type="search" id="search" placeholder="advanced search&hellip;"/>
+    <input type="search" id="ignorelist" placeholder="ignore list, comma separated"/>
   </div>
+  <div id="hiddencount"></div>
 </header>
 <main>
   <div class="tree" id="tree"></div>
   <div class="section" id="appendix"></div>
 </main>
+<div id="tip"></div>
+<div id="toast"></div>
+<div id="attrhelper" style="display:none"></div>
 <script>
 /*__DATA__*/
 
@@ -397,6 +448,7 @@ function attrRow(a){
   li.className = 'attr' + (a.rojo ? ' rojo' : '');
   li.dataset.name = a.n.toLowerCase();
   li.dataset.runtime = a.m ? '1' : '0';
+  li.dataset.mark = a.m || '';        // '' | '*' | '**' for the marker-filter buttons
   li.dataset.rojo = a.rojo ? '1' : '0';
   const mk = a.m === '**' ? '<span class="mk d">**</span>'
            : a.m === '*'  ? '<span class="mk s">*</span>' : '';
@@ -407,9 +459,13 @@ function attrRow(a){
   return li;
 }
 
-function nodeEl(node){
+function nodeEl(node, parentPath){
   const li = document.createElement('li');
   li.className = 'node collapsed';
+  // full Explorer path (the synthetic "game" root contributes nothing) - used as the
+  // host hierarchy in the Attribute Finder panel.
+  const path = (parentPath === undefined) ? '' : (parentPath === '' ? node.n : parentPath + '.' + node.n);
+  li.dataset.path = path;
   const hasKids = (node.ch && node.ch.length) || (node.a && node.a.length);
   const row = document.createElement('div');
   row.className = 'row';
@@ -421,7 +477,7 @@ function nodeEl(node){
   if(hasKids){
     const ul = document.createElement('ul');
     for(const a of (node.a||[])){ ul.appendChild(attrRow(a)); bag += ' '+a.n.toLowerCase(); }
-    for(const c of (node.ch||[])){ const cu = nodeEl(c); ul.appendChild(cu.li); bag += ' '+cu.bag; }
+    for(const c of (node.ch||[])){ const cu = nodeEl(c, path); ul.appendChild(cu.li); bag += ' '+cu.bag; }
     li.appendChild(ul);
     const tw = row.querySelector('.tw');
     const toggle = ()=>{ li.classList.toggle('collapsed');
@@ -433,34 +489,43 @@ function nodeEl(node){
   return {li, bag};
 }
 
-// build tree
+// build tree, wrapped under a single collapsible "game" root (Roblox DataModel),
+// so the whole studio-set hierarchy can be collapsed with one click.
 const treeRoot = document.getElementById('tree');
 const ul = document.createElement('ul');
-for(const n of DATA.tree){ ul.appendChild(nodeEl(n).li); }
+ul.appendChild(nodeEl({n:'game', c:'DataModel', a:[], ch:DATA.tree}).li);
 treeRoot.appendChild(ul);
 
-// stats
+// Global Count (matches the Attribute Treehouse; counts in accent blue)
 const s = DATA.summary;
+document.getElementById('sub').innerHTML =
+  'Global Count: <span class="num">'+s.attributed_instances+'</span> instances with attributes, '+
+  '<span class="num">'+s.real_attr_count+'</span> attributes total.';
+
+// stats line (sits where the Treehouse's service search is). The * / ** counts are
+// spelled out so the legend key is no longer needed.
 document.getElementById('stats').innerHTML =
-  '<b>'+s.attributed_instances+'</b> attributed instances &nbsp;&middot;&nbsp; '+
   '<b>'+s.total_nodes+'</b> tree nodes &nbsp;&middot;&nbsp; '+
-  '<b>'+s.design_names+'</b> design-time attribute names &nbsp;&middot;&nbsp; '+
-  '<b>'+s.runtime_names+'</b> runtime names in code &nbsp;&middot;&nbsp; '+
-  '<b>'+s.overlap+'</b> overlap &nbsp;&middot;&nbsp; '+
-  '<span class="star"><b>'+s.star_count+'</b> *</span> &nbsp; '+
-  '<span class="dstar"><b>'+s.dstar_count+'</b> **</span> &nbsp;&middot;&nbsp; '+
-  '<b>'+s.runtime_only+'</b> runtime-only (see appendix)';
+  '<b>'+s.design_names+'</b> studio set attributes &nbsp;&middot;&nbsp; '+
+  '<b>'+s.runtime_names+'</b> runtime attributes &nbsp;&middot;&nbsp; '+
+  '<b>'+s.runtime_only+'</b> runtime-only';
 
 // appendix
 const ap = document.getElementById('appendix');
-let aphtml = '<h2>Runtime-only attributes <span class="count">'+DATA.appendix.length+
-  ' &mdash; written in code, not present in the Studio dump (host inferred from source files)</span></h2>';
+let aphtml = '<h2 id="aphead"><span class="aptw">&#9660;</span> src runtime attributes <span class="count" id="apcount"></span></h2>';
 for(const a of DATA.appendix){
-  const mk = a.m === '**' ? '<span class="mk d">**</span>' : '<span class="mk s">*</span>';
-  aphtml += '<div class="ap" data-name="'+esc(a.n.toLowerCase())+'"><span class="aname">'+
+  const mk = a.m === '**' ? '<span class="mk d">**</span>'
+           : a.m === '*'  ? '<span class="mk s">*</span>'
+           : '<span class="mk r" title="read in code (GetAttribute), never set in the scanned src">*</span>';
+  aphtml += '<div class="ap" data-name="'+esc(a.n.toLowerCase())+'" data-mark="'+a.m+'" data-files="'+esc(a.files.join(' ').toLowerCase())+'"><span class="aname">'+
     esc(a.n)+'</span>'+mk+'<span class="files">'+esc(a.files.join('  &middot;  '))+'</span></div>';
 }
 ap.innerHTML = aphtml;
+// click the heading to collapse / expand all src runtime attributes
+document.getElementById('aphead').onclick = ()=>{
+  const collapsed = ap.classList.toggle('apcollapsed');
+  document.querySelector('.aptw').innerHTML = collapsed ? '&#9654;' : '&#9660;';
+};
 
 // controls
 const tree = document.getElementById('tree');
@@ -473,59 +538,198 @@ function setAll(collapsed){
     }
   });
 }
+// Tree action + marker-filter buttons (Expand all / Collapse all / Set in code * /
+// Nil-able **) - same look as the Attribute Treehouse; replaces the only-*/** box
+// and the upper-right key.
+const markerFilter = new Set();   // at most one of '*' / '**' (mutually exclusive)
+const HAS_RUNTIME = !!DATA.summary.runtime;   // was the src/runtime scanned?
+const NO_RT_TIP = "For run-time attributes, use the 'Include Runtime' toggle in the Roblox Studio plugin menu. Follow setup directions.";
+function syncMarkerBtns(){ document.querySelectorAll('#treebtns .mbtn[data-mark]').forEach(b=>b.classList.toggle('on', markerFilter.has(b.dataset.mark))); }
+(function buildTreeBtns(){
+  const grp = document.getElementById('treebtns');
+  const exp = document.createElement('button'); exp.className='mbtn'; exp.id='expandAll'; exp.textContent='Expand all';
+  exp.title='expand every branch';
+  const col = document.createElement('button'); col.className='mbtn'; col.id='collapseAll'; col.textContent='Collapse all';
+  col.title='collapse every branch';
+  grp.appendChild(exp); grp.appendChild(col);
+  const mk=(mark,label,cls,opts)=>{
+    opts=opts||{};
+    const glyph=opts.glyph||mark;
+    const b=document.createElement('button'); b.className='mbtn '+cls; b.dataset.mark=mark;
+    const g='<span class="mk">'+glyph+'</span>';
+    b.innerHTML = opts.prefix ? (g+' '+label) : (label+' '+g);  // read = asterisk-first
+    if(!HAS_RUNTIME){ b.classList.add('disabled'); b.title=NO_RT_TIP; } // no runtime -> not clickable
+    else {
+      b.title=opts.title||('show only attributes marked '+glyph);
+      b.onclick=()=>{ const was=markerFilter.has(mark); markerFilter.clear(); // mutually exclusive
+        if(!was) markerFilter.add(mark); syncMarkerBtns(); applyView(); };
+    }
+    grp.appendChild(b);
+  };
+  mk('*', 'Set in code', 'star');
+  mk('r', 'Read in code', 'read', {glyph:'*', prefix:true,
+      title:'show only attributes read in code (GetAttribute)'});
+  mk('**', 'Nil-able', 'dstar');   // nil-able stays furthest right
+})();
 document.getElementById('expandAll').onclick = ()=>setAll(false);
 document.getElementById('collapseAll').onclick = ()=>setAll(true);
 
-// only runtime filter
-const onlyRuntime = document.getElementById('onlyRuntime');
-const hideRojo = document.getElementById('hideRojo');
-function applyAttrFilters(){
-  const onlyRt = onlyRuntime.checked, hRojo = hideRojo.checked;
-  tree.querySelectorAll('.attr').forEach(a=>{
-    let show = true;
-    if(hRojo && a.dataset.rojo === '1') show = false;
-    if(onlyRt && a.dataset.runtime !== '1') show = false;
-    a.classList.toggle('hidden', !show);
-  });
-}
-onlyRuntime.onchange = applyAttrFilters;
-hideRojo.onchange = applyAttrFilters;
-applyAttrFilters();
-
-// search
+// Unified view: hide [rojo], the marker buttons, and the text search ALL funnel
+// here. Attributes are hidden per rojo/marker; then nodes are shown only on the
+// path to a surviving attribute (and any text match), and those branches are
+// expanded so the matches are actually revealed (the buttons now "sort to purpose").
 const search = document.getElementById('search');
-let t=null;
-search.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(runSearch, 120); });
-function runSearch(){
-  const q = search.value.trim().toLowerCase();
-  // appendix filter
-  ap.querySelectorAll('.ap').forEach(d=>{
-    d.classList.toggle('hidden', q && d.dataset.name.indexOf(q) === -1);
-  });
-  if(!q){
-    tree.querySelectorAll('li.node').forEach(li=>{ li.classList.remove('hidden','match'); });
-    setAll(true);
-    return;
-  }
+let ignoreSet = new Set();   // comma-separated names (attr OR host) to ignore everywhere
+function applyView(){
+  const fm = markerFilter.size > 0, q = search.value.trim().toLowerCase(), ig = ignoreSet.size > 0;
+  // 0) ignore pass: mark nodes ignored by name, inherited from ancestors (doc order
+  //    visits ancestors first, so a parent's flag is set before its child reads it).
   tree.querySelectorAll('li.node').forEach(li=>{
-    const hit = li.dataset.bag.indexOf(q) !== -1;
-    li.classList.toggle('hidden', !hit);
-    // direct name match highlight
-    const nameHit = li.querySelector(':scope > .row > .iname')
-      .textContent.toLowerCase().indexOf(q) !== -1;
-    li.classList.toggle('match', nameHit);
+    const own = ig && ignoreSet.has(li.querySelector(':scope > .row > .iname').textContent.toLowerCase());
+    const par = li.parentElement.closest('li.node');
+    li.dataset._ign = (own || (par && par.dataset._ign === '1')) ? '1' : '0';
   });
-  // reveal & expand ancestors of any visible node
-  tree.querySelectorAll('li.node:not(.hidden)').forEach(li=>{
-    let p = li;
-    while(p && p.classList && p.classList.contains('node')){
-      p.classList.remove('hidden','collapsed');
-      const tw = p.querySelector(':scope > .row > .tw');
-      if(tw && !tw.classList.contains('leaf')) tw.textContent = '▼';
-      p = p.parentElement.closest('li.node');
-    }
+  const attrIgnored = a => ig && (ignoreSet.has(a.dataset.name) || a.closest('li.node').dataset._ign === '1');
+  // 1) per-attribute visibility: the marker buttons + the ignore list
+  tree.querySelectorAll('.attr').forEach(a=>{
+    a.classList.toggle('hidden', (fm && !markerFilter.has(a.dataset.mark)) || attrIgnored(a));
   });
+  // appendix ("src runtime attributes") follows the text search, markers, and ignore
+  ap.querySelectorAll('.ap').forEach(d=>{
+    let show = true;
+    if(q && d.dataset.name.indexOf(q) === -1) show = false;
+    if(fm && !markerFilter.has(d.dataset.mark)) show = false;
+    // ignore list hides an entry when the attr name is ignored OR any term appears in
+    // its src file paths - so "client"/"server" act on .client.luau / .server.luau etc.
+    if(ig && (ignoreSet.has(d.dataset.name) || [...ignoreSet].some(t=>d.dataset.files.indexOf(t)!==-1))) show = false;
+    d.classList.toggle('hidden', !show);
+  });
+  if(!fm && !q){
+    // 2) no search/marker -> default collapsed view (game root open), ignored hidden
+    tree.querySelectorAll('li.node').forEach(li=>{ li.classList.toggle('hidden', li.dataset._ign === '1'); li.classList.remove('match'); });
+    setAll(true);
+    const g=tree.querySelector(':scope > ul > li.node');
+    if(g && g.dataset._ign !== '1'){ g.classList.remove('collapsed'); const tw=g.querySelector(':scope > .row > .tw');
+      if(tw && !tw.classList.contains('leaf')) tw.textContent='▼'; }
+  } else {
+    // 3) a node is relevant if its text matches (bag), its subtree still has a visible
+    //    attribute (marker filter), and it isn't ignored. Hide the rest.
+    tree.querySelectorAll('li.node').forEach(li=>{
+      const textOk = !q || li.dataset.bag.indexOf(q) !== -1;
+      const markOk = !fm || li.querySelector('.attr:not(.hidden)') !== null;
+      const ignOk = li.dataset._ign !== '1';
+      li.classList.toggle('hidden', !(textOk && markOk && ignOk));
+      const nameHit = q && li.querySelector(':scope > .row > .iname').textContent.toLowerCase().indexOf(q) !== -1;
+      li.classList.toggle('match', !!nameHit);
+    });
+    // 4) reveal + expand every surviving node and its ancestors
+    tree.querySelectorAll('li.node:not(.hidden)').forEach(li=>{
+      let p = li;
+      while(p && p.classList && p.classList.contains('node')){
+        p.classList.remove('hidden','collapsed');
+        const tw = p.querySelector(':scope > .row > .tw');
+        if(tw && !tw.classList.contains('leaf')) tw.textContent = '▼';
+        p = p.parentElement.closest('li.node');
+      }
+    });
+  }
+  // 5) two living counters - the studio-set tree, and the src-runtime appendix -
+  //    each coloured green / yellow / red and recomputed on every search/toggle.
+  const reasons = [];
+  if(q) reasons.push('search');
+  if(fm) reasons.push('marker filter');
+  if(ig) reasons.push('ignore list');
+  const by = reasons.length ? ' by '+reasons.join(', ')+'.' : '.';
+  const col = (h,t)=> h<=0 ? '#5fd37a' : (h>=t ? '#ff6b6b' : '#e7c45a');
+  const counter = (h,t,label)=>'<span style="color:'+col(h,t)+';font-weight:700">'+h+' of '+t+'</span> '+(label?label+' ':'')+'hidden'+by;
+  // studio-set attributes (the tree)
+  const total = tree.querySelectorAll('.attr').length;
+  const hidden = tree.querySelectorAll('.attr.hidden, li.node.hidden .attr').length;
+  document.getElementById('hiddencount').innerHTML = counter(hidden, total, 'studio set attributes');
+  // src runtime attributes (the appendix) - lives in the appendix heading
+  const apc = document.getElementById('apcount');
+  if(apc){
+    const apTotal = ap.querySelectorAll('.ap').length;
+    const apHidden = ap.querySelectorAll('.ap.hidden').length;
+    apc.innerHTML = counter(apHidden, apTotal, '');
+  }
 }
+let t=null;
+search.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(applyView, 120); });
+// ignore list: comma-separated names (attr OR host), applied across the whole view
+const ignoreInput=document.getElementById('ignorelist'); let it2=null;
+ignoreInput.addEventListener('input', ()=>{ clearTimeout(it2); it2=setTimeout(()=>{
+  ignoreSet=new Set(ignoreInput.value.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean));
+  applyView();
+}, 140); });
+applyView();
+
+// ---- hover tooltip + bottom-left Attribute Finder (ported from the Treehouse) ----
+const CB = navigator.userAgent.indexOf('Mac')!==-1 ? 'Cmd' : 'Ctrl';
+function copyText(s){
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(s); return true; } }catch(e){}
+  const ta=document.createElement('textarea'); ta.value=s; ta.style.position='fixed'; ta.style.top='-1000px';
+  document.body.appendChild(ta); ta.focus(); ta.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta); return ok;
+}
+const tip=document.getElementById('tip'), toast=document.getElementById('toast'); let toastT=null;
+function flashToast(msg, ms){ toast.textContent=msg; toast.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>{ toast.style.display='none'; }, ms||1600); }
+function flashCopied(p){ flashToast('Copied: '+p); }
+
+// Persistent bottom-left panel: Attribute("Name") (script search) + host hierarchy (Explorer).
+const attrHelper=document.getElementById('attrhelper');
+function showFinder(name, host){
+  attrHelper.innerHTML='';
+  const title=document.createElement('div'); title.className='ah-name'; title.textContent='Attribute Finder: '+name;
+  const row=document.createElement('div'); row.className='ah-row';
+  const cell=(text,caption,tipt)=>{
+    const colm=document.createElement('div'); colm.className='ah-cell';
+    const c=document.createElement('code'); c.textContent=text; c.title=tipt;
+    c.onclick=()=>{ if(copyText(text)) flashCopied(text); };
+    const cap=document.createElement('div'); cap.className='ah-cap'; cap.textContent=caption;
+    colm.appendChild(c); colm.appendChild(cap); row.appendChild(colm);
+  };
+  cell('Attribute("'+name+'")', 'Paste into "Find in Place"', 'copy for script search - matches Get & SetAttribute');
+  cell(host, 'Paste into "Explorer"', 'copy the host hierarchy to find the instance(s)');
+  attrHelper.appendChild(title); attrHelper.appendChild(row);
+  attrHelper.style.display='block';
+}
+
+// Clicking an attribute LOCKS it into the panel for 3s, so the cursor can travel to
+// the panel without other rows stealing it.
+let attrLockUntil=0;
+function attrLocked(){ return performance.now() < attrLockUntil; }
+function attrInfo(a){
+  return { name:a.querySelector('.aname').textContent,
+           host:(a.closest('li.node')||{dataset:{}}).dataset.path || '',
+           val:(a.querySelector('.aval')||{}).textContent || '',
+           type:(a.querySelector('.atype')||{}).textContent || '',
+           mk:(a.querySelector('.mk')||{}).textContent || '' };
+}
+tree.addEventListener('mousemove', e=>{
+  const a=e.target.closest('.attr'); if(!a){ tip.style.display='none'; return; }
+  const it=attrInfo(a);
+  let t2='<b>'+esc(it.name)+'</b> = '+esc(it.val)+' '+esc(it.type)+(it.mk?'  '+it.mk:'');
+  if(attrLocked()){
+    t2+='<br/><span style="color:var(--type)">panel locked - move to it to copy</span>';
+  } else {
+    showFinder(it.name, it.host);
+    t2+='<br/><span style="color:var(--type)">click to lock Attribute Finder panel for 3 seconds</span>';
+  }
+  tip.innerHTML=t2; tip.style.display='block';
+  let x=e.clientX+14, y=e.clientY+14; const r=tip.getBoundingClientRect();
+  if(x+r.width>innerWidth) x=e.clientX-r.width-14;
+  if(y+r.height>innerHeight) y=e.clientY-r.height-14;
+  tip.style.left=x+'px'; tip.style.top=y+'px';
+});
+tree.addEventListener('mouseleave', ()=>{ tip.style.display='none'; });
+tree.addEventListener('click', e=>{
+  const a=e.target.closest('.attr'); if(!a) return;
+  const it=attrInfo(a);
+  attrLockUntil=performance.now()+3000;
+  showFinder(it.name, it.host);
+  flashToast('Locked "'+it.name+'" for 3s - move to the panel to copy', 3000);
+});
 </script>
 </body>
 </html>

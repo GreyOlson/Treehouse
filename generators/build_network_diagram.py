@@ -26,9 +26,11 @@ ValueBase network generator can reuse the exact same engine.
 """
 
 import os
+import sys
 import json
 import html
 import importlib.util
+import traceback
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 _spec = importlib.util.spec_from_file_location(
@@ -89,25 +91,144 @@ def attr_node_to_uniform(node):
             "ch": [attr_node_to_uniform(c) for c in node["ch"]]}
 
 
+# ---------------------------------------------------------------------------
+# Code-site script hosts. Every src script that SetAttribute/GetAttribute's a
+# name becomes a node at its real game-hierarchy location, hosting those
+# attributes as items (set = '*' purple, read = 'r' blue). Always merged into
+# the dump tree so the scripts inherit the same expand/collapse/path-compression.
+# ---------------------------------------------------------------------------
+_SCRIPT_EXT = [(".server.luau", "Script"), (".server.lua", "Script"),
+               (".client.luau", "LocalScript"), (".client.lua", "LocalScript"),
+               (".luau", "ModuleScript"), (".lua", "ModuleScript")]
+
+
+def _script_game_path(rel, src_name):
+    """Map a scanned src file path to (parts, leaf_class) in the game tree.
+    'TsunamiGame/src/ServerScriptService/Economy/Dump.server.luau'
+       -> (['ServerScriptService','Economy','Dump'], 'Script'). Rojo init.* files
+    collapse onto their folder. Returns (None, None) for non-script files."""
+    segs = rel.replace("\\", "/").split("/")
+    if src_name in segs:
+        parts = segs[segs.index(src_name) + 1:]
+    elif "src" in segs:
+        parts = segs[segs.index("src") + 1:]
+    else:
+        parts = segs[1:]                      # fall back: drop the project folder
+    if not parts:
+        return None, None
+    fname, cls, base = parts[-1], None, parts[-1]
+    for ext, c in _SCRIPT_EXT:
+        if fname.endswith(ext):
+            cls, base = c, fname[:-len(ext)]
+            break
+    if cls is None:
+        return None, None                     # not a Luau script
+    if base.lower() == "init":
+        parts = parts[:-1]                    # init.* -> the folder is the script
+    else:
+        parts = parts[:-1] + [base]           # file is the script
+    return (parts, cls) if parts else (None, None)
+
+
+def build_script_hosts(runtime_set, runtime_read, src_dir):
+    """{service: nested node}; node = {'c':class,'ch':{name:node},'items':{attr:mark}}."""
+    src_name = os.path.basename(os.path.normpath(src_dir))
+    by_file = {}                              # rel file -> {attr: 'set'|'read'} (set wins)
+    for name, files in runtime_set.items():
+        for rel in files:
+            by_file.setdefault(rel, {})[name] = "set"
+    for name, files in runtime_read.items():
+        for rel in files:
+            by_file.setdefault(rel, {}).setdefault(name, "read")
+
+    services = {}
+    for rel, names in by_file.items():
+        parts, cls = _script_game_path(rel, src_name)
+        if not parts:
+            continue
+        svc = parts[0]
+        node = services.setdefault(svc, {"c": svc, "ch": {}, "items": {}})
+        inner = parts[1:]
+        for i, p in enumerate(inner):
+            leaf = (i == len(inner) - 1)
+            child = node["ch"].get(p)
+            if child is None:
+                child = {"c": cls if leaf else "Folder", "ch": {}, "items": {}}
+                node["ch"][p] = child
+            elif leaf:
+                child["c"] = cls
+            node = child
+        for nm, kind in names.items():
+            mk = "*" if kind == "set" else "r"
+            if node["items"].get(nm) != "*":  # a set beats a read
+                node["items"][nm] = mk
+    return services
+
+
+def _script_to_uniform(name, node):
+    return {"n": name, "c": node["c"],
+            "items": [{"n": nm, "m": mk, "code": True}
+                      for nm, mk in sorted(node["items"].items())],
+            "ch": [_script_to_uniform(cn, node["ch"][cn]) for cn in sorted(node["ch"])]}
+
+
+def _merge_uniform(dst, src):
+    """Deep-merge src (script hosts) into dst (dump tree) by child name."""
+    dst["items"] = dst.get("items", []) + src.get("items", [])
+    idx = {c["n"]: c for c in dst.setdefault("ch", [])}
+    for sc in src.get("ch", []):
+        if sc["n"] in idx:
+            _merge_uniform(idx[sc["n"]], sc)
+        else:
+            dst["ch"].append(sc)
+
+
 def main():
-    runtime_set, runtime_nil = bat.scan_runtime_attributes(bat.SRC_DIR)
+    runtime_set, runtime_nil, runtime_read = bat.scan_runtime_attributes(bat.SRC_DIR)
     roots, _total = bat.parse_dump(bat.DUMP_PATH)
     stats = {"rojo_attr_count": 0, "real_attr_count": 0, "design_names": set(),
              "star_count": 0, "dstar_count": 0, "attributed_instances": 0}
     serialized = [bat.serialize(r, runtime_set, runtime_nil, stats) for r in roots]
 
+    # dump trees -> uniform, keyed by service (preserve the dump's service order)
+    order = [s["n"] for s in serialized]
+    uni = {s["n"]: attr_node_to_uniform(s) for s in serialized}
+
+    # Always merge in the code-site script hosts: each src script that sets/reads an
+    # attribute appears at its real place in the hierarchy, hosting those attributes.
+    # Fail-safe: a problem here must NEVER block the whole Treehouse - on any error we
+    # log the traceback (to working/treehouse_error.log + stderr) and fall back to the
+    # plain dump tree (no code sites), so generation still succeeds.
+    try:
+        for svc, snode in build_script_hosts(runtime_set, runtime_read, bat.SRC_DIR).items():
+            su = _script_to_uniform(svc, snode)
+            if svc in uni:
+                _merge_uniform(uni[svc], su)
+            else:
+                uni[svc] = su
+                order.append(svc)
+    except Exception:                              # noqa: BLE001 - never crash generation
+        tb = traceback.format_exc()
+        sys.stderr.write("[Treehouse] code-site script merge skipped (error below):\n" + tb)
+        try:
+            with open(os.path.join(bat.PROJECT_ROOT, "working", "treehouse_error.log"),
+                      "w", encoding="utf-8") as _f:
+                _f.write(tb)
+        except OSError:
+            pass
+
     services = []
     tot_inst = tot_items = 0
-    for s in serialized:
-        disp = compress(attr_node_to_uniform(s))
+    for name in order:
+        disp = compress(uni[name])
         ic, it = count_display(disp)
-        # subtract the root itself if it carries no items (it's just an anchor)
         services.append(disp)
         tot_inst += ic
         tot_items += it
 
     summary = {"project": bat.PROJECT_NAME, "item_kind": "attribute",
                "item_label": "attributes",
+               "runtime": bool(runtime_set or runtime_nil or runtime_read),  # src scanned?
                "services": [{"name": s["n"], "instances": count_display(s)[0],
                              "items": count_display(s)[1]} for s in services],
                "total_instances": tot_inst, "total_items": tot_items}
@@ -140,13 +261,13 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>__PROJECT__ - __KIND__ Treehouse</title>
+<title>__PROJECT__ | __KIND__ Treehouse</title>
 <style>
   :root{
     --bg:#0f1117; --panel:#161922; --ink:#e6e9f0; --dim:#9aa3b2;
     --line:#2a2f3d; --row:#1b1f2a; --rowh:#232838; --accent:#7cc4ff;
     --edge:#39414f; --star:#ffb454; --dstar:#ff6b6b; --badge:#272c3a;
-    --item:#d7dbe3; --val:#9ece6a; --type:#7a8294; --vcls:#b794f6;
+    --item:#d7dbe3; --val:#9ece6a; --type:#7a8294; --vcls:#b794f6; --purple:#c084fc;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
@@ -157,9 +278,32 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
     border-bottom:1px solid var(--line);padding:10px 14px}
   h1{margin:0 0 6px;font-size:15px;font-weight:600}
   .sub{color:var(--dim);font-size:11px;margin-bottom:6px}
+  .sub .num{color:var(--accent);font-weight:600}     /* counts in accent blue */
+  /* tree action + marker-filter buttons, their own row below the service tabs */
+  #treebtns{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .mbtn{background:var(--row);border:1px solid var(--line);color:var(--dim);
+    border-radius:5px;padding:2px 9px;font:inherit;font-size:11px;cursor:pointer;white-space:nowrap}
+  .mbtn:hover{background:var(--rowh);color:var(--ink)}
+  .mbtn.disabled{color:#6b7280;cursor:not-allowed;opacity:.7}      /* no runtime: greyed, no click */
+  .mbtn.disabled:hover{background:var(--row);color:#6b7280}
+  .mbtn.disabled .mk{color:#6b7280}
+  .mbtn .mk{font-weight:700}                              /* the * / ** key on the button */
+  .mbtn.star .mk{color:var(--purple)}                     /* * = purple (set/declared in code) */
+  .mbtn.read .mk{color:#7aa2f7}                           /* * = blue (read in code) */
+  .mbtn.dstar .mk{color:var(--dstar)}                     /* ** = red */
+  .mbtn.ncm .mk{color:#ff5555}                            /* *** = Instance value */
+  .mbtn.star.on{background:var(--purple);color:#0b0d12;border-color:var(--purple)}
+  .mbtn.read.on{background:#7aa2f7;color:#0b0d12;border-color:#7aa2f7}
+  .mbtn.dstar.on{background:var(--dstar);color:#0b0d12;border-color:var(--dstar)}
+  .mbtn.ncm.on{background:#ff5555;color:#0b0d12;border-color:#ff5555}
+  .mbtn.ncm.on .mk{color:#0b0d12}
+  .mbtn.star.on .mk,.mbtn.read.on .mk,.mbtn.dstar.on .mk{color:#0b0d12}     /* dark key on the lit button */
+  .mbtn.prop.on{background:var(--accent);color:#0b0d12;border-color:var(--accent)}      /* fidelity active */
+  .mbtn.prop.on-true{background:var(--accent);color:#0b0d12;border-color:var(--accent)} /* {Prop} True = blue */
+  .mbtn.prop.on-false{background:var(--star);color:#0b0d12;border-color:var(--star)}     /* {Prop} False = yellow */
   /* global search: a full-width bar above the tabs; non-empty -> each tab shows
      a (match count). Distinct accent border so it reads as the cross-service one. */
-  #globalsearch{display:block;width:100%;max-width:none;margin:0 0 8px;
+  #globalsearch{display:block;width:100%;max-width:520px;min-width:240px;margin:0 0 8px;
     border-color:#34507a;flex:none}
   #globalsearch:focus{outline:none;border-color:var(--accent)}
   .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
@@ -169,6 +313,8 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
   .tab .ct.zero,.tab.active .ct.zero{color:#ff6b6b} /* global search: 0 matches = red */
   .tab.active{background:var(--accent);color:#0b0d12;border-color:var(--accent)}
   .tab.active .ct{color:#0b0d12}
+  .globaltab{margin-right:10px}                                                       /* Global toggle, left of the service tabs */
+  .globaltab.active{background:var(--purple);color:#0b0d12;border-color:var(--purple)} /* on = purple, distinct from a blue service pick */
   .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   input[type=search]{background:var(--row);border:1px solid var(--line);
     color:var(--ink);border-radius:6px;padding:6px 10px;font:inherit;
@@ -176,12 +322,15 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
   #minwrap{display:inline-flex;align-items:center;gap:6px;color:var(--dim);
     font-size:11px;white-space:nowrap}
   #minwrap input[type=range]{width:96px}
+  #hideSibBtn.on{background:var(--accent);color:#0b0d12;border-color:var(--accent)}  /* Hide Siblings active */
   #minlbl{color:var(--accent);font-weight:700;min-width:22px;text-align:right}
   button{background:var(--row);border:1px solid var(--line);color:var(--ink);
     border-radius:6px;padding:6px 10px;font:inherit;cursor:pointer}
   button:hover{background:var(--rowh)}
-  .legend{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;
-    color:var(--dim);font-size:11px;max-width:60%;justify-content:flex-end}
+  /* class legend on its own full-width line, left-aligned (nothing starts at the
+     center/right where it could clash on small screens) */
+  .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+    color:var(--dim);font-size:11px;margin-top:6px}
   .legend span{display:inline-flex;align-items:center;gap:4px;cursor:pointer;user-select:none}
   .legend span:hover{color:var(--ink)}
   .legend span.off{opacity:.4;text-decoration:line-through}
@@ -200,7 +349,8 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
   .item tspan.ival{fill:var(--val)}
   .item tspan.itype{fill:var(--type);font-size:10px}
   .item tspan.icls{fill:var(--vcls);font-size:10px}
-  .item tspan.mk.s{fill:var(--star);font-weight:700}
+  .item tspan.mk.s{fill:var(--purple);font-weight:700}
+  .item tspan.mk.r{fill:#7aa2f7;font-weight:700}
   .item tspan.mk.d{fill:var(--dstar);font-weight:700}
   .item tspan.ncmk{fill:#ff5555;font-weight:700}
   #tip{position:fixed;z-index:50;pointer-events:none;display:none;
@@ -271,23 +421,24 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
 </head>
 <body>
 <header>
-  <h1>__PROJECT__ - __KIND__ Treehouse</h1>
+  <h1>__PROJECT__ | __KIND__ Treehouse</h1>
+  <div class="hint" id="introhint">Only instances that carry <span id="lbl1">items</span> are shown; empty containers are path-compressed (hover a node for its real path).</div>
   <div class="sub" id="sub"></div>
   <div class="sub" id="svccount" style="color:var(--accent)"></div>
   <input type="search" id="globalsearch" placeholder="service search counter&hellip;"/>
   <div class="tabs" id="tabs"></div>
+  <div id="treebtns"></div>
   <div class="controls">
     <input type="search" id="search" placeholder="advanced search&hellip;"/>
+    <input type="search" id="ignorelist" placeholder="ignore list, comma separated"/>
     <label id="minwrap" title="show only instances that have at least this many">
       &ge;&nbsp;<span id="minlbl">1+</span>&nbsp;<span id="minunit">items</span>
       <input type="range" id="minattrs" min="1" max="10" step="1" value="1"/>
     </label>
-    <button id="expandAll">Expand all</button>
-    <button id="collapseAll">Collapse all</button>
-    <span class="hint" id="counter"></span>
-    <div class="legend" id="legend"></div>
+    <button id="hideSibBtn" class="mbtn" title="while searching, show only the matching item on each host and hide its other (sibling) items - lock onto every instance that has the searched name">Hide Siblings</button>
   </div>
-  <div class="hint">Only instances that carry <span id="lbl1">items</span> are shown; empty containers are path-compressed (hover a node for its real path). <span id="lbl2">Items</span> are tabbed beneath their instance. <span id="markerhint"><span style="color:var(--star)">*</span> set in code, <span style="color:var(--dstar)">**</span> <span id="dstarlbl">nil-able</span>.</span></div>
+  <div class="legend" id="legend"></div>
+  <div class="hint" id="counter"></div>
   <div id="hiddencount"></div>
 </header>
 <div id="wrap"><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
@@ -303,13 +454,15 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
 //   finder : bottom-left panel - 'both' = script + host, 'host' = host only
 //   tabs   : bottom-right toolbar cards (in order); [] hides the toolbar
 //   slider : the ">= N" minimum-items control
-//   markers: the * / ** marker hint + per-item marker glyphs
+//   markers : per-item marker glyphs + the "Set in code *" filter button
+//   dstarBtn: also show the second ("**") filter button. Attribute pages do NOT -
+//             nil-able filtering lives only on the Attribute Map page.
 const KIND = DATA.summary.item_kind;
 const CFG = ({
-  attribute: {finder:'both',  tabs:['delete','fortify','farmer'], slider:true,  markers:true,  finderTitle:'Attribute Finder'},
-  value:     {finder:'value', tabs:['convert','farmer'],          slider:false, markers:true,  finderTitle:'Value Finder'},
-  collision: {finder:'host',  tabs:[],                            slider:false, markers:false, finderTitle:'Collision Finder'},
-})[KIND] || {finder:'host', tabs:[], slider:false, markers:false, finderTitle:'Finder'};
+  attribute: {finder:'both',  tabs:['delete','fortify','farmer'], slider:true,  markers:true,  dstarBtn:false, ncBtn:false, finderTitle:'Attribute Finder'},
+  value:     {finder:'value', tabs:['convert','farmer'],          slider:false, markers:true,  dstarBtn:true,  ncBtn:true,  finderTitle:'Value Finder'},
+  collision: {finder:'host',  tabs:[],                            slider:false, markers:false, dstarBtn:false, ncBtn:false, finderTitle:'Collision Finder'},
+})[KIND] || {finder:'host', tabs:[], slider:false, markers:false, dstarBtn:false, ncBtn:false, finderTitle:'Finder'};
 
 const ROWH=20, COLW=280, PADX=20, PADY=16, NODER=4;
 const PALETTE=["#7cc4ff","#9ece6a","#ffb454","#ff6b6b","#b794f6","#4fd6be",
@@ -381,13 +534,35 @@ function buildGrouped(serviceDisp){
   return root;
 }
 let curIdx=0, current=null;
-// Rebuild `current` from the active service + drill state. Called on boot, on tab
-// switch, and on every drill change (the group structure depends on drillStack).
+let globalOn=false;                      // Global mode: aggregate several services
+const globalSel=new Set();               // picked service indices (empty = all)
+const GLOBAL_LABEL='Global';
+function bumpDepth(n,by){ n._depth+=by; for(const c of n._children) bumpDepth(c,by); }
+// Rebuild `current` from the active service (or the Global selection) + drill state.
+// Called on boot, on tab switch, on the Global toggle, and on every drill change.
 // Isolation references live nodes, so it can't survive a rebuild - clear it.
-function rebuildCurrent(){ isoNode=null; current=buildGrouped(DATA.services[curIdx]); }
+function rebuildCurrent(){
+  isoNode=null;
+  if(globalOn){                          // synthetic root holding the picked service trees
+    drillStack=[];                        // no per-service drill in Global mode
+    const idxs=globalSel.size ? [...globalSel].sort((a,b)=>a-b) : DATA.services.map((_,i)=>i);
+    const root={kind:'inst', n:GLOBAL_LABEL, c:'DataModel', path:GLOBAL_LABEL,
+      _depth:0, _p:null, _expanded:true, _children:[], _globalRoot:true};
+    for(const i of idxs){ const svc=buildGrouped(DATA.services[i]);
+      svc._p=root; svc._svc=true; bumpDepth(svc,1); root._children.push(svc); }
+    current=root;
+  } else {
+    current=buildGrouped(DATA.services[curIdx]);
+  }
+}
 
 // tabs
 const tabs=document.getElementById('tabs');
+// Global mode toggle, left of the service tabs: view several services together.
+const gbtn=document.createElement('button'); gbtn.className='tab globaltab'; gbtn.id='globalTab'; gbtn.textContent='Global';
+gbtn.title='Global: view several services together. Click services to add/remove (none picked = all shown). Double-click a class in the legend to see all of it across the game. Click Global again to drop back to one service.';
+gbtn.onclick=()=>toggleGlobal();
+tabs.appendChild(gbtn);
 DATA.summary.services.forEach((s,i)=>{
   const b=document.createElement('button');
   b.className='tab'+(i===0?' active':'');
@@ -395,15 +570,30 @@ DATA.summary.services.forEach((s,i)=>{
   const ct=document.createElement('span'); ct.className='ct'; // global-search match count
   b.appendChild(nm); b.appendChild(document.createTextNode(' ')); b.appendChild(ct);
   b.onclick=()=>{
-    saveState();                       // remember the service we're leaving
-    curIdx=i;
-    [...tabs.children].forEach(c=>c.classList.remove('active')); b.classList.add('active');
-    loadState(i);                      // restore the service we're entering (incl. drill)
-    rebuildCurrent();                  // build its grouped tree for the restored drill
-    render();
+    if(globalOn){                      // Global: toggle this service in/out of the set
+      if(globalSel.has(i)) globalSel.delete(i); else globalSel.add(i);
+      syncTabActive(); rebuildCurrent(); render();
+    } else {                           // single-select (original behaviour)
+      saveState(); curIdx=i; loadState(i); syncTabActive(); rebuildCurrent(); render();
+    }
   };
   tabs.appendChild(b);
 });
+// Reflect curIdx / the Global selection onto the tab buttons (Global is children[0]).
+function syncTabActive(){
+  gbtn.classList.toggle('active', globalOn);
+  DATA.summary.services.forEach((_,i)=>{
+    tabs.children[i+1].classList.toggle('active', globalOn ? globalSel.has(i) : (i===curIdx));
+  });
+}
+// Enter Global: clear all service picks (empty = all shown); pressing a service then
+// narrows to the picked set. Leave Global: return to the picked service closest to the
+// Workspace side (leftmost index), or Workspace if none was picked.
+function toggleGlobal(){
+  if(!globalOn){ saveState(); globalOn=true; globalSel.clear(); drillStack=[]; }
+  else { globalOn=false; curIdx=globalSel.size ? Math.min(...globalSel) : 0; globalSel.clear(); loadState(curIdx); }
+  syncTabActive(); rebuildCurrent(); render();
+}
 // Global search: count items (by name OR value) matching the query within each
 // service's full tree, and show "(N)" on every tab. Empty -> plain service names.
 function countServiceMatches(disp, ql){
@@ -419,7 +609,7 @@ function countServiceMatches(disp, ql){
 function updateGlobalSearch(){
   const ql=document.getElementById('globalsearch').value.trim().toLowerCase();
   DATA.summary.services.forEach((s,i)=>{
-    const ct=tabs.children[i].querySelector('.ct');
+    const ct=tabs.children[i+1].querySelector('.ct');   // +1: Global button is children[0]
     if(!ql){ ct.textContent=''; ct.classList.remove('zero'); return; }
     const cnt=countServiceMatches(DATA.services[i], ql);
     ct.textContent='('+cnt+')'; ct.classList.toggle('zero', cnt===0); // red when 0
@@ -429,16 +619,80 @@ function updateGlobalSearch(){
   const gs=document.getElementById('globalsearch'); let gt=null;
   gs.addEventListener('input',()=>{ clearTimeout(gt); gt=setTimeout(updateGlobalSearch,120); });
 })();
-document.getElementById('sub').innerHTML =
-  'Global Count: '+DATA.summary.total_instances+' instances with '+DATA.summary.item_label+', '+
-  DATA.summary.total_items+' '+DATA.summary.item_label+' total (across all services).'+
-  (DATA.summary.nc_note ? ' &nbsp; <span style="color:#ff5555"><b>***</b> = stores an Instance ref - cannot become an attribute.</span>' : '');
+// Global Count line (just the count text; numbers in accent blue) + the tree
+// action / marker-filter buttons on their own row (#treebtns) below the tabs.
+(function buildSubBar(){
+  const num=v=>'<span class="num">'+v+'</span>';
+  document.getElementById('sub').innerHTML=
+    'Global Count: '+num(DATA.summary.total_instances)+' instances with '+DATA.summary.item_label+', '+
+    num(DATA.summary.total_items)+' '+DATA.summary.item_label+' total.'+
+    (DATA.summary.nc_note ? ' &nbsp; <span style="color:#ff5555"><b>***</b> = stores an Instance value - cannot become an attribute.</span>' : '');
+  const grp=document.getElementById('treebtns'); grp.innerHTML='';
+  // Expand all / Collapse all (ids reused so the existing handlers below bind here).
+  const exp=document.createElement('button'); exp.className='mbtn'; exp.id='expandAll'; exp.textContent='Expand all';
+  exp.title='expand every branch and clear drill / isolation / marker filters';
+  const col=document.createElement('button'); col.className='mbtn'; col.id='collapseAll'; col.textContent='Collapse all';
+  col.title='collapse every branch';
+  grp.appendChild(exp); grp.appendChild(col);
+  if(CFG.markers){ // only kinds with * / ** markers get the filter toggles + key
+    const dlab=KIND==='value' ? 'Destroyable' : 'Nil-able';
+    const hasRT=!!DATA.summary.runtime;  // was runtime/src scanned?
+    const noRtTip="For run-time attributes, use the 'Include Runtime' toggle in the Roblox Studio plugin menu. Follow setup directions.";
+    const mk=(mark,label,cls,tip)=>{
+      const b=document.createElement('button'); b.className='mbtn '+cls; b.dataset.mark=mark;
+      b.innerHTML=label+' <span class="mk">'+mark+'</span>';  // marker shown in its key color
+      if(!hasRT){ b.classList.add('disabled'); b.title=noRtTip; } // no runtime -> not clickable
+      else { b.title=tip; b.onclick=()=>toggleMarker(mark); }
+      grp.appendChild(b);
+    };
+    mk('*', 'Set in code', 'star', 'set in code - show only * items');
+    if(KIND==='attribute'){ // Read in code (GetAttribute): blue *, asterisk-first
+      const rb=document.createElement('button'); rb.className='mbtn read'; rb.dataset.mark='r';
+      rb.innerHTML='<span class="mk">*</span> Read in code';
+      if(!hasRT){ rb.classList.add('disabled'); rb.title=noRtTip; }
+      else { rb.title='read in code (GetAttribute) - show only read items'; rb.onclick=()=>toggleMarker('r'); }
+      grp.appendChild(rb);
+    }
+    if(CFG.dstarBtn) mk('**', dlab, 'dstar', dlab.toLowerCase()+' - show only ** items'); // attr pages skip nil-able
+    if(CFG.ncBtn){ // Instance Value (***) - data-derived, so NOT gated by runtime
+      const b=document.createElement('button'); b.className='mbtn ncm'; b.dataset.mark='***';
+      b.innerHTML='Instance Value <span class="mk">***</span>';
+      b.title='stores an Instance ref - show only *** values';
+      b.onclick=()=>toggleMarker('***');
+      grp.appendChild(b);
+    }
+  }
+  if(KIND==='collision'){ // per-collision-property filter toggles (above the search)
+    ['CanCollide','CanTouch','CanQuery','AudioCanCollide'].forEach(prop=>{
+      const b=document.createElement('button'); b.className='mbtn prop'; b.dataset.prop=prop; b.textContent=prop;
+      b.title='filter by '+prop+': off -> True -> False';
+      b.onclick=()=>{ const c=propFilter.get(prop);            // off -> True -> False -> off
+        if(c===undefined) propFilter.set(prop,'true');
+        else if(c==='true') propFilter.set(prop,'false');
+        else propFilter.delete(prop);
+        syncPropButtons(); render(); };
+      grp.appendChild(b);
+    });
+    // CollisionFidelity cycles through the enum values (off -> Box -> Default -> ...)
+    const fb=document.createElement('button'); fb.className='mbtn prop fid'; fb.id='fidBtn'; fb.textContent='CollisionFidelity';
+    fb.title='cycle the CollisionFidelity enum to filter by';
+    fb.onclick=()=>{ fidFilter=FID_CYCLE[(FID_CYCLE.indexOf(fidFilter)+1)%FID_CYCLE.length]; syncPropButtons(); render(); };
+    grp.appendChild(fb);
+  }
+})();
 
 const svg=document.getElementById('svg'), tip=document.getElementById('tip');
 let qRaw='';                            // search box text EXACTLY as typed (keeps case)
 let q='';                              // qRaw trimmed + lowercased, used for matching only
 let hiddenTypes=new Set();              // instance classes toggled off via the legend
+let markerFilter=new Set();             // '*' / '**' marker toggles (empty = show all)
+let propFilter=new Map();               // collision: prop -> 'true' | 'false' (per-part)
+let fidFilter=null;                     // collision: a CollisionFidelity enum, or null
+let ignoreSet=new Set();                // names (item OR host) to ignore everywhere
+function ignored(name){ return ignoreSet.size>0 && ignoreSet.has(String(name).toLowerCase()); }
+const FID_CYCLE=[null,'Box','Default','Hull','PreciseConvexDecomposition']; // cycle order
 let minAttrs=1;                         // slider: show instances with >= N attributes
+let hideSiblings=false;                 // Hide Siblings: while searching, show only matching items per host
 let isoNode=null;                       // double-clicked node: isolate its branch
 let drillStack=[];                      // Layer Mapper: 2nd-layer keys drilled into
 let attrLockUntil=0;                     // click-to-lock: freeze the panels until this time
@@ -448,15 +702,55 @@ function attrLocked(){ return performance.now() < attrLockUntil; }
 // Per-service state, so switching tabs restores where you left a service (search
 // text, hidden types, the slider, drill). Isolation is NOT persisted: it points at
 // live nodes that a rebuild replaces. Expansion is kept per-tree on the nodes.
-const svcState = DATA.services.map(()=>({qRaw:'', hidden:[], min:1, drill:[]}));
-function saveState(){ svcState[curIdx]={qRaw:qRaw, hidden:[...hiddenTypes], min:minAttrs, drill:[...drillStack]}; }
+const svcState = DATA.services.map(()=>({qRaw:'', hidden:[], min:1, drill:[], marks:[], props:[], fid:null}));
+function saveState(){ svcState[curIdx]={qRaw:qRaw, hidden:[...hiddenTypes], min:minAttrs, drill:[...drillStack], marks:[...markerFilter], props:[...propFilter], fid:fidFilter}; }
 function loadState(i){
-  const st=svcState[i]||{qRaw:'', hidden:[], min:1, drill:[]};
+  const st=svcState[i]||{qRaw:'', hidden:[], min:1, drill:[], marks:[], props:[], fid:null};
   qRaw=st.qRaw||''; q=qRaw.trim().toLowerCase(); // restore the box verbatim; match case-insensitively
   hiddenTypes=new Set(st.hidden); minAttrs=st.min; isoNode=null; drillStack=(st.drill||[]).slice();
+  markerFilter=new Set(st.marks||[]); syncMarkerButtons();
+  propFilter=new Map(st.props||[]); fidFilter=st.fid||null; syncPropButtons();
   const sb=document.getElementById('search'); if(sb) sb.value=qRaw;
   const sl=document.getElementById('minattrs'); if(sl) sl.value=minAttrs;
   const ml=document.getElementById('minlbl'); if(ml) ml.textContent=String(minAttrs)+'+';
+}
+// reflect markerFilter onto the toggle buttons' active state
+function syncMarkerButtons(){
+  document.querySelectorAll('#treebtns .mbtn[data-mark]').forEach(b=>b.classList.toggle('on', markerFilter.has(b.dataset.mark)));
+}
+function toggleMarker(mark){
+  const was=markerFilter.has(mark);
+  markerFilter.clear();          // Set in code / Nil-able are mutually exclusive
+  if(!was) markerFilter.add(mark);
+  syncMarkerButtons(); render();
+}
+// Collision property filters are PER-PART: a part must satisfy every active boolean
+// constraint AND the (optional) CollisionFidelity enum. A part's boolean value is
+// inferred - the dump only records the non-default (false) ones, so a part is 'false'
+// for a prop when it has that item, else 'true' (the default).
+function collisionActive(){ return propFilter.size>0 || !!fidFilter; }
+function collisionPartOk(n){
+  if(!collisionActive()) return true;
+  for(const [prop, want] of propFilter){
+    const isFalse = n._children.some(c=>c.kind==='item' && c.it.n===prop);
+    if((isFalse ? 'false' : 'true') !== want) return false;
+  }
+  if(fidFilter){
+    const ok = n._children.some(c=>c.kind==='item' && c.it.n==='CollisionFidelity' && String(c.it.v).split('.').pop()===fidFilter);
+    if(!ok) return false;
+  }
+  return true;
+}
+// Each boolean button cycles: off (grey) -> True (blue) -> False (yellow) -> off.
+function syncPropButtons(){
+  document.querySelectorAll('#treebtns .mbtn.prop[data-prop]').forEach(b=>{
+    const v=propFilter.get(b.dataset.prop);
+    b.classList.toggle('on-true', v==='true');
+    b.classList.toggle('on-false', v==='false');
+    b.textContent = b.dataset.prop + (v ? (' '+(v==='true'?'True':'False')) : '');
+  });
+  const fb=document.getElementById('fidBtn');
+  if(fb){ fb.classList.toggle('on', !!fidFilter); fb.textContent = fidFilter ? ('CollisionFidelity: '+fidFilter) : 'CollisionFidelity'; }
 }
 // path helpers for the Layer Mapper (works off each node's full, real path)
 function nodeParts(n){ return String((n.kind==='item')?n._p.path:n.path).split('.'); }
@@ -472,24 +766,34 @@ function inDrillScope(n){
 // many of the current service's items pass, for the hidden counter.
 function computeVisibility(){
   lastTotalItems=0; lastShownItems=0;
+  const filterMarks = markerFilter.size>0;            // marker toggles active?
+  // '***' (Instance Value) filters by the nc flag; '*'/'**' filter by the m marker.
+  const keepMarker = it => !filterMarks || (markerFilter.has('***') ? !!it.nc : markerFilter.has(it.m));
   const inSub=new Set(), anc=new Set();
   if(isoNode){
     (function mark(n){ inSub.add(n); n._children.forEach(mark); })(isoNode);
     for(let p=isoNode._p;p;p=p._p) anc.add(p);
   }
   function rec(n, ancTypeOk, isRoot){
-    const typeOk = isRoot ? true : (ancTypeOk && !hiddenTypes.has(n.c));
+    // typeOk threads down both the legend type filter AND the ignore list (by host
+    // instance name), so an ignored instance hides its whole subtree.
+    const typeOk = isRoot ? true : (ancTypeOk && !hiddenTypes.has(n.c) && !ignored(n.n));
     const dscope = isRoot ? true : inDrillScope(n); // Layer Mapper: only the drilled branch
-    let directCount=0, anyItemMatch=false, subtreeTarget=false;
+    const itemKeep=it => keepMarker(it) && !ignored(it.n); // markers + ignore list (by item name)
+    let directCount=0, anyItemMatch=false, anyMarkerItem=false, subtreeTarget=false;
     for(const c of n._children){
       if(c.kind==='item'){
         lastTotalItems++; directCount++;
         c._matchQ = !q || c.n.toLowerCase().indexOf(q)!==-1 || String(c.it.v).toLowerCase().indexOf(q)!==-1;
         if(c._matchQ) anyItemMatch=true;
+        if(itemKeep(c.it)) anyMarkerItem=true;
       } else if(rec(c, typeOk, false)) subtreeTarget=true;
     }
     const nameMatch = !q || n.n.toLowerCase().indexOf(q)!==-1;
     const countOk = directCount >= minAttrs;
+    const markerQ = !filterMarks || anyMarkerItem;     // has >=1 item of an active marker
+    // collision filter is PER-PART (only on nodes that carry collision items)
+    const partOk = (KIND!=='collision' || isRoot || directCount===0) ? true : collisionPartOk(n);
     let show, showItems, target;
     if(isoNode){
       // isolation: the isolated branch is shown in full, plus the ancestor path
@@ -497,14 +801,15 @@ function computeVisibility(){
       else if(anc.has(n) || isRoot){ show=true; showItems=false; target=subtreeTarget; }
       else { show=false; showItems=false; target=false; }
     } else {
-      target = dscope && typeOk && countOk && (!q || nameMatch || anyItemMatch);
+      target = dscope && typeOk && countOk && markerQ && partOk && (!q || nameMatch || anyItemMatch);
       show = isRoot ? true : (dscope && typeOk && (target || subtreeTarget));
       // root's own attributes belong to the service itself - hide them once drilled
-      showItems = isRoot ? (drillStack.length===0 && countOk && (!q || nameMatch || anyItemMatch)) : target;
+      showItems = isRoot ? (drillStack.length===0 && countOk && markerQ && (!q || nameMatch || anyItemMatch)) : target;
     }
     if(!isRoot && !dscope){ show=false; showItems=false; target=false; } // gate iso path too
     n._show = show;
-    for(const c of n._children){ if(c.kind==='item'){ c._show=showItems; if(showItems) lastShownItems++; } }
+    // items: blanket per shown instance, each one still gated by the marker filter
+    for(const c of n._children){ if(c.kind==='item'){ const vis=showItems && itemKeep(c.it) && (!hideSiblings || !q || c._matchQ); c._show=vis; if(vis) lastShownItems++; } }
     return target || subtreeTarget;
   }
   rec(current, true, true);
@@ -565,42 +870,60 @@ function render(){
       const it=n.it;
       const match=q&&(it.n.toLowerCase().indexOf(q)!==-1);
       s+='<g class="item'+(match?' match':'')+'" data-i="'+n._idx+'" transform="translate('+n._x+','+n._y+')">';
-      s+='<rect x="-3" y="-1.5" width="3" height="3" fill="'+(it.m==='**'?'var(--dstar)':it.m==='*'?'var(--star)':'#5f6b80')+'"/>';
+      s+='<rect x="-3" y="-1.5" width="3" height="3" fill="'+(it.m==='**'?'var(--dstar)':it.m==='r'?'#7aa2f7':it.m==='*'?'var(--purple)':'#5f6b80')+'"/>';
       // Inline <tspan>s so the (type) always sits at the end of the value extent.
       s+='<text x="8" y="3.5">';
       s+='<tspan class="inm">'+esc(it.n)+'</tspan>';
       if(it.c){ s+='<tspan class="icls" dx="6">['+esc(it.c)+']</tspan>'; }
-      if(it.m){ s+='<tspan class="mk '+(it.m==='**'?'d':'s')+'" dx="6">'+it.m+'</tspan>'; }
-      s+='<tspan class="itype" dx="6">=</tspan>';
-      s+='<tspan class="ival" dx="6">'+esc(trunc(it.v))+'</tspan>';
-      s+='<tspan class="itype" dx="6">('+esc(it.t)+')</tspan>';
+      if(it.m){ const mc=it.m==='**'?'d':it.m==='r'?'r':'s'; s+='<tspan class="mk '+mc+'" dx="6">'+(it.m==='r'?'*':it.m)+'</tspan>'; }
+      if(it.code){ /* code-site row: the colour-coded * (purple=set, blue=read) says it - no text */ }
+      else {
+        s+='<tspan class="itype" dx="6">=</tspan>';
+        s+='<tspan class="ival" dx="6">'+esc(trunc(it.v))+'</tspan>';
+        s+='<tspan class="itype" dx="6">('+esc(it.t)+')</tspan>';
+      }
       if(it.nc){ s+='<tspan class="ncmk" dx="6">***</tspan>'; }
       s+='</text>';
       s+='</g>';
     }
   }
   svg.innerHTML=s;
-  const svc=DATA.summary.services[curIdx];
-  document.getElementById('svccount').textContent =
-    current.n+' Count: '+svc.instances+' instances, '+svc.items+' '+DATA.summary.item_label;
-  document.getElementById('counter').textContent = nodes.length+' rows shown';
+  if(globalOn){
+    const idxs=globalSel.size ? [...globalSel].sort((a,b)=>a-b) : DATA.summary.services.map((_,i)=>i);
+    let ic=0,it=0; idxs.forEach(i=>{ ic+=DATA.summary.services[i].instances; it+=DATA.summary.services[i].items; });
+    const who=globalSel.size ? idxs.map(i=>DATA.summary.services[i].name).join(', ') : 'all services';
+    document.getElementById('svccount').textContent='Global ('+who+'): '+ic+' instances, '+it+' '+DATA.summary.item_label;
+  } else {
+    const svc=DATA.summary.services[curIdx];
+    document.getElementById('svccount').textContent=
+      current.n+' Count: '+svc.instances+' instances, '+svc.items+' '+DATA.summary.item_label;
+  }
+  document.getElementById('counter').innerHTML = '<span style="color:var(--accent);font-weight:600">'+nodes.length+'</span> rows shown';
   const hidden=lastTotalItems-lastShownItems;
   const reasons=[];
   if(drillStack.length) reasons.push('Layer Mapper');
   if(q) reasons.push('search');
+  if(hideSiblings && q) reasons.push('hide siblings');
+  if(markerFilter.size) reasons.push('marker filter');
+  if(propFilter.size || fidFilter) reasons.push('collision filter');
+  if(ignoreSet.size) reasons.push('ignore list');
   if(hiddenTypes.size) reasons.push('hidden types');
   if(minAttrs>1) reasons.push('>= '+minAttrs+' '+DATA.summary.item_label);
   if(isoNode) reasons.push('isolation');
-  document.getElementById('hiddencount').textContent =
-    hidden+' of '+lastTotalItems+' '+DATA.summary.item_label+' hidden in '+current.n+
-    (hidden>0 ? ' by: '+(reasons.length?reasons.join(', '):'filters')+'.' : ' - all shown.');
+  // colour only the "X of Y" numbers: green = none hidden, yellow = some hidden,
+  // red = all hidden (e.g. a search with no matches). The rest keeps its accent colour.
+  const numColor = hidden<=0 ? '#5fd37a' : (hidden>=lastTotalItems ? '#ff6b6b' : '#e7c45a');
+  document.getElementById('hiddencount').innerHTML =
+    '<span style="color:'+numColor+';font-weight:700">'+hidden+' of '+lastTotalItems+'</span> '+
+    DATA.summary.item_label+' hidden in '+esc(current.n)+
+    (hidden>0 ? ' by: '+esc(reasons.length?reasons.join(', '):'filters')+'.' : '');
   buildLegend();
   buildMapper(nodes);
 }
 
 function buildLegend(){
   const present={};
-  current._children.forEach(function w(n){ if(n.kind==='inst'){ if(!n._group) present[n.c]=true; n._children.forEach(w);} });
+  current._children.forEach(function w(n){ if(n.kind==='inst'){ if(!n._group && !n._svc) present[n.c]=true; n._children.forEach(w);} });
   const keys=Object.keys(present);
   const lg=document.getElementById('legend'); lg.innerHTML='';
   keys.sort().forEach(c=>{
@@ -639,6 +962,7 @@ const TOPPAD=24;  // px below the viewport top where a section's first row count
 // (path[1]); drilled into one, it groups by the 3rd layer (path[2]).
 function groupKeyOf(n){
   const parts=nodeParts(n);
+  if(globalOn) return parts[0];          // Global: bucket the section rail by service
   const idx=1+drillStack.length;
   return parts.length<=idx ? '__ATTRS__' : parts[idx];
 }
@@ -699,7 +1023,7 @@ function railDouble(info){
   if(info.kind==='crumb'){
     drillStack=drillStack.slice(0, info.depth); // pop back out to before this crumb
     onDrillChange();
-  } else if(drillStack.length===0 && info.sec.key!=='__ATTRS__'){ // only 2nd -> 3rd for now
+  } else if(!globalOn && drillStack.length===0 && info.sec.key!=='__ATTRS__'){ // only 2nd -> 3rd; no drill in Global
     drillStack.push(info.sec.key);
     onDrillChange();
   }
@@ -810,7 +1134,7 @@ svg.addEventListener('mousemove',e=>{
     } else {
       showFinder(n.it.n, n._p.path);     // bottom-left finder (host, or script+host)
       setToolbarTarget(n.it.n);          // bottom-right toolbar (no-op when CFG.tabs is empty)
-      t+='<br/><span style="color:var(--type)">click to lock this into the panels for 3s</span>';
+      t+='<br/><span style="color:var(--type)">click to lock '+CFG.finderTitle+' panel for 3 seconds</span>';
     }
     tip.innerHTML=t;
   }
@@ -824,8 +1148,10 @@ svg.addEventListener('mouseleave',()=>{ tip.style.display='none'; hoverNode=null
 
 // Expand all also pops out of any drilled layer, back to the highest (base) level
 // the current service is built on - and the Layer Mapper reflects it (no breadcrumbs).
+// Expand all = the old "Reset" too: clears drill / isolation / marker filters and
+// expands every branch from the base layer (the text search + slider are left alone).
 document.getElementById('expandAll').onclick=()=>{
-  isoNode=null; drillStack=[];        // back to the base layer for this service
+  isoNode=null; drillStack=[]; markerFilter.clear(); syncMarkerButtons();
   rebuildCurrent(); setAll(true); render();
   requestAnimationFrame(()=>{
     document.getElementById('wrap').scrollTop=0;
@@ -880,7 +1206,7 @@ function showFinder(name, host){
   } else if(CFG.finder==='value'){
     // Values have no Get/Set prefix, and code may reach them via FindFirstChild,
     // WaitForChild, or dot access - so offer the tokens that catch each.
-    cell('Child("'+name+'")', 'Find in code: FindFirst/WaitForChild', 'matches :FindFirstChild("'+name+'") and :WaitForChild("'+name+'")');
+    cell('Child("'+name+'")', 'Find in code: FindFirst/WaitFor', 'matches :FindFirstChild("'+name+'") and :WaitForChild("'+name+'")');
     cell('.'+name, 'Find in code: dot access', 'matches direct .'+name+' access');
     cell('Attribute("'+name+'")', 'After converting: Get/SetAttribute', 'once converted, code reads/writes it via Get & SetAttribute("'+name+'")');
   }
@@ -892,6 +1218,7 @@ function showFinder(name, host){
 // The highest directory the Layer Mapper is currently showing: the service when at
 // the base level, or the drilled branch (e.g. Workspace.Lobby) when drilled in.
 function scopeRootPath(){
+  if(globalOn) return 'game';                         // whole DataModel in Global mode
   let p=current.path;                                 // service path (e.g. "Workspace")
   if(drillStack.length) p+='.'+drillStack.join('.');  // + the drilled branch
   return p;
@@ -905,7 +1232,7 @@ function appendSegs(expr, segs){
   return expr;
 }
 // A full path -> a safe Luau accessor rooted at the service (game:GetService(...)).
-function luauAccessor(path){ const p=path.split('.'); return appendSegs('game:GetService("'+p[0]+'")', p.slice(1)); }
+function luauAccessor(path){ const p=path.split('.'); return p[0]==='game' ? appendSegs('game', p.slice(1)) : appendSegs('game:GetService("'+p[0]+'")', p.slice(1)); }
 // Reconstruct a captured attribute value as a Luau literal from its dump
 // (value-string, type). Returns null for a type we can't safely rebuild, so the
 // caller can comment that line out instead of emitting broken code.
@@ -1036,8 +1363,8 @@ function renderToolbar(){
       detail:'Convert "'+name+'" under '+scope+' to attributes', code:convertCode(name,scope),
       cap:'for each <b>'+esc(name)+'</b> Value object: sets a matching attribute on its parent, then Destroys the Value.'+
         '<br><b style="color:#ff9b9b">Code change needed:</b> this snippet only changes the data model - it does NOT edit your scripts. '+
-        'Any code that reads this Value (<b>:FindFirstChild("'+esc(name)+'")</b>, <b>:WaitForChild</b>, or <b>.'+esc(name)+'</b>) must be updated to <b>GetAttribute("'+esc(name)+'")</b>. '+
-        'Use the bottom-left Value Finder tokens to locate that code first.'})}
+        'Any code that reads or writes this Value (<b>:FindFirstChild("'+esc(name)+'")</b>, <b>:WaitForChild</b>, or <b>.'+esc(name)+'</b>) must be updated to <b>GetAttribute / SetAttribute("'+esc(name)+'")</b>. '+
+        'Use the bottom-left '+CFG.finderTitle+' Panel to locate that code first.'})}
   };
   toolbar.innerHTML='';
   for(const tab of CFG.tabs){
@@ -1079,6 +1406,11 @@ minattrs.addEventListener('input',()=>{
   document.getElementById('minlbl').textContent = String(minAttrs)+'+';
   render();
 });
+// Hide Siblings: collapse the non-matching items on each host while searching, so only
+// the searched item remains - the way to lock onto every instance that has it.
+const hideSibBtn=document.getElementById('hideSibBtn');
+hideSibBtn.onclick=()=>{ hideSiblings=!hideSiblings; hideSibBtn.classList.toggle('on',hideSiblings);
+  hideSibBtn.textContent=hideSiblings?'Show Siblings':'Hide Siblings'; render(); };
 
 // section rail: re-size entries as the tree scrolls; reposition on window resize
 document.getElementById('wrap').addEventListener('scroll', updateMapper);
@@ -1090,6 +1422,16 @@ window.addEventListener('resize', ()=>{
 
 const search=document.getElementById('search'); let t=null;
 search.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(doSearch,140);});
+
+// Ignore list: comma-separated names (item OR host). Persists across services / toggles.
+(function(){
+  const ig=document.getElementById('ignorelist'); let it=null;
+  ig.addEventListener('input',()=>{ clearTimeout(it); it=setTimeout(()=>{
+    ignoreSet=new Set(ig.value.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean));
+    setAll(true); current._expanded=true;
+    if(q){ doSearch(); } else { render(); }      // re-apply with the new ignore set
+  }, 160); });
+})();
 function doSearch(){
   qRaw=search.value;                       // keep the user's exact text (and case)
   q=qRaw.trim().toLowerCase();              // match case-insensitively
@@ -1111,13 +1453,15 @@ function doSearch(){
   const lab=DATA.summary.item_label;
   const Cap=lab.charAt(0).toUpperCase()+lab.slice(1);
   const set=(id,t)=>{ const el=document.getElementById(id); if(el) el.textContent=t; };
-  set('minunit', lab); set('lbl1', lab); set('lbl2', Cap);
-  set('dstarlbl', KIND==='value' ? 'destroyable' : 'nil-able');
+  set('minunit', lab); set('lbl1', lab);
+  if(KIND==='attribute'){ const ih=document.getElementById('introhint');
+    if(ih) ih.innerHTML='Instances that carry attributes — plus the scripts that set ('+
+      '<span style="color:var(--purple);font-weight:700">*</span>) or read ('+
+      '<span style="color:#7aa2f7;font-weight:700">*</span>) them — are shown; empty containers are '+
+      'path-compressed (hover a node for its real path).'; }
   const mw=document.getElementById('minwrap');
   if(mw){ mw.title='show only instances that have at least this many '+lab;
     if(!CFG.slider) mw.style.display='none'; }            // slider: attributes only
-  const mh=document.getElementById('markerhint');
-  if(mh && !CFG.markers) mh.style.display='none';         // * / ** hint: kinds with markers only
 })();
 
 // Show the bottom-right toolbar (collapsed) only for kinds that have tabs.

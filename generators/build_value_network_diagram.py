@@ -83,6 +83,7 @@ def main():
     summary = {
         "project": bvt.PROJECT_NAME, "item_kind": "value", "item_label": "values",
         "nc_note": True,
+        "runtime": bool(writes or nil_writes),  # was the src/value-write scan run?
         "services": [{"name": s["n"], "instances": bnd.count_display(s)[0],
                       "items": bnd.count_display(s)[1]} for s in services],
         "total_instances": tot_inst, "total_items": tot_items,
