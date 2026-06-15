@@ -250,7 +250,7 @@ def render_network(services, summary):
     payload = json.dumps({"services": services, "summary": summary})
     out = ENGINE_TEMPLATE.replace("/*__DATA__*/", "const DATA = " + payload + ";")
     out = out.replace("__PROJECT__", html.escape(bat.PROJECT_NAME))
-    kind = {"value": "Value*", "collision": "Collision"}.get(
+    kind = {"value": "Value*", "collision": "Collision", "ownership": "Ownership"}.get(
         summary.get("item_kind"), "Attribute")
     out = out.replace("__KIND__", kind)
     return out
@@ -334,6 +334,9 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
   .legend span{display:inline-flex;align-items:center;gap:4px;cursor:pointer;user-select:none}
   .legend span:hover{color:var(--ink)}
   .legend span.off{opacity:.4;text-decoration:line-through}
+  #creators{margin-top:4px}
+  #creators .crlab{color:var(--dim);cursor:default}
+  #creators .crtag{color:var(--dim);font-size:9px;margin-left:3px;opacity:.65}
   .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
   .hint{color:var(--dim);font-size:11px;margin-top:4px}
   #hiddencount{color:var(--accent);font-size:11px;margin-top:6px}
@@ -400,6 +403,8 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
   .tb-card.farm pre{color:#f0d98a}     .tb-card.farm pre:hover{border-color:#e7c45a}
   .tb-card.conv .tb-title,.tb-card.conv .tb-detail{color:#7cc4ff} /* convert value*=blue */
   .tb-card.conv pre{color:#a9d8ff}     .tb-card.conv pre:hover{border-color:#7cc4ff}
+  .tb-card.space .tb-title,.tb-card.space .tb-detail{color:#4fd6be} /* instance spacing = teal */
+  .tb-card.space pre{color:#9bead9}    .tb-card.space pre:hover{border-color:#4fd6be}
   /* Right-anchored section rail (jump to a first-layer node). Entries are
      right-aligned and overflow LEFT so long names stay full-size. */
   #mapper{position:fixed;right:0;width:15vw;z-index:40;overflow-y:auto;
@@ -438,6 +443,7 @@ ENGINE_TEMPLATE = r"""<!DOCTYPE html>
     <button id="hideSibBtn" class="mbtn" title="while searching, show only the matching item on each host and hide its other (sibling) items - lock onto every instance that has the searched name">Hide Siblings</button>
   </div>
   <div class="legend" id="legend"></div>
+  <div class="legend" id="creators"></div>
   <div class="hint" id="counter"></div>
   <div id="hiddencount"></div>
 </header>
@@ -461,7 +467,8 @@ const KIND = DATA.summary.item_kind;
 const CFG = ({
   attribute: {finder:'both',  tabs:['delete','fortify','farmer'], slider:true,  markers:true,  dstarBtn:false, ncBtn:false, finderTitle:'Attribute Finder'},
   value:     {finder:'value', tabs:['convert','farmer'],          slider:false, markers:true,  dstarBtn:true,  ncBtn:true,  finderTitle:'Value Finder'},
-  collision: {finder:'host',  tabs:[],                            slider:false, markers:false, dstarBtn:false, ncBtn:false, finderTitle:'Collision Finder'},
+  collision: {finder:'host',  tabs:['spacing'],                            slider:false, markers:false, dstarBtn:false, ncBtn:false, finderTitle:'Collision Finder'},
+  ownership: {finder:'host',  tabs:[],                                     slider:false, markers:false, dstarBtn:false, ncBtn:false, creators:true, finderTitle:'Ownership Finder'},
 })[KIND] || {finder:'host', tabs:[], slider:false, markers:false, dstarBtn:false, ncBtn:false, finderTitle:'Finder'};
 
 const ROWH=20, COLW=280, PADX=20, PADY=16, NODER=4;
@@ -685,6 +692,7 @@ const svg=document.getElementById('svg'), tip=document.getElementById('tip');
 let qRaw='';                            // search box text EXACTLY as typed (keeps case)
 let q='';                              // qRaw trimmed + lowercased, used for matching only
 let hiddenTypes=new Set();              // instance classes toggled off via the legend
+let hiddenCreators=new Set();           // ownership: creators toggled off via the creator row
 let markerFilter=new Set();             // '*' / '**' marker toggles (empty = show all)
 let propFilter=new Map();               // collision: prop -> 'true' | 'false' (per-part)
 let fidFilter=null;                     // collision: a CollisionFidelity enum, or null
@@ -767,6 +775,7 @@ function inDrillScope(n){
 function computeVisibility(){
   lastTotalItems=0; lastShownItems=0;
   const filterMarks = markerFilter.size>0;            // marker toggles active?
+  const filterCreators = hiddenCreators.size>0;       // ownership: any creator hidden?
   // '***' (Instance Value) filters by the nc flag; '*'/'**' filter by the m marker.
   const keepMarker = it => !filterMarks || (markerFilter.has('***') ? !!it.nc : markerFilter.has(it.m));
   const inSub=new Set(), anc=new Set();
@@ -774,12 +783,15 @@ function computeVisibility(){
     (function mark(n){ inSub.add(n); n._children.forEach(mark); })(isoNode);
     for(let p=isoNode._p;p;p=p._p) anc.add(p);
   }
-  function rec(n, ancTypeOk, isRoot){
-    // typeOk threads down both the legend type filter AND the ignore list (by host
-    // instance name), so an ignored instance hides its whole subtree.
-    const typeOk = isRoot ? true : (ancTypeOk && !hiddenTypes.has(n.c) && !ignored(n.n));
+  function rec(n, ancIgnOk, isRoot){
+    // The ignore list threads down (an ignored host hides its whole subtree). The legend
+    // TYPE filter is per-node: hiding a type hides ITS own attributes, but the node still
+    // acts as a container for visible descendants of other types - so isolating "Script"
+    // hides a service's direct attributes yet still shows the scripts beneath it.
+    const ignOk = isRoot ? true : (ancIgnOk && !ignored(n.n));
+    const ownTypeOk = isRoot ? true : !hiddenTypes.has(n.c);
     const dscope = isRoot ? true : inDrillScope(n); // Layer Mapper: only the drilled branch
-    const itemKeep=it => keepMarker(it) && !ignored(it.n); // markers + ignore list (by item name)
+    const itemKeep=it => keepMarker(it) && !ignored(it.n) && !hiddenCreators.has(it.cr); // markers + ignore + creator filter
     let directCount=0, anyItemMatch=false, anyMarkerItem=false, subtreeTarget=false;
     for(const c of n._children){
       if(c.kind==='item'){
@@ -787,11 +799,11 @@ function computeVisibility(){
         c._matchQ = !q || c.n.toLowerCase().indexOf(q)!==-1 || String(c.it.v).toLowerCase().indexOf(q)!==-1;
         if(c._matchQ) anyItemMatch=true;
         if(itemKeep(c.it)) anyMarkerItem=true;
-      } else if(rec(c, typeOk, false)) subtreeTarget=true;
+      } else if(rec(c, ignOk, false)) subtreeTarget=true;
     }
     const nameMatch = !q || n.n.toLowerCase().indexOf(q)!==-1;
     const countOk = directCount >= minAttrs;
-    const markerQ = !filterMarks || anyMarkerItem;     // has >=1 item of an active marker
+    const markerQ = (!filterMarks && !filterCreators) || anyMarkerItem; // >=1 item past the marker/creator filters
     // collision filter is PER-PART (only on nodes that carry collision items)
     const partOk = (KIND!=='collision' || isRoot || directCount===0) ? true : collisionPartOk(n);
     let show, showItems, target;
@@ -801,8 +813,8 @@ function computeVisibility(){
       else if(anc.has(n) || isRoot){ show=true; showItems=false; target=subtreeTarget; }
       else { show=false; showItems=false; target=false; }
     } else {
-      target = dscope && typeOk && countOk && markerQ && partOk && (!q || nameMatch || anyItemMatch);
-      show = isRoot ? true : (dscope && typeOk && (target || subtreeTarget));
+      target = dscope && ignOk && ownTypeOk && countOk && markerQ && partOk && (!q || nameMatch || anyItemMatch);
+      show = isRoot ? true : (dscope && ignOk && (target || subtreeTarget));
       // root's own attributes belong to the service itself - hide them once drilled
       showItems = isRoot ? (drillStack.length===0 && countOk && markerQ && (!q || nameMatch || anyItemMatch)) : target;
     }
@@ -918,12 +930,48 @@ function render(){
     DATA.summary.item_label+' hidden in '+esc(current.n)+
     (hidden>0 ? ' by: '+esc(reasons.length?reasons.join(', '):'filters')+'.' : '');
   buildLegend();
+  buildCreators();
   buildMapper(nodes);
+  if(CFG.tabs.includes('spacing')) renderToolbar();   // keep the scope-based Instance Spacing card live
 }
 
+// Ownership: a second filter row under the type legend - one chip per creator present
+// in the CURRENT view (so it reflects whatever service / Global selection is showing).
+// Single-click hides that creator's assets; double-click shows ONLY that creator.
+let creatorColors={}, creatorPi=0;
+function creatorColor(k){ if(!(k in creatorColors)) creatorColors[k]=PALETTE[creatorPi++%PALETTE.length]; return creatorColors[k]; }
+function buildCreators(){
+  const row=document.getElementById('creators'); if(!row) return;
+  if(!CFG.creators){ row.style.display='none'; return; }
+  const present={};
+  (function w(n){ for(const c of n._children){ if(c.kind==='item'){ if(c.it.cr) present[c.it.cr]=c.it.ct||''; } else w(c); } })(current);
+  const keys=Object.keys(present).sort();
+  row.innerHTML=''; if(!keys.length){ row.style.display='none'; return; } row.style.display='flex';
+  const lab=document.createElement('span'); lab.className='crlab'; lab.textContent='creators:'; row.appendChild(lab);
+  keys.forEach(k=>{
+    const typ=present[k], nm=k.slice(k.indexOf(':')+1);
+    const sp=document.createElement('span');
+    if(hiddenCreators.has(k)) sp.className='off';
+    sp.title='click to '+(hiddenCreators.has(k)?'show':'hide')+' '+typ+' "'+nm+'" · double-click to show only this creator';
+    sp.innerHTML='<span class="dot" style="background:'+creatorColor(k)+'"></span>'+esc(nm)+'<span class="crtag">'+esc(typ)+'</span>';
+    let lc=0, timer=null;
+    sp.onclick=()=>{
+      const now=performance.now();
+      if(timer && now-lc<200){ clearTimeout(timer); timer=null;           // double-click: only this creator
+        hiddenCreators.clear(); keys.forEach(x=>{ if(x!==k) hiddenCreators.add(x); }); render(); return; }
+      lc=now; if(timer) clearTimeout(timer);
+      timer=setTimeout(()=>{ timer=null;                                   // single-click: toggle this creator
+        if(hiddenCreators.has(k)) hiddenCreators.delete(k); else hiddenCreators.add(k);
+        if(keys.every(x=>hiddenCreators.has(x))) hiddenCreators.clear();   // all hidden -> re-enable all
+        render();
+      }, 210);
+    };
+    row.appendChild(sp);
+  });
+}
 function buildLegend(){
   const present={};
-  current._children.forEach(function w(n){ if(n.kind==='inst'){ if(!n._group && !n._svc) present[n.c]=true; n._children.forEach(w);} });
+  current._children.forEach(function w(n){ if(n.kind==='inst'){ if(!n._group) present[n.c]=true; n._children.forEach(w);} });
   const keys=Object.keys(present);
   const lg=document.getElementById('legend'); lg.innerHTML='';
   keys.sort().forEach(c=>{
@@ -956,6 +1004,7 @@ function buildLegend(){
 // path-compressed, so we derive the 2nd-layer name from each node's full path
 // (e.g. "Workspace.Backrooms.Build.ArtPainting1" -> "Backrooms") and group by it.
 let mapSections=[];
+let activeSectionKey=null;   // the Layer Mapper's current "active" section - Instance Spacing roots here
 const INDENT=22;  // reverse-tab px per drilled level (deeper = more toward center)
 const TOPPAD=24;  // px below the viewport top where a section's first row counts as "current"
 // The group key at the CURRENT drill depth: e.g. base groups by the 2nd-layer
@@ -998,7 +1047,7 @@ function buildMapper(nodes){
     el.appendChild(pill); bindRailClick(el,{kind:'group', sec});
     sec.entry=el; m.appendChild(el);
   });
-  mapSections=order;
+  mapSections=order; if(!order.length) activeSectionKey=null;
   const wrap=document.getElementById('wrap');
   m.style.top=wrap.getBoundingClientRect().top+'px';
   m.style.height=wrap.clientHeight+'px';
@@ -1047,6 +1096,8 @@ function updateMapper(){
   // row exactly on that line, so the section you clicked is the one that lights up.
   let cur=mapSections[0];
   for(const sec of mapSections){ if(sec.s<=vt+TOPPAD+1) cur=sec; }
+  const nk = cur ? cur.key : null;       // Instance Spacing follows the active (deepest-selected) section
+  if(nk!==activeSectionKey){ activeSectionKey=nk; if(CFG.tabs.includes('spacing')) renderToolbar(); }
   for(const sec of mapSections){
     let size=24;
     if(sec===cur) size=32;
@@ -1346,6 +1397,30 @@ function setToolbarTarget(name){
   if(name===tbAttr && scope===tbScope) return;
   tbAttr=name; tbScope=scope; renderToolbar();
 }
+// Instance Spacing (collision only): rename every descendant so spaces / special chars
+// collapse to "_", so the resulting path pastes into the Explorer search (which breaks
+// on spaces and treats "." as a hierarchy separator).
+// Instance Spacing roots at the deepest level selected in the Layer Mapper: the service
+// + any drilled branch (scopeRootPath) + the currently-active section the user scrolled to.
+function spacingScope(){
+  let p=scopeRootPath();
+  if(activeSectionKey && activeSectionKey!=='__ATTRS__') p+='.'+activeSectionKey;
+  return p;
+}
+function spacingCode(scope){
+  return 'local root = '+luauAccessor(scope)+'\n'+
+    'local function clean(nm)\n'+
+    '\tlocal s = (string.gsub(nm, "[^%w_]", "_"))  -- each space / special char -> "_"\n'+
+    '\tif s == "" then s = "_" end\n'+
+    '\treturn s\n'+
+    'end\n'+
+    'local renamed = 0\n'+
+    'for _, inst in ipairs(root:GetDescendants()) do\n'+
+    '\tlocal nn = clean(inst.Name)\n'+
+    '\tif nn ~= inst.Name then inst.Name = nn; renamed += 1 end\n'+
+    'end\n'+
+    'print("Instance Spacing: renamed "..renamed.." instance(s).")';
+}
 function renderToolbar(){
   if(!CFG.tabs.length) return;
   const name=tbAttr, scope=tbScope;
@@ -1364,7 +1439,10 @@ function renderToolbar(){
       cap:'for each <b>'+esc(name)+'</b> Value object: sets a matching attribute on its parent, then Destroys the Value.'+
         '<br><b style="color:#ff9b9b">Code change needed:</b> this snippet only changes the data model - it does NOT edit your scripts. '+
         'Any code that reads or writes this Value (<b>:FindFirstChild("'+esc(name)+'")</b>, <b>:WaitForChild</b>, or <b>.'+esc(name)+'</b>) must be updated to <b>GetAttribute / SetAttribute("'+esc(name)+'")</b>. '+
-        'Use the bottom-left '+CFG.finderTitle+' Panel to locate that code first.'})}
+        'Use the bottom-left '+CFG.finderTitle+' Panel to locate that code first.'})},
+    spacing:{cls:'space', label:'Instance Spacing', noTarget:true, mk:()=>{ const sc=spacingScope(); return {
+      detail:'Underscore the names under '+sc, code:spacingCode(sc),
+      cap:'<b>*underscores will replace special characters and spaces in this command</b> &middot; renames every descendant under <b>'+esc(sc)+'</b> so spaces and characters like <b>- / .</b> become <b>_</b>, making the path copyable / searchable in the Explorer. <b style="color:#ff9b9b">Heads up:</b> this renames instances - code that finds them by their old name (FindFirstChild / WaitForChild) would need updating.'};}}
   };
   toolbar.innerHTML='';
   for(const tab of CFG.tabs){
@@ -1376,7 +1454,7 @@ function renderToolbar(){
     card.appendChild(head);
     if(tbOpen[tab]){
       const body=document.createElement('div'); body.className='tb-body';
-      if(!name){ body.innerHTML='<div class="tb-hint">Hover an item to target one.</div>'; }
+      if(!name && !d.noTarget){ body.innerHTML='<div class="tb-hint">Hover an item to target one.</div>'; }
       else{
         const info=d.mk();
         const det=document.createElement('div'); det.className='tb-detail'; det.textContent=info.detail;
@@ -1411,6 +1489,7 @@ minattrs.addEventListener('input',()=>{
 const hideSibBtn=document.getElementById('hideSibBtn');
 hideSibBtn.onclick=()=>{ hideSiblings=!hideSiblings; hideSibBtn.classList.toggle('on',hideSiblings);
   hideSibBtn.textContent=hideSiblings?'Show Siblings':'Hide Siblings'; render(); };
+if(CFG.creators) hideSibBtn.style.display='none';   // ownership: hide-siblings is irrelevant
 
 // section rail: re-size entries as the tree scrolls; reposition on window resize
 document.getElementById('wrap').addEventListener('scroll', updateMapper);

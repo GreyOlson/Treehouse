@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PROJECT_NAME | Attribute Treehouse</title>
+<title>Tsunami Game 2026 Test Server | Ownership Treehouse</title>
 <style>
   :root{
     --bg:#0f1117; --panel:#161922; --ink:#e6e9f0; --dim:#9aa3b2;
@@ -168,7 +168,7 @@
 </head>
 <body>
 <header>
-  <h1>PROJECT_NAME | Attribute Treehouse</h1>
+  <h1>Tsunami Game 2026 Test Server | Ownership Treehouse</h1>
   <div class="hint" id="introhint">Only instances that carry <span id="lbl1">items</span> are shown; empty containers are path-compressed (hover a node for its real path).</div>
   <div class="sub" id="sub"></div>
   <div class="sub" id="svccount" style="color:var(--accent)"></div>
@@ -196,7 +196,7 @@
 <div id="toolbar" style="display:none"></div>
 <div id="mapper"></div>
 <script>
-const DATA = {"services": [{"n": "Workspace", "c": "Workspace", "path": "Workspace", "items": [{"n": "Existing", "v": "1", "t": "number", "m": ""}], "ch": []}, {"n": "ReplicatedStorage", "c": "ReplicatedStorage", "path": "ReplicatedStorage", "items": [], "ch": [{"n": "UserIdUtil", "c": "ModuleScript", "path": "ReplicatedStorage.Util.UserIdUtil", "items": [{"n": "OwnerUserId", "m": "*", "code": true}], "ch": []}]}, {"n": "ServerScriptService", "c": "ServerScriptService", "path": "ServerScriptService", "items": [], "ch": [{"n": "Literal", "c": "Script", "path": "ServerScriptService.Literal", "items": [{"n": "Alpha", "m": "*", "code": true}, {"n": "Beta", "m": "r", "code": true}], "ch": []}, {"n": "RaycastModule", "c": "ModuleScript", "path": "ServerScriptService.RaycastModule", "items": [{"n": "OwnerUserId", "m": "r", "code": true}], "ch": []}]}], "summary": {"project": "PROJECT_NAME", "item_kind": "attribute", "item_label": "attributes", "runtime": true, "services": [{"name": "Workspace", "instances": 1, "items": 1}, {"name": "ReplicatedStorage", "instances": 2, "items": 1}, {"name": "ServerScriptService", "instances": 3, "items": 3}], "total_instances": 6, "total_items": 5}};
+const DATA = {"services": [{"n": "Workspace", "c": "Workspace", "path": "Workspace", "items": [], "ch": [{"n": "Lamp", "c": "MeshPart", "path": "Workspace.Lamp", "items": [{"n": "MeshId", "v": "CoolDev", "t": "User", "m": "", "cr": "User:CoolDev", "ct": "User"}, {"n": "TextureID", "v": "MeshGroup", "t": "Group", "m": "", "cr": "Group:MeshGroup", "ct": "Group"}], "ch": []}, {"n": "Ambience", "c": "Sound", "path": "Workspace.Ambience", "items": [{"n": "SoundId", "v": "AudioMaker", "t": "User", "m": "", "cr": "User:AudioMaker", "ct": "User"}], "ch": []}, {"n": "Sign", "c": "Decal", "path": "Workspace.Sign", "items": [{"n": "Texture", "v": "MeshGroup", "t": "Group", "m": "", "cr": "Group:MeshGroup", "ct": "Group"}], "ch": []}]}, {"n": "ReplicatedStorage", "c": "ReplicatedStorage", "path": "ReplicatedStorage", "items": [], "ch": [{"n": "RunAnim", "c": "Animation", "path": "ReplicatedStorage.RunAnim", "items": [{"n": "AnimationId", "v": "CoolDev", "t": "User", "m": "", "cr": "User:CoolDev", "ct": "User"}], "ch": []}]}], "summary": {"project": "Tsunami Game 2026 Test Server", "item_kind": "ownership", "item_label": "assets", "creators": true, "creator_count": 3, "services": [{"name": "Workspace", "instances": 4, "items": 4}, {"name": "ReplicatedStorage", "instances": 2, "items": 1}], "total_instances": 6, "total_items": 5}};
 
 // Per-kind behavior, so one engine serves Attribute / Value* / Collision pages:
 //   finder : bottom-left panel - 'both' = script + host, 'host' = host only

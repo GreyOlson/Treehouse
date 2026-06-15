@@ -113,16 +113,19 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	genRow.Size = UDim2.new(1, -2 * MARGIN, 0, 46)
 	genRow.Parent = backdrop
 
-	-- three generate buttons, evenly split across the row (text scales to fit)
+	-- four generate buttons, evenly split across the row (text scales to fit)
 	local genAttr = makeButton("GenerateAttributeTree", "Generate Attribute Treehouse",
 		Color3.fromRGB(120, 170, 235), -- medium-light blue
-		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 14, 8)
+		UDim2.new(1 / 4, -3, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 13, 8)
 	local genValue = makeButton("GenerateValueBaseTree", "Generate Value* Treehouse",
 		Color3.fromRGB(235, 120, 120), -- medium-light red
-		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(1 / 3, 2, 0, 0), genRow, 14, 8)
-	local genCollision = makeButton("GenerateCollisionTree", "Generate Collision Treehouse",
+		UDim2.new(1 / 4, -3, 1, 0), UDim2.new(1 / 4, 1, 0, 0), genRow, 13, 8)
+	local genCollision = makeButton("GenerateGeometryTree", "Generate Geometry Treehouse",
 		Color3.fromRGB(120, 205, 165), -- medium-light teal
-		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(2 / 3, 4, 0, 0), genRow, 14, 8)
+		UDim2.new(1 / 4, -3, 1, 0), UDim2.new(2 / 4, 2, 0, 0), genRow, 13, 8)
+	local genOwnership = makeButton("GenerateOwnershipTree", "Generate Ownership Treehouse",
+		Color3.fromRGB(200, 160, 235), -- medium-light purple
+		UDim2.new(1 / 4, -3, 1, 0), UDim2.new(3 / 4, 3, 0, 0), genRow, 13, 8)
 
 	-- Runtime toggle, between the generate buttons and the status area
 	local includeRuntime = false
@@ -190,6 +193,86 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	htmlDesc.AutomaticSize = Enum.AutomaticSize.Y
 	htmlDesc.ZIndex = 6
 	htmlDesc.Parent = backdrop
+
+	-- Ownership asset-class checkboxes. Shown only while the Ownership button is the
+	-- active (last-hovered) Treehouse, in the space the runtime row uses otherwise.
+	-- Narrowing the classes makes the (slow) catalog scan faster. Default = All.
+	local ownSel = { all = true, mesh = false, sound = false, image = false }
+	local ownChecks: { [string]: TextButton } = {}
+	local ownPanel = Instance.new("Frame")
+	ownPanel.Name = "OwnershipClasses"
+	ownPanel.BackgroundTransparency = 1
+	ownPanel.Position = UDim2.fromOffset(MARGIN, 96)
+	ownPanel.Size = UDim2.new(1, -2 * MARGIN, 0, 118)
+	ownPanel.ZIndex = 6
+	ownPanel.Visible = false
+	ownPanel.Parent = backdrop
+	local ownList = Instance.new("UIListLayout")
+	ownList.FillDirection = Enum.FillDirection.Vertical
+	ownList.SortOrder = Enum.SortOrder.LayoutOrder
+	ownList.Padding = UDim.new(0, 3)
+	ownList.Parent = ownPanel
+	local ownHdr = Instance.new("TextLabel")
+	ownHdr.Text = "Asset classes to scan (fewer = faster):"
+	ownHdr.Font = Enum.Font.GothamMedium
+	ownHdr.TextSize = 12
+	ownHdr.TextXAlignment = Enum.TextXAlignment.Left
+	ownHdr.TextColor3 = Color3.fromRGB(205, 185, 230)
+	ownHdr.BackgroundTransparency = 1
+	ownHdr.Size = UDim2.new(1, 0, 0, 18)
+	ownHdr.LayoutOrder = 0
+	ownHdr.ZIndex = 6
+	ownHdr.Parent = ownPanel
+
+	local function syncOwn()
+		-- a specific pick clears "All"; with no specific picks, fall back to "All"
+		if not (ownSel.mesh or ownSel.sound or ownSel.image) then ownSel.all = true end
+		if ownSel.all then ownSel.mesh, ownSel.sound, ownSel.image = false, false, false end
+		for key, b in pairs(ownChecks) do
+			local on = if key == "all" then ownSel.all else ownSel[key]
+			b.Text = (on and "✅  " or "❌  ") .. (b:GetAttribute("lbl") :: string)
+		end
+	end
+	local function ownCheck(key: string, labelText: string, order: number)
+		local b = Instance.new("TextButton")
+		b.Name = "Class_" .. key
+		b:SetAttribute("lbl", labelText)
+		b.Text = "❌  " .. labelText
+		b.Font = Enum.Font.Gotham
+		b.TextSize = 13
+		b.TextXAlignment = Enum.TextXAlignment.Left
+		b.TextColor3 = Color3.fromRGB(225, 220, 235)
+		b.BackgroundColor3 = Color3.fromRGB(48, 44, 58)
+		b.AutoButtonColor = true
+		b.BorderSizePixel = 0
+		b.Size = UDim2.new(1, 0, 0, 22)
+		b.LayoutOrder = order
+		b.ZIndex = 6
+		b.Parent = ownPanel
+		corner(b, 6)
+		local pad = Instance.new("UIPadding")
+		pad.PaddingLeft = UDim.new(0, 8)
+		pad.Parent = b
+		b.Activated:Connect(function()
+			if key == "all" then
+				ownSel.all = true
+			else
+				ownSel[key] = not ownSel[key]
+				ownSel.all = false
+			end
+			syncOwn()
+		end)
+		ownChecks[key] = b
+	end
+	ownCheck("all", "All", 1)
+	ownCheck("mesh", "Meshes", 2)
+	ownCheck("sound", "Sounds", 3)
+	ownCheck("image", "Images (textures & decals)", 4)
+	syncOwn()
+	local function getOwnershipClasses(): { [string]: boolean }?
+		if ownSel.all then return nil end -- nil = scan everything
+		return { mesh = ownSel.mesh, sound = ownSel.sound, image = ownSel.image }
+	end
 
 	-- assigned once srcToggle exists (further down); shows/hides it with the runtime toggle
 	local onRuntimeChanged: ((boolean) -> ())? = nil
@@ -494,27 +577,76 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		status.CanvasPosition = Vector2.new(0, maxY)
 	end
 
-	genAttr.Activated:Connect(function()
-		if opts.onGenerateAttribute then
-			opts.onGenerateAttribute(setStatus)
-		else
-			print("[AttributeTool] Generate Attribute Tree clicked")
+	-- Busy guard: while one Treehouse is generating, the clicked button shows
+	-- "Generating … Treehouse…" and every generate button ignores clicks until it
+	-- finishes (then the label resets). Runs in a thread so the widget stays live.
+	local generating = false
+	local function runGen(btn: TextButton, name: string, fn: ((any) -> ())?)
+		if not fn then
+			print("[AttributeTool] Generate " .. name .. " Treehouse clicked (no handler)")
+			return
 		end
+		if generating then return end
+		generating = true
+		local orig = btn.Text
+		btn.Text = "Generating " .. name .. " Treehouse…"
+		btn.AutoButtonColor = false
+		task.spawn(function()
+			local ok, err = pcall(fn, setStatus)
+			btn.Text = orig
+			btn.AutoButtonColor = true
+			generating = false
+			if not ok then warn("[Treehouse] " .. name .. " generate failed: " .. tostring(err)) end
+		end)
+	end
+	genAttr.Activated:Connect(function() runGen(genAttr, "Attribute", opts.onGenerateAttribute) end)
+	genValue.Activated:Connect(function() runGen(genValue, "Value*", opts.onGenerateValue) end)
+	genCollision.Activated:Connect(function() runGen(genCollision, "Geometry", opts.onGenerateCollision) end)
+	genOwnership.Activated:Connect(function()
+		runGen(genOwnership, "Ownership", opts.onGenerateOwnership and function(ss)
+			opts.onGenerateOwnership(ss, getOwnershipClasses())
+		end or nil)
 	end)
-	genValue.Activated:Connect(function()
-		if opts.onGenerateValue then
-			opts.onGenerateValue(setStatus)
-		else
-			print("[AttributeTool] Generate ValueBase Tree clicked")
-		end
-	end)
-	genCollision.Activated:Connect(function()
-		if opts.onGenerateCollision then
-			opts.onGenerateCollision(setStatus)
-		else
-			print("[AttributeTool] Generate Collision Tree clicked")
-		end
-	end)
+
+	-- Hover a generate button -> the info area below retargets to that Treehouse: the dock
+	-- title, the gray tint, the runtime row (attribute / value* only), the feature blurb,
+	-- and the Ownership asset-class checkboxes all follow the last-hovered button. Attribute
+	-- is the default (matches the dock's "Treehouse - Attribute Explorer").
+	local PROFILES = {
+		attribute = { title = "Treehouse - Attribute Explorer", color = Color3.fromRGB(120, 170, 235), runtime = true,
+			pages = "Generate for 2 pages to open.  One for a hierarchy map, the other for a hierarchy tree.  Categorize by search, service, host instance type.  Find the attribute you need and copy back text for code or hierarchy search." },
+		value = { title = "Treehouse - Value* Explorer", color = Color3.fromRGB(235, 120, 120), runtime = true,
+			pages = "Generate for 2 pages to open.  One for a hierarchy map, the other for a hierarchy tree.  Categorize by search, service, host instance type.  Find the ValueBase object you need and copy back text for code or hierarchy search." },
+		geometry = { title = "Treehouse - Geometry Explorer", color = Color3.fromRGB(120, 205, 165), runtime = false,
+			pages = "Find and sort through collision properties on the geometry in your place - CanCollide, CanQuery, CanTouch, CollisionFidelity and more - across services, with a layer map to jump around.  Opens one hierarchy tree." },
+		ownership = { title = "Treehouse - Ownership Explorer", color = Color3.fromRGB(200, 160, 235), runtime = false,
+			pages = "Find who created the uploaded assets in your place (user or group), sorted by instance type and by creator.  Pick which asset classes to scan above - fewer = faster.  Opens one hierarchy tree." },
+	}
+	local BG1, BG2 = Color3.fromRGB(40, 40, 40), Color3.fromRGB(60, 60, 80)
+	local function applyProfile(key: string)
+		local p = PROFILES[key]
+		if not p then return end
+		pcall(function() (host :: any).Title = p.title end) -- dock title (best-effort; read-only on some hosts)
+		grad.Color = ColorSequence.new(BG1:Lerp(p.color, 0.16), BG2:Lerp(p.color, 0.28))
+		status.BackgroundColor3 = Color3.fromRGB(28, 28, 34):Lerp(p.color, 0.10)
+		toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 60):Lerp(p.color, 0.16)
+		toggle.Visible = p.runtime       -- runtime row is only relevant to attribute / value*
+		toggleDesc.Visible = p.runtime
+		htmlDesc.Text = p.pages
+		ownPanel.Visible = (key == "ownership")
+		-- the src "second section" (runtime note + connect-src / hide-path toggles) is
+		-- attribute / value* only; the list reflows when these go invisible
+		runtimeText.Visible = p.runtime
+		local srcVis = p.runtime and includeRuntime
+		srcToggle.Visible = srcVis
+		hidePathToggle.Visible = srcVis
+		if opts.onActiveTreehouse then opts.onActiveTreehouse(p.runtime) end
+	end
+	genAttr.MouseEnter:Connect(function() applyProfile("attribute") end)
+	genValue.MouseEnter:Connect(function() applyProfile("value") end)
+	genCollision.MouseEnter:Connect(function() applyProfile("geometry") end)
+	genOwnership.MouseEnter:Connect(function() applyProfile("ownership") end)
+	applyProfile("attribute") -- default
 	clearOut.Activated:Connect(function()
 		setStatus("")
 	end)

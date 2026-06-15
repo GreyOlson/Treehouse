@@ -59,6 +59,7 @@ local hasPython = true   -- GUI "I have Python installed" toggle; if false, use 
 local mailboxUp = false  -- set true when an open-time ping reaches the mailbox
 local srcConnected = false -- "project src connected" toggle (auto from /health, or manual)
 local srcPath = ""        -- the TREE_SRC the mailbox reported, if any
+local srcRelevant = true  -- attribute / value* use src; geometry / ownership don't (GUI sets this)
 local ui                 -- GUI handle (assigned after Gui.build below)
 
 -- The all-in-one terminal command shown in the GUI boxes: cd into the Treehouse
@@ -68,8 +69,8 @@ local ui                 -- GUI handle (assigned after Gui.build below)
 local function commandsFor(): (string, string)
 	local runner = hasPython and "python3" or "uv run"
 	local winRunner = hasPython and "python" or "uv run"
-	local macSrc = includeRuntime and 'TREE_SRC="/path/to/YourProject/src" ' or ""
-	local winSrc = includeRuntime and 'set "TREE_SRC=C:\\path\\YourProject\\src" && ' or ""
+	local macSrc = (includeRuntime and srcRelevant) and 'TREE_SRC="/path/to/YourProject/src" ' or ""
+	local winSrc = (includeRuntime and srcRelevant) and 'set "TREE_SRC=C:\\path\\YourProject\\src" && ' or ""
 	local mac = "cd ~/Treehouse && " .. macSrc .. runner .. " mailbox/server.py"
 	local win = 'cd /d "%USERPROFILE%\\Treehouse" && ' .. winSrc .. winRunner .. " mailbox\\server.py"
 	return mac, win
@@ -217,9 +218,20 @@ local MAX_CHUNK = 512 * 1024
 
 local function sendOnce(url: string, body: string): (boolean, string, number)
 	local t0 = os.clock()
-	local ok, resp = pcall(function()
-		return HttpService:PostAsync(url, body, Enum.HttpContentType.TextPlain)
-	end)
+	local ok, resp
+	-- Retry transient network failures (NetFail / Timeout). Heavy GetProductInfo use
+	-- right before an Ownership upload can briefly throttle Roblox's HTTP, so the first
+	-- PostAsync sometimes comes back NetFail - back off and try again before giving up.
+	for attempt = 1, 4 do
+		ok, resp = pcall(function()
+			return HttpService:PostAsync(url, body, Enum.HttpContentType.TextPlain)
+		end)
+		if ok then break end
+		local low = tostring(resp):lower()
+		local transient = low:find("netfail") or low:find("timedout") or low:find("timeout") or low:find("throttle")
+		if (not transient) or attempt == 4 then break end
+		task.wait(2 * attempt) -- 2s, 4s, 6s back-off to let the throttle clear
+	end
 	return ok, tostring(resp), os.clock() - t0
 end
 
@@ -297,6 +309,16 @@ ui = Gui.build(widget, {
 		local dump = Dumpers.CollisionDump()
 		post("/refresh/collisions", "collision", dump, setStatus)
 	end,
+	onGenerateOwnership = function(setStatus, classes)
+		if not httpReady(setStatus) then return end
+		setStatus("Walking the DataModel for uploaded assets…")
+		task.wait()
+		local dump = Dumpers.OwnershipDump(function(done, total)
+			setStatus(("Generating Ownership Treehouse… resolved %d / %d unique assets\n"
+				.. "(one Roblox catalog lookup each — large places take a while)"):format(done, total))
+		end, classes)
+		post("/refresh/ownership", "ownership", dump, setStatus)
+	end,
 	-- "Include Runtime in Treehouse" toggle: update the runtime status AND the
 	-- command boxes (they add/drop the TREE_SRC= prefix with the runtime toggle).
 	onToggleRuntime = function(checked)
@@ -316,6 +338,16 @@ ui = Gui.build(widget, {
 	onToggleSrc = function(checked)
 		srcConnected = checked
 		ui.setRuntimeText(runtimeBlock())
+	end,
+	-- The active (hovered) Treehouse reports whether src matters. Geometry & Ownership
+	-- don't use src, so the command boxes drop the TREE_SRC= prefix for them. (Guarded:
+	-- this fires once during Gui.build before `ui` exists - skip the push that time.)
+	onActiveTreehouse = function(relevant)
+		srcRelevant = relevant
+		if ui then
+			ui.setRuntimeText(runtimeBlock())
+			ui.setCommands(commandsFor())
+		end
 	end,
 })
 

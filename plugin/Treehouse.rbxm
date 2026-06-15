@@ -61,6 +61,7 @@ local hasPython = true   -- GUI "I have Python installed" toggle; if false, use 
 local mailboxUp = false  -- set true when an open-time ping reaches the mailbox
 local srcConnected = false -- "project src connected" toggle (auto from /health, or manual)
 local srcPath = ""        -- the TREE_SRC the mailbox reported, if any
+local srcRelevant = true  -- attribute / value* use src; geometry / ownership don't (GUI sets this)
 local ui                 -- GUI handle (assigned after Gui.build below)
 
 -- The all-in-one terminal command shown in the GUI boxes: cd into the Treehouse
@@ -70,8 +71,8 @@ local ui                 -- GUI handle (assigned after Gui.build below)
 local function commandsFor(): (string, string)
 	local runner = hasPython and "python3" or "uv run"
 	local winRunner = hasPython and "python" or "uv run"
-	local macSrc = includeRuntime and 'TREE_SRC="/path/to/YourProject/src" ' or ""
-	local winSrc = includeRuntime and 'set "TREE_SRC=C:\\path\\YourProject\\src" &amp;&amp; ' or ""
+	local macSrc = (includeRuntime and srcRelevant) and 'TREE_SRC="/path/to/YourProject/src" ' or ""
+	local winSrc = (includeRuntime and srcRelevant) and 'set "TREE_SRC=C:\\path\\YourProject\\src" &amp;&amp; ' or ""
 	local mac = "cd ~/Treehouse &amp;&amp; " .. macSrc .. runner .. " mailbox/server.py"
 	local win = 'cd /d "%USERPROFILE%\\Treehouse" &amp;&amp; ' .. winSrc .. winRunner .. " mailbox\\server.py"
 	return mac, win
@@ -219,9 +220,20 @@ local MAX_CHUNK = 512 * 1024
 
 local function sendOnce(url: string, body: string): (boolean, string, number)
 	local t0 = os.clock()
-	local ok, resp = pcall(function()
-		return HttpService:PostAsync(url, body, Enum.HttpContentType.TextPlain)
-	end)
+	local ok, resp
+	-- Retry transient network failures (NetFail / Timeout). Heavy GetProductInfo use
+	-- right before an Ownership upload can briefly throttle Roblox's HTTP, so the first
+	-- PostAsync sometimes comes back NetFail - back off and try again before giving up.
+	for attempt = 1, 4 do
+		ok, resp = pcall(function()
+			return HttpService:PostAsync(url, body, Enum.HttpContentType.TextPlain)
+		end)
+		if ok then break end
+		local low = tostring(resp):lower()
+		local transient = low:find("netfail") or low:find("timedout") or low:find("timeout") or low:find("throttle")
+		if (not transient) or attempt == 4 then break end
+		task.wait(2 * attempt) -- 2s, 4s, 6s back-off to let the throttle clear
+	end
 	return ok, tostring(resp), os.clock() - t0
 end
 
@@ -299,6 +311,16 @@ ui = Gui.build(widget, {
 		local dump = Dumpers.CollisionDump()
 		post("/refresh/collisions", "collision", dump, setStatus)
 	end,
+	onGenerateOwnership = function(setStatus, classes)
+		if not httpReady(setStatus) then return end
+		setStatus("Walking the DataModel for uploaded assets…")
+		task.wait()
+		local dump = Dumpers.OwnershipDump(function(done, total)
+			setStatus(("Generating Ownership Treehouse… resolved %d / %d unique assets\n"
+				.. "(one Roblox catalog lookup each — large places take a while)"):format(done, total))
+		end, classes)
+		post("/refresh/ownership", "ownership", dump, setStatus)
+	end,
 	-- "Include Runtime in Treehouse" toggle: update the runtime status AND the
 	-- command boxes (they add/drop the TREE_SRC= prefix with the runtime toggle).
 	onToggleRuntime = function(checked)
@@ -318,6 +340,16 @@ ui = Gui.build(widget, {
 	onToggleSrc = function(checked)
 		srcConnected = checked
 		ui.setRuntimeText(runtimeBlock())
+	end,
+	-- The active (hovered) Treehouse reports whether src matters. Geometry &amp; Ownership
+	-- don't use src, so the command boxes drop the TREE_SRC= prefix for them. (Guarded:
+	-- this fires once during Gui.build before `ui` exists - skip the push that time.)
+	onActiveTreehouse = function(relevant)
+		srcRelevant = relevant
+		if ui then
+			ui.setRuntimeText(runtimeBlock())
+			ui.setCommands(commandsFor())
+		end
 	end,
 })
 
@@ -453,16 +485,19 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	genRow.Size = UDim2.new(1, -2 * MARGIN, 0, 46)
 	genRow.Parent = backdrop
 
-	-- three generate buttons, evenly split across the row (text scales to fit)
+	-- four generate buttons, evenly split across the row (text scales to fit)
 	local genAttr = makeButton("GenerateAttributeTree", "Generate Attribute Treehouse",
 		Color3.fromRGB(120, 170, 235), -- medium-light blue
-		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 14, 8)
+		UDim2.new(1 / 4, -3, 1, 0), UDim2.new(0, 0, 0, 0), genRow, 13, 8)
 	local genValue = makeButton("GenerateValueBaseTree", "Generate Value* Treehouse",
 		Color3.fromRGB(235, 120, 120), -- medium-light red
-		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(1 / 3, 2, 0, 0), genRow, 14, 8)
-	local genCollision = makeButton("GenerateCollisionTree", "Generate Collision Treehouse",
+		UDim2.new(1 / 4, -3, 1, 0), UDim2.new(1 / 4, 1, 0, 0), genRow, 13, 8)
+	local genCollision = makeButton("GenerateGeometryTree", "Generate Geometry Treehouse",
 		Color3.fromRGB(120, 205, 165), -- medium-light teal
-		UDim2.new(1 / 3, -4, 1, 0), UDim2.new(2 / 3, 4, 0, 0), genRow, 14, 8)
+		UDim2.new(1 / 4, -3, 1, 0), UDim2.new(2 / 4, 2, 0, 0), genRow, 13, 8)
+	local genOwnership = makeButton("GenerateOwnershipTree", "Generate Ownership Treehouse",
+		Color3.fromRGB(200, 160, 235), -- medium-light purple
+		UDim2.new(1 / 4, -3, 1, 0), UDim2.new(3 / 4, 3, 0, 0), genRow, 13, 8)
 
 	-- Runtime toggle, between the generate buttons and the status area
 	local includeRuntime = false
@@ -530,6 +565,86 @@ function M.build(host: Instance, opts: { [string]: any }?)
 	htmlDesc.AutomaticSize = Enum.AutomaticSize.Y
 	htmlDesc.ZIndex = 6
 	htmlDesc.Parent = backdrop
+
+	-- Ownership asset-class checkboxes. Shown only while the Ownership button is the
+	-- active (last-hovered) Treehouse, in the space the runtime row uses otherwise.
+	-- Narrowing the classes makes the (slow) catalog scan faster. Default = All.
+	local ownSel = { all = true, mesh = false, sound = false, image = false }
+	local ownChecks: { [string]: TextButton } = {}
+	local ownPanel = Instance.new("Frame")
+	ownPanel.Name = "OwnershipClasses"
+	ownPanel.BackgroundTransparency = 1
+	ownPanel.Position = UDim2.fromOffset(MARGIN, 96)
+	ownPanel.Size = UDim2.new(1, -2 * MARGIN, 0, 118)
+	ownPanel.ZIndex = 6
+	ownPanel.Visible = false
+	ownPanel.Parent = backdrop
+	local ownList = Instance.new("UIListLayout")
+	ownList.FillDirection = Enum.FillDirection.Vertical
+	ownList.SortOrder = Enum.SortOrder.LayoutOrder
+	ownList.Padding = UDim.new(0, 3)
+	ownList.Parent = ownPanel
+	local ownHdr = Instance.new("TextLabel")
+	ownHdr.Text = "Asset classes to scan (fewer = faster):"
+	ownHdr.Font = Enum.Font.GothamMedium
+	ownHdr.TextSize = 12
+	ownHdr.TextXAlignment = Enum.TextXAlignment.Left
+	ownHdr.TextColor3 = Color3.fromRGB(205, 185, 230)
+	ownHdr.BackgroundTransparency = 1
+	ownHdr.Size = UDim2.new(1, 0, 0, 18)
+	ownHdr.LayoutOrder = 0
+	ownHdr.ZIndex = 6
+	ownHdr.Parent = ownPanel
+
+	local function syncOwn()
+		-- a specific pick clears "All"; with no specific picks, fall back to "All"
+		if not (ownSel.mesh or ownSel.sound or ownSel.image) then ownSel.all = true end
+		if ownSel.all then ownSel.mesh, ownSel.sound, ownSel.image = false, false, false end
+		for key, b in pairs(ownChecks) do
+			local on = if key == "all" then ownSel.all else ownSel[key]
+			b.Text = (on and "✅  " or "❌  ") .. (b:GetAttribute("lbl") :: string)
+		end
+	end
+	local function ownCheck(key: string, labelText: string, order: number)
+		local b = Instance.new("TextButton")
+		b.Name = "Class_" .. key
+		b:SetAttribute("lbl", labelText)
+		b.Text = "❌  " .. labelText
+		b.Font = Enum.Font.Gotham
+		b.TextSize = 13
+		b.TextXAlignment = Enum.TextXAlignment.Left
+		b.TextColor3 = Color3.fromRGB(225, 220, 235)
+		b.BackgroundColor3 = Color3.fromRGB(48, 44, 58)
+		b.AutoButtonColor = true
+		b.BorderSizePixel = 0
+		b.Size = UDim2.new(1, 0, 0, 22)
+		b.LayoutOrder = order
+		b.ZIndex = 6
+		b.Parent = ownPanel
+		corner(b, 6)
+		local pad = Instance.new("UIPadding")
+		pad.PaddingLeft = UDim.new(0, 8)
+		pad.Parent = b
+		b.Activated:Connect(function()
+			if key == "all" then
+				ownSel.all = true
+			else
+				ownSel[key] = not ownSel[key]
+				ownSel.all = false
+			end
+			syncOwn()
+		end)
+		ownChecks[key] = b
+	end
+	ownCheck("all", "All", 1)
+	ownCheck("mesh", "Meshes", 2)
+	ownCheck("sound", "Sounds", 3)
+	ownCheck("image", "Images (textures &amp; decals)", 4)
+	syncOwn()
+	local function getOwnershipClasses(): { [string]: boolean }?
+		if ownSel.all then return nil end -- nil = scan everything
+		return { mesh = ownSel.mesh, sound = ownSel.sound, image = ownSel.image }
+	end
 
 	-- assigned once srcToggle exists (further down); shows/hides it with the runtime toggle
 	local onRuntimeChanged: ((boolean) -&gt; ())? = nil
@@ -834,27 +949,76 @@ function M.build(host: Instance, opts: { [string]: any }?)
 		status.CanvasPosition = Vector2.new(0, maxY)
 	end
 
-	genAttr.Activated:Connect(function()
-		if opts.onGenerateAttribute then
-			opts.onGenerateAttribute(setStatus)
-		else
-			print("[AttributeTool] Generate Attribute Tree clicked")
+	-- Busy guard: while one Treehouse is generating, the clicked button shows
+	-- "Generating … Treehouse…" and every generate button ignores clicks until it
+	-- finishes (then the label resets). Runs in a thread so the widget stays live.
+	local generating = false
+	local function runGen(btn: TextButton, name: string, fn: ((any) -&gt; ())?)
+		if not fn then
+			print("[AttributeTool] Generate " .. name .. " Treehouse clicked (no handler)")
+			return
 		end
+		if generating then return end
+		generating = true
+		local orig = btn.Text
+		btn.Text = "Generating " .. name .. " Treehouse…"
+		btn.AutoButtonColor = false
+		task.spawn(function()
+			local ok, err = pcall(fn, setStatus)
+			btn.Text = orig
+			btn.AutoButtonColor = true
+			generating = false
+			if not ok then warn("[Treehouse] " .. name .. " generate failed: " .. tostring(err)) end
+		end)
+	end
+	genAttr.Activated:Connect(function() runGen(genAttr, "Attribute", opts.onGenerateAttribute) end)
+	genValue.Activated:Connect(function() runGen(genValue, "Value*", opts.onGenerateValue) end)
+	genCollision.Activated:Connect(function() runGen(genCollision, "Geometry", opts.onGenerateCollision) end)
+	genOwnership.Activated:Connect(function()
+		runGen(genOwnership, "Ownership", opts.onGenerateOwnership and function(ss)
+			opts.onGenerateOwnership(ss, getOwnershipClasses())
+		end or nil)
 	end)
-	genValue.Activated:Connect(function()
-		if opts.onGenerateValue then
-			opts.onGenerateValue(setStatus)
-		else
-			print("[AttributeTool] Generate ValueBase Tree clicked")
-		end
-	end)
-	genCollision.Activated:Connect(function()
-		if opts.onGenerateCollision then
-			opts.onGenerateCollision(setStatus)
-		else
-			print("[AttributeTool] Generate Collision Tree clicked")
-		end
-	end)
+
+	-- Hover a generate button -&gt; the info area below retargets to that Treehouse: the dock
+	-- title, the gray tint, the runtime row (attribute / value* only), the feature blurb,
+	-- and the Ownership asset-class checkboxes all follow the last-hovered button. Attribute
+	-- is the default (matches the dock's "Treehouse - Attribute Explorer").
+	local PROFILES = {
+		attribute = { title = "Treehouse - Attribute Explorer", color = Color3.fromRGB(120, 170, 235), runtime = true,
+			pages = "Generate for 2 pages to open.  One for a hierarchy map, the other for a hierarchy tree.  Categorize by search, service, host instance type.  Find the attribute you need and copy back text for code or hierarchy search." },
+		value = { title = "Treehouse - Value* Explorer", color = Color3.fromRGB(235, 120, 120), runtime = true,
+			pages = "Generate for 2 pages to open.  One for a hierarchy map, the other for a hierarchy tree.  Categorize by search, service, host instance type.  Find the ValueBase object you need and copy back text for code or hierarchy search." },
+		geometry = { title = "Treehouse - Geometry Explorer", color = Color3.fromRGB(120, 205, 165), runtime = false,
+			pages = "Find and sort through collision properties on the geometry in your place - CanCollide, CanQuery, CanTouch, CollisionFidelity and more - across services, with a layer map to jump around.  Opens one hierarchy tree." },
+		ownership = { title = "Treehouse - Ownership Explorer", color = Color3.fromRGB(200, 160, 235), runtime = false,
+			pages = "Find who created the uploaded assets in your place (user or group), sorted by instance type and by creator.  Pick which asset classes to scan above - fewer = faster.  Opens one hierarchy tree." },
+	}
+	local BG1, BG2 = Color3.fromRGB(40, 40, 40), Color3.fromRGB(60, 60, 80)
+	local function applyProfile(key: string)
+		local p = PROFILES[key]
+		if not p then return end
+		pcall(function() (host :: any).Title = p.title end) -- dock title (best-effort; read-only on some hosts)
+		grad.Color = ColorSequence.new(BG1:Lerp(p.color, 0.16), BG2:Lerp(p.color, 0.28))
+		status.BackgroundColor3 = Color3.fromRGB(28, 28, 34):Lerp(p.color, 0.10)
+		toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 60):Lerp(p.color, 0.16)
+		toggle.Visible = p.runtime       -- runtime row is only relevant to attribute / value*
+		toggleDesc.Visible = p.runtime
+		htmlDesc.Text = p.pages
+		ownPanel.Visible = (key == "ownership")
+		-- the src "second section" (runtime note + connect-src / hide-path toggles) is
+		-- attribute / value* only; the list reflows when these go invisible
+		runtimeText.Visible = p.runtime
+		local srcVis = p.runtime and includeRuntime
+		srcToggle.Visible = srcVis
+		hidePathToggle.Visible = srcVis
+		if opts.onActiveTreehouse then opts.onActiveTreehouse(p.runtime) end
+	end
+	genAttr.MouseEnter:Connect(function() applyProfile("attribute") end)
+	genValue.MouseEnter:Connect(function() applyProfile("value") end)
+	genCollision.MouseEnter:Connect(function() applyProfile("geometry") end)
+	genOwnership.MouseEnter:Connect(function() applyProfile("ownership") end)
+	applyProfile("attribute") -- default
 	clearOut.Activated:Connect(function()
 		setStatus("")
 	end)
@@ -1123,6 +1287,160 @@ function Dumpers.CollisionDump(): string
 			for _, fl in ipairs(flags) do
 				local vs, vt = fmt(fl[2])
 				emit(indent .. "  - " .. fl[1] .. " = " .. vs .. " (" .. vt .. ")")
+			end
+		end
+		local kids = {}
+		for _, c in ipairs(inst:GetChildren()) do
+			if included[c] then kids[#kids + 1] = c end
+		end
+		table.sort(kids, sortKids)
+		for _, c in ipairs(kids) do walk(c, depth + 1) end
+	end
+
+	for _, svc in ipairs(services()) do
+		if included[svc] then walk(svc, 0); emit("") end
+	end
+	return table.concat(lines, "\n")
+end
+
+----------------------------------------------------------------------
+-- Ownership: uploaded assets (MeshParts, Sounds, Animations, Decals/Textures, ...)
+-- and who created them. MarketplaceService:GetProductInfo gives the asset's Creator
+-- (a User or a Group); we cache it per asset id so each unique asset is fetched once.
+local MarketplaceService = game:GetService("MarketplaceService")
+
+-- The asset-bearing properties we read, per instance type. (Start set; easy to extend.)
+local function assetRefs(inst: Instance, classes: { [string]: boolean }?): { { string } }
+	-- classes: { mesh, sound, image } picks which asset categories to scan; nil = all.
+	-- Animations ride on the "all" case (no dedicated checkbox).
+	local function want(cat: string): boolean
+		return classes == nil or classes[cat] == true
+	end
+	local refs = {}
+	local function add(prop: string)
+		local ok, v = pcall(function() return (inst :: any)[prop] end)
+		if ok and type(v) == "string" and v ~= "" then refs[#refs + 1] = { prop, v } end
+	end
+	if inst:IsA("MeshPart") then
+		if want("mesh") then add("MeshId") end
+		if want("image") then add("TextureID") end
+	elseif inst:IsA("SpecialMesh") then
+		if want("mesh") then add("MeshId") end
+		if want("image") then add("TextureId") end
+	elseif inst:IsA("Sound") then
+		if want("sound") then add("SoundId") end
+	elseif inst:IsA("Animation") then
+		if classes == nil then add("AnimationId") end
+	elseif inst:IsA("Decal") then
+		if want("image") then add("Texture") end   -- Texture is a subclass of Decal
+	end
+	return refs
+end
+
+-- Pull the numeric asset id out of a content string. rbxasset:// (built-in) has no
+-- creator, so it's skipped.
+local function assetIdFrom(content: string): number?
+	if type(content) ~= "string" or content == "" then return nil end
+	if string.find(content, "rbxasset://", 1, true) then return nil end
+	local id = string.match(content, "id=(%d+)")
+		or string.match(content, "rbxassetid://(%d+)")
+		or string.match(content, "(%d+)")
+	return id and tonumber(id) or nil
+end
+
+local creatorCache: { [number]: { name: string, typ: string } } = {}
+local lookups = 0
+local function creatorOf(assetId: number): { name: string, typ: string }
+	local cached = creatorCache[assetId]
+	if cached then return cached end
+	lookups += 1
+	if lookups % 25 == 0 then task.wait() end -- gentle throttle so GetProductInfo isn't spammed
+	local res = { name = "unknown", typ = "Unknown" }
+	local ok, info = pcall(function()
+		return MarketplaceService:GetProductInfo(assetId, Enum.InfoType.Asset)
+	end)
+	if ok and info and info.Creator then
+		res.name = tostring(info.Creator.Name or "unknown")
+		local ct = info.Creator.CreatorType
+		if typeof(ct) == "EnumItem" then ct = ct.Name end
+		res.typ = tostring(ct or "Unknown") -- "User" or "Group"
+	end
+	-- keep the dump line parseable: name is the value, "(typ)" is the type token
+	res.name = (res.name:gsub("[%(%)\r\n]", "")):gsub("%s+", " ")
+	creatorCache[assetId] = res
+	return res
+end
+
+function Dumpers.OwnershipDump(progress: ((number, number) -&gt; ())?, classes: { [string]: boolean }?): string
+	-- pass 1: collect asset-bearing instances + the set of unique asset ids (no API yet)
+	local found: { { any } } = {} -- { inst, refs }
+	local uniq: { [number]: boolean } = {}
+	local uniqCount = 0
+	for _, svc in ipairs(services()) do
+		local stack = { svc }
+		while #stack &gt; 0 do
+			local inst = table.remove(stack)
+			local refs = assetRefs(inst, classes)
+			if #refs &gt; 0 then
+				found[#found + 1] = { inst, refs }
+				for _, r in ipairs(refs) do
+					local id = assetIdFrom(r[2])
+					if id and not uniq[id] then uniq[id] = true; uniqCount += 1 end
+				end
+			end
+			local okc, kids = pcall(function() return inst:GetChildren() end)
+			if okc then
+				for _, c in ipairs(kids) do stack[#stack + 1] = c end
+			end
+		end
+	end
+
+	-- pass 2: resolve each unique creator (cached), reporting progress so the plugin can
+	-- show a live "X / Y" counter (the catalog lookups are the slow part).
+	local done = 0
+	for id in pairs(uniq) do
+		creatorOf(id)
+		done += 1
+		if progress and (done % 5 == 0 or done == uniqCount) then
+			progress(done, uniqCount)
+			task.wait() -- repaint the counter
+		end
+	end
+
+	-- pass 3: stitch the cached creators onto each host instance
+	local included: { [Instance]: boolean } = {}
+	local ownOf: { [Instance]: { { string } } } = {} -- inst -&gt; { {prop, creatorName, creatorType}, ... }
+	local count = 0
+	for _, entry in ipairs(found) do
+		local inst, refs = entry[1], entry[2]
+		local out = {}
+		for _, r in ipairs(refs) do
+			local id = assetIdFrom(r[2])
+			local cr = id and creatorCache[id]
+			if cr then out[#out + 1] = { r[1], cr.name, cr.typ } end
+		end
+		if #out &gt; 0 then
+			ownOf[inst] = out
+			count += 1
+			include(included, inst)
+		end
+	end
+
+	local lines = {}
+	local function emit(s) lines[#lines + 1] = s end
+	emit("==== OWNERSHIP DUMP (uploaded assets + their creator) ====")
+	emit("Total asset-bearing instances found: " .. count .. " | unique assets: " .. uniqCount)
+	emit("Each row:  - &lt;Property&gt; = &lt;CreatorName&gt; (User|Group)")
+	emit(string.rep("=", 70))
+	emit("")
+
+	local function walk(inst: Instance, depth: number)
+		local indent = string.rep("  ", depth)
+		emit(indent .. inst.Name .. " [" .. inst.ClassName .. "]")
+		local own = ownOf[inst]
+		if own then
+			for _, o in ipairs(own) do
+				emit(indent .. "  - " .. o[1] .. " = " .. o[2] .. " (" .. o[3] .. ")")
 			end
 		end
 		local kids = {}

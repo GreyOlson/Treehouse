@@ -142,6 +142,8 @@
   .tb-card.farm pre{color:#f0d98a}     .tb-card.farm pre:hover{border-color:#e7c45a}
   .tb-card.conv .tb-title,.tb-card.conv .tb-detail{color:#7cc4ff} /* convert value*=blue */
   .tb-card.conv pre{color:#a9d8ff}     .tb-card.conv pre:hover{border-color:#7cc4ff}
+  .tb-card.space .tb-title,.tb-card.space .tb-detail{color:#4fd6be} /* instance spacing = teal */
+  .tb-card.space pre{color:#9bead9}    .tb-card.space pre:hover{border-color:#4fd6be}
   /* Right-anchored section rail (jump to a first-layer node). Entries are
      right-aligned and overflow LEFT so long names stay full-size. */
   #mapper{position:fixed;right:0;width:15vw;z-index:40;overflow-y:auto;
@@ -203,7 +205,7 @@ const KIND = DATA.summary.item_kind;
 const CFG = ({
   attribute: {finder:'both',  tabs:['delete','fortify','farmer'], slider:true,  markers:true,  dstarBtn:false, ncBtn:false, finderTitle:'Attribute Finder'},
   value:     {finder:'value', tabs:['convert','farmer'],          slider:false, markers:true,  dstarBtn:true,  ncBtn:true,  finderTitle:'Value Finder'},
-  collision: {finder:'host',  tabs:[],                            slider:false, markers:false, dstarBtn:false, ncBtn:false, finderTitle:'Collision Finder'},
+  collision: {finder:'host',  tabs:['spacing'],                            slider:false, markers:false, dstarBtn:false, ncBtn:false, finderTitle:'Collision Finder'},
 })[KIND] || {finder:'host', tabs:[], slider:false, markers:false, dstarBtn:false, ncBtn:false, finderTitle:'Finder'};
 
 const ROWH=20, COLW=280, PADX=20, PADY=16, NODER=4;
@@ -516,10 +518,13 @@ function computeVisibility(){
     (function mark(n){ inSub.add(n); n._children.forEach(mark); })(isoNode);
     for(let p=isoNode._p;p;p=p._p) anc.add(p);
   }
-  function rec(n, ancTypeOk, isRoot){
-    // typeOk threads down both the legend type filter AND the ignore list (by host
-    // instance name), so an ignored instance hides its whole subtree.
-    const typeOk = isRoot ? true : (ancTypeOk && !hiddenTypes.has(n.c) && !ignored(n.n));
+  function rec(n, ancIgnOk, isRoot){
+    // The ignore list threads down (an ignored host hides its whole subtree). The legend
+    // TYPE filter is per-node: hiding a type hides ITS own attributes, but the node still
+    // acts as a container for visible descendants of other types - so isolating "Script"
+    // hides a service's direct attributes yet still shows the scripts beneath it.
+    const ignOk = isRoot ? true : (ancIgnOk && !ignored(n.n));
+    const ownTypeOk = isRoot ? true : !hiddenTypes.has(n.c);
     const dscope = isRoot ? true : inDrillScope(n); // Layer Mapper: only the drilled branch
     const itemKeep=it => keepMarker(it) && !ignored(it.n); // markers + ignore list (by item name)
     let directCount=0, anyItemMatch=false, anyMarkerItem=false, subtreeTarget=false;
@@ -529,7 +534,7 @@ function computeVisibility(){
         c._matchQ = !q || c.n.toLowerCase().indexOf(q)!==-1 || String(c.it.v).toLowerCase().indexOf(q)!==-1;
         if(c._matchQ) anyItemMatch=true;
         if(itemKeep(c.it)) anyMarkerItem=true;
-      } else if(rec(c, typeOk, false)) subtreeTarget=true;
+      } else if(rec(c, ignOk, false)) subtreeTarget=true;
     }
     const nameMatch = !q || n.n.toLowerCase().indexOf(q)!==-1;
     const countOk = directCount >= minAttrs;
@@ -543,8 +548,8 @@ function computeVisibility(){
       else if(anc.has(n) || isRoot){ show=true; showItems=false; target=subtreeTarget; }
       else { show=false; showItems=false; target=false; }
     } else {
-      target = dscope && typeOk && countOk && markerQ && partOk && (!q || nameMatch || anyItemMatch);
-      show = isRoot ? true : (dscope && typeOk && (target || subtreeTarget));
+      target = dscope && ignOk && ownTypeOk && countOk && markerQ && partOk && (!q || nameMatch || anyItemMatch);
+      show = isRoot ? true : (dscope && ignOk && (target || subtreeTarget));
       // root's own attributes belong to the service itself - hide them once drilled
       showItems = isRoot ? (drillStack.length===0 && countOk && markerQ && (!q || nameMatch || anyItemMatch)) : target;
     }
@@ -661,11 +666,12 @@ function render(){
     (hidden>0 ? ' by: '+esc(reasons.length?reasons.join(', '):'filters')+'.' : '');
   buildLegend();
   buildMapper(nodes);
+  if(CFG.tabs.includes('spacing')) renderToolbar();   // keep the scope-based Instance Spacing card live
 }
 
 function buildLegend(){
   const present={};
-  current._children.forEach(function w(n){ if(n.kind==='inst'){ if(!n._group && !n._svc) present[n.c]=true; n._children.forEach(w);} });
+  current._children.forEach(function w(n){ if(n.kind==='inst'){ if(!n._group) present[n.c]=true; n._children.forEach(w);} });
   const keys=Object.keys(present);
   const lg=document.getElementById('legend'); lg.innerHTML='';
   keys.sort().forEach(c=>{
@@ -698,6 +704,7 @@ function buildLegend(){
 // path-compressed, so we derive the 2nd-layer name from each node's full path
 // (e.g. "Workspace.Backrooms.Build.ArtPainting1" -> "Backrooms") and group by it.
 let mapSections=[];
+let activeSectionKey=null;   // the Layer Mapper's current "active" section - Instance Spacing roots here
 const INDENT=22;  // reverse-tab px per drilled level (deeper = more toward center)
 const TOPPAD=24;  // px below the viewport top where a section's first row counts as "current"
 // The group key at the CURRENT drill depth: e.g. base groups by the 2nd-layer
@@ -740,7 +747,7 @@ function buildMapper(nodes){
     el.appendChild(pill); bindRailClick(el,{kind:'group', sec});
     sec.entry=el; m.appendChild(el);
   });
-  mapSections=order;
+  mapSections=order; if(!order.length) activeSectionKey=null;
   const wrap=document.getElementById('wrap');
   m.style.top=wrap.getBoundingClientRect().top+'px';
   m.style.height=wrap.clientHeight+'px';
@@ -789,6 +796,8 @@ function updateMapper(){
   // row exactly on that line, so the section you clicked is the one that lights up.
   let cur=mapSections[0];
   for(const sec of mapSections){ if(sec.s<=vt+TOPPAD+1) cur=sec; }
+  const nk = cur ? cur.key : null;       // Instance Spacing follows the active (deepest-selected) section
+  if(nk!==activeSectionKey){ activeSectionKey=nk; if(CFG.tabs.includes('spacing')) renderToolbar(); }
   for(const sec of mapSections){
     let size=24;
     if(sec===cur) size=32;
@@ -1088,6 +1097,30 @@ function setToolbarTarget(name){
   if(name===tbAttr && scope===tbScope) return;
   tbAttr=name; tbScope=scope; renderToolbar();
 }
+// Instance Spacing (collision only): rename every descendant so spaces / special chars
+// collapse to "_", so the resulting path pastes into the Explorer search (which breaks
+// on spaces and treats "." as a hierarchy separator).
+// Instance Spacing roots at the deepest level selected in the Layer Mapper: the service
+// + any drilled branch (scopeRootPath) + the currently-active section the user scrolled to.
+function spacingScope(){
+  let p=scopeRootPath();
+  if(activeSectionKey && activeSectionKey!=='__ATTRS__') p+='.'+activeSectionKey;
+  return p;
+}
+function spacingCode(scope){
+  return 'local root = '+luauAccessor(scope)+'\n'+
+    'local function clean(nm)\n'+
+    '\tlocal s = (string.gsub(nm, "[^%w_]", "_"))  -- each space / special char -> "_"\n'+
+    '\tif s == "" then s = "_" end\n'+
+    '\treturn s\n'+
+    'end\n'+
+    'local renamed = 0\n'+
+    'for _, inst in ipairs(root:GetDescendants()) do\n'+
+    '\tlocal nn = clean(inst.Name)\n'+
+    '\tif nn ~= inst.Name then inst.Name = nn; renamed += 1 end\n'+
+    'end\n'+
+    'print("Instance Spacing: renamed "..renamed.." instance(s).")';
+}
 function renderToolbar(){
   if(!CFG.tabs.length) return;
   const name=tbAttr, scope=tbScope;
@@ -1106,7 +1139,10 @@ function renderToolbar(){
       cap:'for each <b>'+esc(name)+'</b> Value object: sets a matching attribute on its parent, then Destroys the Value.'+
         '<br><b style="color:#ff9b9b">Code change needed:</b> this snippet only changes the data model - it does NOT edit your scripts. '+
         'Any code that reads or writes this Value (<b>:FindFirstChild("'+esc(name)+'")</b>, <b>:WaitForChild</b>, or <b>.'+esc(name)+'</b>) must be updated to <b>GetAttribute / SetAttribute("'+esc(name)+'")</b>. '+
-        'Use the bottom-left '+CFG.finderTitle+' Panel to locate that code first.'})}
+        'Use the bottom-left '+CFG.finderTitle+' Panel to locate that code first.'})},
+    spacing:{cls:'space', label:'Instance Spacing', noTarget:true, mk:()=>{ const sc=spacingScope(); return {
+      detail:'Underscore the names under '+sc, code:spacingCode(sc),
+      cap:'<b>*underscores will replace special characters and spaces in this command</b> &middot; renames every descendant under <b>'+esc(sc)+'</b> so spaces and characters like <b>- / .</b> become <b>_</b>, making the path copyable / searchable in the Explorer. <b style="color:#ff9b9b">Heads up:</b> this renames instances - code that finds them by their old name (FindFirstChild / WaitForChild) would need updating.'};}}
   };
   toolbar.innerHTML='';
   for(const tab of CFG.tabs){
@@ -1118,7 +1154,7 @@ function renderToolbar(){
     card.appendChild(head);
     if(tbOpen[tab]){
       const body=document.createElement('div'); body.className='tb-body';
-      if(!name){ body.innerHTML='<div class="tb-hint">Hover an item to target one.</div>'; }
+      if(!name && !d.noTarget){ body.innerHTML='<div class="tb-hint">Hover an item to target one.</div>'; }
       else{
         const info=d.mk();
         const det=document.createElement('div'); det.className='tb-detail'; det.textContent=info.detail;

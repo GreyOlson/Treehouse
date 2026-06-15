@@ -47,6 +47,11 @@ ROUTES = {
         ["build_collision_diagram.py"],
         ["CollisionNetworkDiagram.html"],
     ),
+    "/refresh/ownership": (
+        "OwnershipTree.luau",
+        ["build_ownership_diagram.py"],
+        ["OwnershipNetworkDiagram.html"],
+    ),
 }
 
 # In-flight chunked uploads: id -> {chunk_index: text}. Reassembled once all

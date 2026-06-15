@@ -253,4 +253,158 @@ function Dumpers.CollisionDump(): string
 	return table.concat(lines, "\n")
 end
 
+----------------------------------------------------------------------
+-- Ownership: uploaded assets (MeshParts, Sounds, Animations, Decals/Textures, ...)
+-- and who created them. MarketplaceService:GetProductInfo gives the asset's Creator
+-- (a User or a Group); we cache it per asset id so each unique asset is fetched once.
+local MarketplaceService = game:GetService("MarketplaceService")
+
+-- The asset-bearing properties we read, per instance type. (Start set; easy to extend.)
+local function assetRefs(inst: Instance, classes: { [string]: boolean }?): { { string } }
+	-- classes: { mesh, sound, image } picks which asset categories to scan; nil = all.
+	-- Animations ride on the "all" case (no dedicated checkbox).
+	local function want(cat: string): boolean
+		return classes == nil or classes[cat] == true
+	end
+	local refs = {}
+	local function add(prop: string)
+		local ok, v = pcall(function() return (inst :: any)[prop] end)
+		if ok and type(v) == "string" and v ~= "" then refs[#refs + 1] = { prop, v } end
+	end
+	if inst:IsA("MeshPart") then
+		if want("mesh") then add("MeshId") end
+		if want("image") then add("TextureID") end
+	elseif inst:IsA("SpecialMesh") then
+		if want("mesh") then add("MeshId") end
+		if want("image") then add("TextureId") end
+	elseif inst:IsA("Sound") then
+		if want("sound") then add("SoundId") end
+	elseif inst:IsA("Animation") then
+		if classes == nil then add("AnimationId") end
+	elseif inst:IsA("Decal") then
+		if want("image") then add("Texture") end   -- Texture is a subclass of Decal
+	end
+	return refs
+end
+
+-- Pull the numeric asset id out of a content string. rbxasset:// (built-in) has no
+-- creator, so it's skipped.
+local function assetIdFrom(content: string): number?
+	if type(content) ~= "string" or content == "" then return nil end
+	if string.find(content, "rbxasset://", 1, true) then return nil end
+	local id = string.match(content, "id=(%d+)")
+		or string.match(content, "rbxassetid://(%d+)")
+		or string.match(content, "(%d+)")
+	return id and tonumber(id) or nil
+end
+
+local creatorCache: { [number]: { name: string, typ: string } } = {}
+local lookups = 0
+local function creatorOf(assetId: number): { name: string, typ: string }
+	local cached = creatorCache[assetId]
+	if cached then return cached end
+	lookups += 1
+	if lookups % 25 == 0 then task.wait() end -- gentle throttle so GetProductInfo isn't spammed
+	local res = { name = "unknown", typ = "Unknown" }
+	local ok, info = pcall(function()
+		return MarketplaceService:GetProductInfo(assetId, Enum.InfoType.Asset)
+	end)
+	if ok and info and info.Creator then
+		res.name = tostring(info.Creator.Name or "unknown")
+		local ct = info.Creator.CreatorType
+		if typeof(ct) == "EnumItem" then ct = ct.Name end
+		res.typ = tostring(ct or "Unknown") -- "User" or "Group"
+	end
+	-- keep the dump line parseable: name is the value, "(typ)" is the type token
+	res.name = (res.name:gsub("[%(%)\r\n]", "")):gsub("%s+", " ")
+	creatorCache[assetId] = res
+	return res
+end
+
+function Dumpers.OwnershipDump(progress: ((number, number) -> ())?, classes: { [string]: boolean }?): string
+	-- pass 1: collect asset-bearing instances + the set of unique asset ids (no API yet)
+	local found: { { any } } = {} -- { inst, refs }
+	local uniq: { [number]: boolean } = {}
+	local uniqCount = 0
+	for _, svc in ipairs(services()) do
+		local stack = { svc }
+		while #stack > 0 do
+			local inst = table.remove(stack)
+			local refs = assetRefs(inst, classes)
+			if #refs > 0 then
+				found[#found + 1] = { inst, refs }
+				for _, r in ipairs(refs) do
+					local id = assetIdFrom(r[2])
+					if id and not uniq[id] then uniq[id] = true; uniqCount += 1 end
+				end
+			end
+			local okc, kids = pcall(function() return inst:GetChildren() end)
+			if okc then
+				for _, c in ipairs(kids) do stack[#stack + 1] = c end
+			end
+		end
+	end
+
+	-- pass 2: resolve each unique creator (cached), reporting progress so the plugin can
+	-- show a live "X / Y" counter (the catalog lookups are the slow part).
+	local done = 0
+	for id in pairs(uniq) do
+		creatorOf(id)
+		done += 1
+		if progress and (done % 5 == 0 or done == uniqCount) then
+			progress(done, uniqCount)
+			task.wait() -- repaint the counter
+		end
+	end
+
+	-- pass 3: stitch the cached creators onto each host instance
+	local included: { [Instance]: boolean } = {}
+	local ownOf: { [Instance]: { { string } } } = {} -- inst -> { {prop, creatorName, creatorType}, ... }
+	local count = 0
+	for _, entry in ipairs(found) do
+		local inst, refs = entry[1], entry[2]
+		local out = {}
+		for _, r in ipairs(refs) do
+			local id = assetIdFrom(r[2])
+			local cr = id and creatorCache[id]
+			if cr then out[#out + 1] = { r[1], cr.name, cr.typ } end
+		end
+		if #out > 0 then
+			ownOf[inst] = out
+			count += 1
+			include(included, inst)
+		end
+	end
+
+	local lines = {}
+	local function emit(s) lines[#lines + 1] = s end
+	emit("==== OWNERSHIP DUMP (uploaded assets + their creator) ====")
+	emit("Total asset-bearing instances found: " .. count .. " | unique assets: " .. uniqCount)
+	emit("Each row:  - <Property> = <CreatorName> (User|Group)")
+	emit(string.rep("=", 70))
+	emit("")
+
+	local function walk(inst: Instance, depth: number)
+		local indent = string.rep("  ", depth)
+		emit(indent .. inst.Name .. " [" .. inst.ClassName .. "]")
+		local own = ownOf[inst]
+		if own then
+			for _, o in ipairs(own) do
+				emit(indent .. "  - " .. o[1] .. " = " .. o[2] .. " (" .. o[3] .. ")")
+			end
+		end
+		local kids = {}
+		for _, c in ipairs(inst:GetChildren()) do
+			if included[c] then kids[#kids + 1] = c end
+		end
+		table.sort(kids, sortKids)
+		for _, c in ipairs(kids) do walk(c, depth + 1) end
+	end
+
+	for _, svc in ipairs(services()) do
+		if included[svc] then walk(svc, 0); emit("") end
+	end
+	return table.concat(lines, "\n")
+end
+
 return Dumpers

@@ -67,24 +67,60 @@ ROJO_ATTRS = {"RojoSyncMode", "PreserveParts"}
 # ---------------------------------------------------------------------------
 SET_LITERAL_RE = re.compile(r':SetAttribute\(\s*"([^"]+)"')
 SET_LITERAL_NIL_RE = re.compile(r':SetAttribute\(\s*"([^"]+)"\s*,\s*nil\s*\)')
-SET_IDENT_RE = re.compile(r':SetAttribute\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*,')
+# A variable or table-field reference, e.g. `KEY` or `UserIdUtil.ATTRIBUTE`.
+_REF = r'[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*'
+SET_REF_RE = re.compile(r':SetAttribute\(\s*(' + _REF + r')\s*,')
+SET_REF_NIL_RE = re.compile(r':SetAttribute\(\s*(' + _REF + r')\s*,\s*nil\s*\)')
 # GetAttribute("Name") - a read. Proves the attribute is touched by code even when
 # it's never SetAttribute'd in the scanned src (e.g. set elsewhere / by the engine).
 GET_LITERAL_RE = re.compile(r':GetAttribute\(\s*"([^"]+)"')
-CONST_ASSIGN_RE = lambda ident: re.compile(
-    r'\b' + re.escape(ident) + r'\s*=\s*"([^"]+)"'
-)
+GET_REF_RE = re.compile(r':GetAttribute\(\s*(' + _REF + r')\s*\)')
+# `<ref> = "<string>"` (captures KEY = "Foo", UserIdUtil.ATTRIBUTE = "Foo", ...).
+ASSIGN_STR_RE = re.compile(r'(' + _REF + r')\s*=\s*["\']([^"\']+)["\']')
+
+
+def _module_name(path):
+    """The name a require(...) uses for this file: the basename, or the parent
+    folder for an init.luau / init.server.luau module."""
+    fn = os.path.basename(path)
+    base = fn
+    for ext in (".server.luau", ".client.luau", ".luau", ".server.lua", ".client.lua", ".lua"):
+        if fn.endswith(ext):
+            base = fn[: -len(ext)]
+            break
+    return os.path.basename(os.path.dirname(path)) if base == "init" else base
+
+
+def _requires(text):
+    """Module names this file require()s - the last identifier inside each
+    require(...), with nested parens (e.g. :GetService("X")) handled."""
+    mods = set()
+    for mm in re.finditer(r'require\s*\(', text):
+        depth, i = 1, mm.end()
+        while i < len(text) and depth > 0:
+            c = text[i]
+            if c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+            i += 1
+        names = re.findall(r'[A-Za-z_][A-Za-z0-9_]*', text[mm.end(): i - 1])
+        if names:
+            mods.add(names[-1])
+    return mods
 
 
 def scan_runtime_attributes(src_dir):
-    runtime_set = {}      # name -> set(relative file paths where written)
-    runtime_nil = set()   # names written with a literal nil
-    runtime_read = {}     # name -> set(files) where read via GetAttribute("...")
-    ident_names = set()   # identifier args to SetAttribute (constants)
+    """Attribute names referenced in code. Catches three shapes:
+      1. literal    :SetAttribute("Name") / :GetAttribute("Name")
+      2. via a var  KEY = "Name" ... :SetAttribute(KEY); or a field
+         UserIdUtil.ATTRIBUTE = "Name" ... :GetAttribute(UserIdUtil.ATTRIBUTE)
+      3. via a module wrapper - a ModuleScript that does (2) is an attribute
+         wrapper, so every script that require()s it is credited too (catches the
+         indirect callers of a UserIdUtil-style helper)."""
+    runtime_set, runtime_nil, runtime_read = {}, set(), {}
 
-    # Show appendix paths starting at the project folder (e.g. "TsunamiGame/src/...")
-    # instead of "../Workspace/..." - relative to the parent of the project folder
-    # (the folder that contains src), which saves a lot of characters per line.
+    # Show appendix paths from the project folder (e.g. "TsunamiGame/src/...").
     src_base = os.path.dirname(os.path.dirname(os.path.normpath(src_dir))) or PROJECT_ROOT
 
     luau_files = []
@@ -93,15 +129,33 @@ def scan_runtime_attributes(src_dir):
             if fn.endswith(".luau") or fn.endswith(".lua"):
                 luau_files.append(os.path.join(root, fn))
 
-    # First pass: literals + collect identifier arg names per file text.
     file_texts = {}
     for path in luau_files:
         try:
             with open(path, "r", encoding="utf-8", errors="replace") as f:
-                text = f.read()
+                file_texts[path] = f.read()
         except OSError:
             continue
-        file_texts[path] = text
+
+    # ref -> the string it was assigned, per file and globally. A dotted field like
+    # UserIdUtil.ATTRIBUTE is globally unique; a plain KEY is resolved file-local first.
+    file_ref, global_ref = {}, {}
+    for path, text in file_texts.items():
+        m = {}
+        for a in ASSIGN_STR_RE.finditer(text):
+            m[a.group(1)] = a.group(2)
+            global_ref[a.group(1)] = a.group(2)
+        file_ref[path] = m
+
+    def resolve(path, ref):
+        return file_ref[path].get(ref) or global_ref.get(ref)
+
+    # main pass: literals + variable/field-resolved Get/Set. A module that resolves a
+    # ref through Get/Set is an attribute "wrapper"; record what it wraps so callers
+    # (scripts that require it) can be credited afterward.
+    module_attrs = {}      # module name -> set(attribute names it wraps)
+    file_requires = {}     # path -> set(module names required)
+    for path, text in file_texts.items():
         rel = os.path.relpath(path, src_base)
         for name in SET_LITERAL_RE.findall(text):
             runtime_set.setdefault(name, set()).add(rel)
@@ -109,23 +163,32 @@ def scan_runtime_attributes(src_dir):
             runtime_nil.add(name)
         for name in GET_LITERAL_RE.findall(text):
             runtime_read.setdefault(name, set()).add(rel)
-        for ident in SET_IDENT_RE.findall(text):
-            # ignore obvious non-constants like `self`, table indexes handled
-            ident_names.add(ident)
+        wrapped = set()
+        for ref in SET_REF_RE.findall(text):
+            name = resolve(path, ref)
+            if name:
+                runtime_set.setdefault(name, set()).add(rel)
+                wrapped.add(name)
+        for ref in SET_REF_NIL_RE.findall(text):
+            name = resolve(path, ref)
+            if name:
+                runtime_nil.add(name)
+        for ref in GET_REF_RE.findall(text):
+            name = resolve(path, ref)
+            if name:
+                runtime_read.setdefault(name, set()).add(rel)
+                wrapped.add(name)
+        if wrapped:
+            module_attrs.setdefault(_module_name(path), set()).update(wrapped)
+        file_requires[path] = _requires(text)
 
-    # Second pass: resolve identifier args to their string-literal value
-    # by searching every file for `IDENT = "value"`.
-    all_text = "\n".join(file_texts.values())
-    for ident in ident_names:
-        m = CONST_ASSIGN_RE(ident).search(all_text)
-        if m:
-            name = m.group(1)
-            # find which files reference the ident in a SetAttribute call
-            pat = re.compile(r':SetAttribute\(\s*' + re.escape(ident) + r'\s*,')
-            for path, text in file_texts.items():
-                if pat.search(text):
-                    rel = os.path.relpath(path, src_base)
-                    runtime_set.setdefault(name, set()).add(rel)
+    # credit every script that require()s a wrapper with that wrapper's attributes
+    # (the indirect callers - e.g. everything that uses UserIdUtil.Get / .Set).
+    for path, mods in file_requires.items():
+        rel = os.path.relpath(path, src_base)
+        for mod in mods:
+            for name in module_attrs.get(mod, ()):
+                runtime_read.setdefault(name, set()).add(rel)
 
     return runtime_set, runtime_nil, runtime_read
 
@@ -651,7 +714,10 @@ function applyView(){
   if(apc){
     const apTotal = ap.querySelectorAll('.ap').length;
     const apHidden = ap.querySelectorAll('.ap.hidden').length;
-    apc.innerHTML = counter(apHidden, apTotal, '');
+    // 0 of 0 = nothing scanned from src - usually means the src isn't synced. Flag it red.
+    apc.innerHTML = apTotal===0
+      ? '<span style="color:#ff6b6b;font-weight:700">0 of 0</span> hidden. <span style="color:#ff6b6b">*Did you sync to your src?</span>'
+      : counter(apHidden, apTotal, '');
   }
 }
 let t=null;
